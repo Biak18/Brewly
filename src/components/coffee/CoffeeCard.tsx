@@ -122,10 +122,6 @@ function CoffeeCardComponent({
   );
 }
 
-// Menu screens will render dozens of these inside FlashList. Without this memo,
-// tapping one card's favorite heart re-renders every visible card in the grid —
-// not a hypothetical, that's the default React behavior for a list item whose
-// parent re-renders on state change.
 export const CoffeeCard = memo(
   CoffeeCardComponent,
   (prev, next) => prev.coffee === next.coffee && prev.liked === next.liked,
@@ -135,7 +131,7 @@ const styles = StyleSheet.create({
   card: { borderWidth: 1, overflow: "hidden" },
   cardRow: { width: 202 },
   cardGrid: { flex: 1 },
-  heartSlot: { position: "absolute", right: 10, top: 10 },
+  heartSlot: { position: "absolute", end: 10, top: 10 }, // was `right: 10`
   foot: {
     flexDirection: "row",
     justifyContent: "space-between",

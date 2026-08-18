@@ -1,9 +1,8 @@
 // src/features/home/components/HomeSkeleton.tsx
+import { Pulse } from "@/components/ui/Pulse";
 import { useTheme } from "@/theme";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-// src/features/home/components/HomeSkeleton.tsx — replace the private Pulse with the shared one
-import { Pulse } from "@/components/ui/Pulse";
 
 export function HomeSkeleton() {
   const { spacing } = useTheme();

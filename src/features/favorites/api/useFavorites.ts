@@ -4,10 +4,6 @@ import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-// Both hooks share the ['favorites', ...] prefix specifically so a single
-// invalidateQueries({queryKey: ['favorites']}) in the mutation below catches
-// the ids-only cache AND the full-coffee-objects cache in one call, rather
-// than the mutation needing to know about every screen that reads favorites.
 export function useFavoriteIds() {
   const userId = useAuthStore((s) => s.session?.user.id);
   return useQuery({
@@ -59,10 +55,6 @@ export function useToggleFavorite() {
       if (error) throw error;
     },
     onMutate: async ({ coffeeId, liked }) => {
-      // Optimistic update only touches the ids cache (what the heart icon
-      // reads) — the coffees-list cache updates via the invalidation below,
-      // which is fine since it only matters on the Favorites screen itself,
-      // not on the icon's immediate visual feedback.
       await queryClient.cancelQueries({ queryKey: idsKey });
       const previous = queryClient.getQueryData<Set<string>>(idsKey);
       queryClient.setQueryData<Set<string>>(idsKey, (old) => {

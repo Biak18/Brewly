@@ -10,6 +10,7 @@ import {
   selectCartTotal,
   useCartStore,
 } from "@/stores/cartStore";
+import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ShoppingBag } from "lucide-react-native";
@@ -21,7 +22,10 @@ import Animated, {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function CartScreen() {
   const { colors, spacing, typography } = useTheme();
@@ -30,11 +34,38 @@ export default function CartScreen() {
   const items = useCartStore((s) => s.items);
   const savings = useCartStore(selectCartSavings);
 
-  // Zustand actions defined inside create() are referentially stable across
-  // renders — no useCallback wrapper needed to keep the memo below effective.
   const removeItem = useCartStore((s) => s.removeItem);
   const setQuantity = useCartStore((s) => s.setQuantity);
   const total = useCartStore(selectCartTotal);
+
+  const addItem = useCartStore((s) => s.addItem);
+  const showToast = useToastStore((s) => s.show);
+
+  const handleRemove = useCallback(
+    (lineId: string) => {
+      const removed = items.find((i) => i.id === lineId);
+      removeItem(lineId);
+      if (removed) {
+        showToast("Removed from cart", {
+          actionLabel: "Undo",
+          onAction: () =>
+            addItem({
+              coffeeId: removed.coffeeId,
+              name: removed.name,
+              imageUrl: removed.imageUrl,
+              unitPrice: removed.unitPrice,
+              compareAtUnitPrice: removed.compareAtUnitPrice,
+              quantity: removed.quantity,
+              size: removed.size,
+              temperature: removed.temperature,
+              milk: removed.milk,
+              extras: removed.extras,
+            }),
+        });
+      }
+    },
+    [items, removeItem, addItem, showToast],
+  );
 
   const bump = useSharedValue(1);
   useEffect(() => {
@@ -51,22 +82,21 @@ export default function CartScreen() {
     ({ item }: { item: CartLineItem }) => (
       <CartLineItemCard
         item={item}
-        onRemove={removeItem}
+        // onRemove={removeItem}
+        onRemove={handleRemove}
         onQuantityChange={setQuantity}
       />
     ),
-    [removeItem, setQuantity],
+    [handleRemove, setQuantity],
   );
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: spacing.lg,
+          paddingHorizontal: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
@@ -161,6 +191,6 @@ export default function CartScreen() {
           </View>
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

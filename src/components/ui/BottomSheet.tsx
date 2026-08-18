@@ -12,7 +12,6 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -33,7 +32,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   useEffect(() => {
     if (visible) {
       setMounted(true);
-      translateY.value = withSpring(0, { damping: 22, stiffness: 220 });
+      translateY.value = withTiming(0, { duration: 300 });
       backdropOpacity.value = withTiming(1, { duration: 200 });
     } else if (mounted) {
       translateY.value = withTiming(
@@ -45,7 +44,6 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       );
       backdropOpacity.value = withTiming(0, { duration: 200 });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const pan = Gesture.Pan()
@@ -54,9 +52,9 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
     })
     .onEnd((e) => {
       if (e.translationY > 100 || e.velocityY > 800) {
-        scheduleOnRN(onClose); // parent flips `visible` false; the effect above handles the animated exit
+        scheduleOnRN(onClose);
       } else {
-        translateY.value = withSpring(0, { damping: 22, stiffness: 220 });
+        translateY.value = withTiming(0, { duration: 300 });
       }
     });
 
@@ -100,7 +98,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
               borderTopRightRadius: radius.xxl,
               paddingBottom: spacing.xxl,
             },
-            // sheetStyle,
+            sheetStyle,
           ]}
         >
           <View style={[styles.handle, { backgroundColor: colors.line }]} />

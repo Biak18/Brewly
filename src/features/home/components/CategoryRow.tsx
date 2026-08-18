@@ -7,8 +7,6 @@ import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import { FlatList, ListRenderItem } from "react-native";
 
-// Chip.active is always false here — Home doesn't own filter state, it navigates
-// away to Menu on tap. Selected-state chips belong to Menu, where filtering happens.
 export function CategoryRow() {
   const { spacing } = useTheme();
   const router = useRouter();

@@ -159,8 +159,6 @@ function OrderCardComponent({
   );
 }
 
-// Same reasoning as CoffeeCard's memo (Step 1): without it, one realtime
-// invalidation touching a single order re-renders every visible order card.
 export const OrderCard = memo(
   OrderCardComponent,
   (prev, next) =>

@@ -36,14 +36,12 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
 }
 
 async function handleSession(session: Session | null) {
-  // First update the auth state.
   useAuthStore.setState({
     session,
     profile: null,
     isLoading: true,
   });
 
-  // Don't run the database query while inside onAuthStateChange.
   if (!session) {
     useAuthStore.setState({
       session: null,
@@ -54,7 +52,6 @@ async function handleSession(session: Session | null) {
     return;
   }
 
-  // Run profile query after the auth callback has returned.
   setTimeout(async () => {
     const profile = await fetchProfile(session.user.id);
 

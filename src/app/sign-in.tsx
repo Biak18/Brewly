@@ -39,7 +39,6 @@ export default function SignInScreen() {
     const { error } = await supabase.auth.signInWithPassword(values);
     if (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      // Deliberately generic — don't reveal whether the email exists in the system.
       setServerError("Incorrect email or password.");
     }
     // No manual navigation here: authStore's listener updates session state,

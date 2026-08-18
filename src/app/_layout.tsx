@@ -1,6 +1,7 @@
-// src/app/_layout.tsx — remove the auth useEffect and the now-unused `supabase` import
+// src/app/_layout.tsx
 import { CartPreviewSheet } from "@/components/cart/CartPreviewSheet";
 import { FloatingCartButton } from "@/components/cart/FloatingCartButton";
+import { ToastHost } from "@/components/ui/Toast";
 import { useOrdersRealtimeSync } from "@/features/orders/hooks/useOrdersRealtimeSync";
 import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromotionsRealtimeSync";
 import { useAuthStore } from "@/stores/authStore";
@@ -31,9 +32,6 @@ function RootNavigator() {
     if (!isLoading) SplashScreen.hideAsync();
   }, [isLoading]);
 
-  // No auth subscription here — this component only ever reads session/isLoading.
-  // authStore.ts owns writing to them exclusively.
-
   if (isLoading) return null;
 
   return (
@@ -57,6 +55,7 @@ function RootNavigator() {
       </Stack>
       <CartPreviewSheet />
       <FloatingCartButton />
+      <ToastHost />
     </View>
   );
 }

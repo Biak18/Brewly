@@ -11,13 +11,12 @@ import Animated, {
   useSharedValue,
   withSequence,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TAB_ROUTES = ["/", "/menu", "/orders", "/favorites", "/profile"];
-// Screens that already own this bottom-right space, or where "go to cart"
-// doesn't make sense — Cart/Checkout are already Cart-adjacent, and Coffee
-// Detail's own sticky footer bar occupies the same corner.
+
 const HIDDEN_ROUTE_PREFIXES = ["/cart", "/checkout", "/coffee"];
 
 export function FloatingCartButton() {
@@ -39,21 +38,26 @@ export function FloatingCartButton() {
       );
   }, [count, scale]);
 
+  const bottomOffset = isOnTabScreen ? 80 + insets.bottom : insets.bottom + 120;
+  const translateY = useSharedValue(bottomOffset);
+
+  useEffect(() => {
+    translateY.value = withTiming(bottomOffset, {
+      duration: 300,
+    });
+  }, [bottomOffset]);
+
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.value }, { translateY: -translateY.value }],
   }));
 
   if (count === 0 || isHidden) return null;
-
-  // Tab screens have a tab bar eating the bottom safe area; non-tab screens
-  // (that aren't in the hidden list) don't — different clearance needed.
-  const bottomOffset = isOnTabScreen ? 70 + insets.bottom : insets.bottom + 20;
 
   return (
     <Animated.View
       pointerEvents="box-none"
       style={[
-        { position: "absolute", right: 20, bottom: bottomOffset },
+        { position: "absolute", end: 20, /*bottom: bottomOffset*/ bottom: 0 },
         animatedStyle,
       ]}
     >
@@ -79,7 +83,7 @@ export function FloatingCartButton() {
           style={{
             position: "absolute",
             top: -4,
-            right: -4,
+            end: -4,
             minWidth: 20,
             height: 20,
             borderRadius: 10,

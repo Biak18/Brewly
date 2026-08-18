@@ -7,8 +7,7 @@ export function useCoffeeDetail(id: string) {
     queryKey: ["coffee", id],
     queryFn: () => fetchCoffeeById(id),
   });
-  // ['coffee-options'] is shared across every coffee detail screen — visiting
-  // a second coffee doesn't refetch options, TanStack Query dedupes by key.
+
   const options = useQuery({
     queryKey: ["coffee-options"],
     queryFn: fetchCoffeeOptions,

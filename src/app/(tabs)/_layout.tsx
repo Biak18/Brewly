@@ -1,13 +1,43 @@
 // src/app/(tabs)/_layout.tsx
 import { useFavoriteIds } from "@/features/favorites/api/useFavorites";
+import { ThemeColors } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Tabs } from "expo-router";
 import { Coffee, Heart, Home, ReceiptText, User } from "lucide-react-native";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+interface TabBarIconProps {
+  focused: boolean;
+  children: React.ReactNode;
+  colors: ThemeColors;
+}
+
+const TabBarIcon = ({ focused, children, colors }: TabBarIconProps) => {
+  return (
+    <View
+      style={[
+        {
+          width: 40,
+          height: 32,
+          borderRadius: 16,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        focused && {
+          backgroundColor: colors.cream,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+};
 
 export default function TabsLayout() {
   const colors = useThemeStore((s) => s.colors);
   const coffees = useFavoriteIds();
+  const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Tabs
@@ -19,6 +49,10 @@ export default function TabsLayout() {
           tabBarStyle: {
             backgroundColor: colors.surface,
             borderTopColor: colors.line,
+            marginBottom:
+              Platform.OS === "ios" ? 20 : Math.max(insets.bottom, 20),
+            borderRadius: 20,
+            marginHorizontal: 12,
           },
         }}
       >
@@ -26,8 +60,14 @@ export default function TabsLayout() {
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => (
-              <Home color={color} size={size} strokeWidth={1.8} />
+            tabBarIcon: ({ size, focused }) => (
+              <TabBarIcon focused={focused} colors={colors}>
+                <Home
+                  color={focused ? colors.espresso : colors.muted}
+                  size={size}
+                  strokeWidth={1.8}
+                />
+              </TabBarIcon>
             ),
           }}
         />
@@ -35,8 +75,14 @@ export default function TabsLayout() {
           name="menu"
           options={{
             title: "Menu",
-            tabBarIcon: ({ color, size }) => (
-              <Coffee color={color} size={size} strokeWidth={1.8} />
+            tabBarIcon: ({ size, focused }) => (
+              <TabBarIcon focused={focused} colors={colors}>
+                <Coffee
+                  color={focused ? colors.espresso : colors.muted}
+                  size={size}
+                  strokeWidth={1.8}
+                />
+              </TabBarIcon>
             ),
           }}
         />
@@ -44,8 +90,14 @@ export default function TabsLayout() {
           name="orders"
           options={{
             title: "Orders",
-            tabBarIcon: ({ color, size }) => (
-              <ReceiptText color={color} size={size} strokeWidth={1.8} />
+            tabBarIcon: ({ size, focused }) => (
+              <TabBarIcon focused={focused} colors={colors}>
+                <ReceiptText
+                  color={focused ? colors.espresso : colors.muted}
+                  size={size}
+                  strokeWidth={1.8}
+                />
+              </TabBarIcon>
             ),
           }}
         />
@@ -53,8 +105,14 @@ export default function TabsLayout() {
           name="favorites"
           options={{
             title: "Favorites",
-            tabBarIcon: ({ color, size }) => (
-              <Heart color={color} size={size} strokeWidth={1.8} />
+            tabBarIcon: ({ size, focused }) => (
+              <TabBarIcon focused={focused} colors={colors}>
+                <Heart
+                  color={focused ? colors.espresso : colors.muted}
+                  size={size}
+                  strokeWidth={1.8}
+                />
+              </TabBarIcon>
             ),
             tabBarBadge: coffees.data?.size || undefined,
           }}
@@ -63,8 +121,14 @@ export default function TabsLayout() {
           name="profile"
           options={{
             title: "Profile",
-            tabBarIcon: ({ color, size }) => (
-              <User color={color} size={size} strokeWidth={1.8} />
+            tabBarIcon: ({ size, focused }) => (
+              <TabBarIcon focused={focused} colors={colors}>
+                <User
+                  color={focused ? colors.espresso : colors.muted}
+                  size={size}
+                  strokeWidth={1.8}
+                />
+              </TabBarIcon>
             ),
           }}
         />

@@ -42,8 +42,6 @@ export async function fetchFeaturedCoffees(): Promise<Coffee[]> {
 }
 
 export async function fetchPopularCoffees(): Promise<Coffee[]> {
-  // "Popular" = highest-rated for now. A real order-count-based ranking needs
-  // aggregating order_items — legitimate future work, not faked here.
   const { data, error } = await supabase
     .from("coffees")
     .select("*")
@@ -55,8 +53,6 @@ export async function fetchPopularCoffees(): Promise<Coffee[]> {
 }
 
 export async function fetchRecommendedCoffees(): Promise<Coffee[]> {
-  // Placeholder heuristic (non-featured, active). No purchase-history signal
-  // exists yet to personalize this — being explicit rather than pretending.
   const { data, error } = await supabase
     .from("coffees")
     .select("*")
@@ -67,7 +63,6 @@ export async function fetchRecommendedCoffees(): Promise<Coffee[]> {
   return data;
 }
 
-// src/services/coffees.ts — fetchMenuCoffees gets page params
 export async function fetchMenuCoffees(params: {
   categoryId?: string | null;
   search?: string;
@@ -79,8 +74,10 @@ export async function fetchMenuCoffees(params: {
   const pageSize = params.pageSize ?? 20;
   let query = supabase.from("coffees").select("*").eq("is_active", true);
   if (params.categoryId) query = query.eq("category_id", params.categoryId);
-  if (params.search?.trim())
-    query = query.ilike("name", `%${params.search.trim()}%`);
+  if (params.search?.trim()) {
+    const term = params.search.trim();
+    query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%`);
+  }
   switch (params.sort) {
     case "price_asc":
       query = query.order("base_price", { ascending: true });

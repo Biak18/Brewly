@@ -22,7 +22,7 @@ export function CartPreviewSheet() {
   const items = useCartStore((s) => s.items);
   const total = useCartStore(selectCartTotal);
   const savings = useCartStore(selectCartSavings);
-  const recent = items.slice(-3); // addItem appends, so the tail is the most recently added — a glance, not the full cart
+  const recent = items.slice(-3);
 
   return (
     <BottomSheet visible={isOpen} onClose={close}>

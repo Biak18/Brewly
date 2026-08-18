@@ -23,9 +23,6 @@ export function Chip({ label, active, onPress }: ChipProps) {
     progress.value = withTiming(active ? 1 : 0, { duration: 180 });
   }, [active, progress]);
 
-  // interpolateColor needs plain hex strings — this only works because we chose a
-  // static brand palette instead of PlatformColor/Color in the theme layer.
-  // (PlatformColor values can't be interpolated on the UI thread.)
   const containerStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       progress.value,

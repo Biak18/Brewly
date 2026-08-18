@@ -26,9 +26,6 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
 
   const { data: promotions = [] } = useActivePromotions();
 
-  // Stable callbacks defined ONCE at the row level, taking the id as an argument —
-  // not a closure factory per card. This is what actually makes CoffeeCard's memo
-  // (from Step 1) effective; an inline arrow per row item would defeat it silently.
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
     [router],
@@ -61,13 +58,6 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
   const renderItem = useCallback<ListRenderItem<Coffee>>(
     ({ item }) => {
       const data = toCoffeeCardData(item, promotions);
-      // const data: CoffeeCardData = {
-      //   id: item.id,
-      //   name: item.name,
-      //   description: item.description ?? "",
-      //   price: item.base_price,
-      //   imageUrl: item.image_url ?? "",
-      // };
       return (
         <CoffeeCard
           coffee={data}
@@ -87,7 +77,7 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
     ],
   );
 
-  if (coffees.length === 0) return null; // Home rows omit themselves silently when empty; Menu owns the real empty state.
+  if (coffees.length === 0) return null;
 
   return (
     <View style={{ marginTop: spacing.xxl }}>

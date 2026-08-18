@@ -8,20 +8,31 @@ import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
 import { OrderStatus, updateOrderStatus } from "@/services/orders";
 import { useAuthStore } from "@/stores/authStore";
+import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft, PackageX } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
-import { BackHandler, ScrollView, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  BackHandler,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 function CompletedBanner() {
   const { colors, spacing, radius, typography } = useTheme();
@@ -87,6 +98,22 @@ export default function OrderTrackingScreen() {
   const { data: order, isLoading, isError, refetch } = useOrderTracking(id);
   const [isAdvancing, setIsAdvancing] = useState(false);
 
+  const showToast = useToastStore((s) => s.show);
+  const prevStatusRef = useRef<OrderStatus | undefined>(undefined);
+  const pendingSelfChangeRef = useRef<OrderStatus | null>(null);
+
+  useEffect(() => {
+    if (!order) return;
+    if (prevStatusRef.current && order.status !== prevStatusRef.current) {
+      if (pendingSelfChangeRef.current === order.status) {
+        pendingSelfChangeRef.current = null;
+      } else {
+        showToast("This order was updated on another device");
+      }
+    }
+    prevStatusRef.current = order.status;
+  }, [order, showToast]);
+
   const canManage =
     !!order && (order.user_id === userId || profile?.role === "owner");
   const currentIndex = order ? STATUS_FLOW.indexOf(order.status) : -1;
@@ -94,6 +121,43 @@ export default function OrderTrackingScreen() {
     currentIndex >= 0 && currentIndex < STATUS_FLOW.length - 1
       ? STATUS_FLOW[currentIndex + 1]
       : null;
+
+  const previousStatus =
+    currentIndex > 0 ? STATUS_FLOW[currentIndex - 1] : null;
+  const canRevert = profile?.role === "owner" && !!previousStatus;
+
+  const handleRevert = useCallback(() => {
+    if (!order || !previousStatus) return;
+    Alert.alert(
+      "Revert status?",
+      `This moves the order back to "${previousStatus}".`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Revert",
+          style: "destructive",
+          onPress: async () => {
+            pendingSelfChangeRef.current = previousStatus;
+            setIsAdvancing(true);
+            try {
+              await updateOrderStatus(order.id, previousStatus);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Warning,
+              );
+              queryClient.setQueryData(["orders", "detail", id], {
+                ...order,
+                status: previousStatus,
+              });
+            } catch {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            } finally {
+              setIsAdvancing(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [order, previousStatus, queryClient, id]);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -112,11 +176,11 @@ export default function OrderTrackingScreen() {
   const handleAdvance = useCallback(async () => {
     if (!order || !nextStatus) return;
     setIsAdvancing(true);
+    pendingSelfChangeRef.current = nextStatus;
     try {
       await updateOrderStatus(order.id, nextStatus);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      // Realtime will also deliver this update — setting it locally too avoids
-      // a visible round-trip delay for the person who just tapped the button.
+
       queryClient.setQueryData(["order", id], { ...order, status: nextStatus });
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -156,14 +220,12 @@ export default function OrderTrackingScreen() {
   }
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: spacing.lg,
+          paddingHorizontal: spacing.lg,
         }}
       >
         <IconButton
@@ -318,8 +380,24 @@ export default function OrderTrackingScreen() {
             loading={isAdvancing}
             variant="primary"
           />
+          {canRevert && (
+            <Pressable
+              onPress={handleRevert}
+              style={{ alignSelf: "center", marginTop: spacing.sm }}
+            >
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  fontWeight: "600",
+                }}
+              >
+                Revert to {previousStatus}
+              </Text>
+            </Pressable>
+          )}
         </View>
       ) : null}
-    </View>
+    </SafeAreaView>
   );
 }

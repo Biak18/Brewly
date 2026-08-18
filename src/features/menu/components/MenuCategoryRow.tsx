@@ -16,8 +16,7 @@ export function MenuCategoryRow({
   onSelect: (id: string | null) => void;
 }) {
   const { spacing } = useTheme();
-  // Same ['categories'] key as Home's CategoryRow — TanStack Query dedupes and
-  // caches by key across components automatically, so this isn't a second network call.
+
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,

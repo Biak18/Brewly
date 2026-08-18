@@ -2,8 +2,6 @@
 import { useTheme } from "@/theme";
 import { Text, View } from "react-native";
 
-// Delivery renders disabled rather than being omitted — an intentional
-// "coming soon," matching the mockup, not an accidentally missing feature.
 export function FulfillmentToggle() {
   const { colors, radius, spacing, typography } = useTheme();
   return (

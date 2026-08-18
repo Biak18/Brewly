@@ -31,6 +31,7 @@ export default function MenuContent({ value, onChange }: MenuContentProps) {
         title: option.label,
       }))}
       onPressAction={(event) => {
+        console.log("MENU EVENT:", event.nativeEvent);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         onChange(event.nativeEvent.event as MenuSort);
       }}

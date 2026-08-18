@@ -50,7 +50,6 @@ export const useCartStore = create<CartState>((set) => ({
   clear: () => set({ items: [] }),
 }));
 
-// Selectors, not stored fields — derived values never get to drift from their source.
 export const selectCartCount = (s: CartState) =>
   s.items.reduce((sum, i) => sum + i.quantity, 0);
 export const selectCartTotal = (s: CartState) =>

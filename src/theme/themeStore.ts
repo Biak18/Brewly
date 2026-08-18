@@ -51,9 +51,6 @@ export const useThemeStore = create<ThemeState>()(
     {
       name: "brewly-theme",
       storage: createJSONStorage(() => AsyncStorage),
-      // Persist only the user's explicit choice. colors/shadows are derived,
-      // not source-of-truth — recomputing on load means a previous app
-      // version's color object can never ship stale.
       partialize: (state) => ({ mode: state.mode }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -67,15 +64,11 @@ export const useThemeStore = create<ThemeState>()(
   ),
 );
 
-// Live OS theme changes only matter while mode is 'system' — an explicit
-// light/dark choice should never get silently overridden by the OS.
 Appearance.addChangeListener(({ colorScheme }) => {
   const { mode } = useThemeStore.getState();
   if (mode === "system") useThemeStore.setState(slice(colorScheme === "dark"));
 });
 
-// Back-compat shim — every existing call site keeps working unchanged.
-// New components should prefer useThemeStore(selector) for field-level subscriptions.
 export function useTheme() {
   return useThemeStore();
 }

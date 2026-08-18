@@ -9,16 +9,14 @@ export function PromoBanner() {
   const { colors, radius, spacing, typography } = useTheme();
   const router = useRouter();
   const { data: promotions = [] } = useActivePromotions();
-  // Multiple active promos can coexist (a category one and a single-coffee
-  // one, say) — the banner only has room for one, so a store-wide promo wins
-  // if present, otherwise whichever's most recent.
+
   const featured =
     promotions.find((p) => p.scope === "all") ?? promotions[0] ?? null;
 
   return (
     <View
       style={{
-        backgroundColor: colors.espresso,
+        backgroundColor: colors.cream,
         borderRadius: radius.xxl,
         marginHorizontal: spacing.xl,
         padding: spacing.xl,

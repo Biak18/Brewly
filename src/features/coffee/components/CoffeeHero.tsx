@@ -33,7 +33,6 @@ export function CoffeeHero({
   const burstOpacity = useSharedValue(0);
 
   const imageStyle = useAnimatedStyle(() => {
-    // Over-scroll (pull down) scales the image up; scrolling content up shrinks/lifts it.
     const scale = interpolate(
       scrollY.value,
       [-150, 0, HERO_HEIGHT],
@@ -54,10 +53,6 @@ export function CoffeeHero({
     transform: [{ scale: burstScale.value }],
   }));
 
-  // Animations run directly on the UI thread inside the worklet. Only the two
-  // calls that genuinely require the JS thread — a native Haptics module call,
-  // and the favorite mutation touching React Query — cross via runOnJS. No
-  // reason to bounce the animation itself through JS first.
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(() => {

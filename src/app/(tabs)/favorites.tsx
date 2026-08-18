@@ -9,7 +9,6 @@ import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
-import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { getCoffeePricing, toCoffeeCardData } from "@/utils/pricing";
 import { FlashList } from "@shopify/flash-list";
@@ -17,6 +16,7 @@ import { useRouter } from "expo-router";
 import { Heart } from "lucide-react-native";
 import { useCallback } from "react";
 import { View } from "react-native";
+import Animated, { FadeOut, LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoritesScreen() {
@@ -31,14 +31,13 @@ export default function FavoritesScreen() {
   } = useFavoriteCoffees(userId);
   const toggleFavorite = useToggleFavorite();
   const addItem = useCartStore((s) => s.addItem);
-  const openCartPreview = useUIStore((s) => s.openCartPreview);
   const { data: promotions = [] } = useActivePromotions();
 
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
     [router],
   );
-  // Every card on this screen is, by definition, already liked — so this is always an unlike, unlike Home/Menu's toggle.
+
   const handleToggleFavorite = useCallback(
     (id: string) => toggleFavorite.mutate({ coffeeId: id, liked: false }),
 
@@ -113,7 +112,11 @@ export default function FavoritesScreen() {
         renderItem={({ item }) => {
           const data = toCoffeeCardData(item, promotions);
           return (
-            <View style={{ flex: 1, margin: spacing.xs }}>
+            <Animated.View
+              style={{ flex: 1, margin: spacing.xs }}
+              exiting={FadeOut.duration(100)}
+              layout={LinearTransition.springify()}
+            >
               <CoffeeCard
                 coffee={data}
                 layout="grid"
@@ -122,7 +125,7 @@ export default function FavoritesScreen() {
                 onToggleFavorite={handleToggleFavorite}
                 onAddToCart={handleAddToCart}
               />
-            </View>
+            </Animated.View>
           );
         }}
       />

@@ -59,8 +59,6 @@ export function Button({
     onPress();
   }, [isDisabled, onPress]);
 
-  // btn-light in the mockup is deliberately NOT theme-adaptive — it's used on top
-  // of the photographic hero banner in both light and dark mode, so it stays cream.
   const variantBg = {
     primary: colors.espresso,
     light: "#fff9ef",

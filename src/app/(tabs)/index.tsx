@@ -16,13 +16,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const colors = useThemeStore((s) => s.colors);
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);

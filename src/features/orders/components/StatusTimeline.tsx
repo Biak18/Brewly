@@ -17,11 +17,6 @@ const STEPS: { key: OrderStatus; label: string }[] = [
   { key: "completed", label: "Completed" },
 ];
 
-// Simplification worth noting: the fill line and the step dots are laid out
-// as two independent rows (line above, dots below via space-between), not a
-// single connected line threading precisely through each dot's center. Good
-// enough visually for 4 evenly-spaced steps; would need real coordinate math
-// to hold up with a variable or dynamic number of steps.
 export function StatusTimeline({ status }: { status: OrderStatus }) {
   const { colors, spacing, typography } = useTheme();
   const currentIndex = STEPS.findIndex((s) => s.key === status);

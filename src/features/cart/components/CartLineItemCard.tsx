@@ -8,9 +8,10 @@ import * as Haptics from "expo-haptics";
 import { Trash2 } from "lucide-react-native";
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-// import { Swipeable } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
+  FadeOut,
+  LinearTransition,
   SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
@@ -71,79 +72,79 @@ function CartLineItemCardComponent({
     .join(" · ");
 
   return (
-    <ReanimatedSwipeable
-      renderRightActions={(progress) => (
-        <DeleteAction progress={progress} onPress={() => onRemove(item.id)} />
-      )}
-      overshootRight={false}
+    <Animated.View
+      exiting={FadeOut.duration(200)}
+      layout={LinearTransition.springify()}
     >
-      <View
-        style={[
-          styles.row,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.line,
-            borderRadius: radius.lg,
-            padding: spacing.md,
-          },
-        ]}
+      <ReanimatedSwipeable
+        renderRightActions={(progress) => (
+          <DeleteAction progress={progress} onPress={() => onRemove(item.id)} />
+        )}
+        overshootRight={false}
       >
-        <CoffeeImage uri={item.imageUrl} height={64} radius={radius.md} />
-        <View style={{ flex: 1, marginLeft: spacing.md }}>
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.body,
-              fontWeight: "800",
-            }}
-            numberOfLines={1}
-          >
-            {item.name}
-          </Text>
-          {optionsSummary.length > 0 && (
+        <View
+          style={[
+            styles.row,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.line,
+              borderRadius: radius.lg,
+              padding: spacing.md,
+            },
+          ]}
+        >
+          <CoffeeImage uri={item.imageUrl} height={64} radius={radius.md} />
+          <View style={{ flex: 1, marginLeft: spacing.md }}>
             <Text
               style={{
-                color: colors.muted,
-                fontSize: typography.micro,
-                marginTop: 2,
+                color: colors.ink,
+                fontSize: typography.body,
+                fontWeight: "800",
               }}
               numberOfLines={1}
             >
-              {optionsSummary}
+              {item.name}
             </Text>
-          )}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: spacing.sm,
-            }}
-          >
-            <QuantityStepper
-              value={item.quantity}
-              onChange={(q) => onQuantityChange(item.id, q)}
-            />
-            <CoffeePrice
-              value={item.unitPrice * item.quantity}
-              compareAtValue={
-                item.compareAtUnitPrice
-                  ? item.compareAtUnitPrice * item.quantity
-                  : undefined
-              }
-            />
+            {optionsSummary.length > 0 && (
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.micro,
+                  marginTop: 2,
+                }}
+                numberOfLines={1}
+              >
+                {optionsSummary}
+              </Text>
+            )}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: spacing.sm,
+              }}
+            >
+              <QuantityStepper
+                value={item.quantity}
+                onChange={(q) => onQuantityChange(item.id, q)}
+              />
+              <CoffeePrice
+                value={item.unitPrice * item.quantity}
+                compareAtValue={
+                  item.compareAtUnitPrice
+                    ? item.compareAtUnitPrice * item.quantity
+                    : undefined
+                }
+              />
+            </View>
           </View>
         </View>
-      </View>
-    </ReanimatedSwipeable>
+      </ReanimatedSwipeable>
+    </Animated.View>
   );
 }
 
-// item is a new object every time cartStore.items changes (Zustand's set()
-// replaces the array), so reference-equality would re-render every row on
-// any cart mutation. Comparing only the fields that affect THIS row's render.
-// Assumption: name/imageUrl/options are fixed at add-time and never edited in
-// place — if an "edit cart line" flow is ever added, this comparator needs those fields too.
 export const CartLineItemCard = memo(
   CartLineItemCardComponent,
   (prev, next) =>

@@ -11,9 +11,6 @@ const PRESETS = [
 ] as const;
 export type PickupTimeValue = (typeof PRESETS)[number]["value"];
 
-// Preset chips, not a native date/time picker — avoids pulling in
-// @react-native-community/datetimepicker (its own native linking/config) for
-// pickup slots that are coarse-grained in practice.
 export function PickupTimeRow({
   value,
   onChange,

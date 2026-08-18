@@ -16,7 +16,10 @@ import { ChevronLeft } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
@@ -99,14 +102,12 @@ export default function CheckoutScreen() {
   );
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: spacing.lg,
+          paddingHorizontal: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
@@ -206,6 +207,6 @@ export default function CheckoutScreen() {
           variant="primary"
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

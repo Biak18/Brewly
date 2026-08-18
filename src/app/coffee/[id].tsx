@@ -29,10 +29,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CoffeeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -75,7 +72,6 @@ export default function CoffeeDetailScreen() {
     };
   }, [options.data]);
 
-  // Defaults can only be set once options actually load — can't default to a real id before then.
   useEffect(() => {
     if (grouped.size.length && !size) setSize(grouped.size[0].id);
     if (grouped.temperature.length && !temperature)
@@ -178,7 +174,7 @@ export default function CoffeeDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Animated.ScrollView
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -308,7 +304,7 @@ export default function CoffeeDetailScreen() {
         compareAtTotal={compareAtTotal}
         onAddToCart={handleAddToCart}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -323,6 +319,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
   },
-  backButtonWrap: { position: "absolute", left: 16 },
-  heartSlot: { position: "absolute", right: 16 },
+  backButtonWrap: { position: "absolute", start: 16 }, // was left: 16
+  heartSlot: { position: "absolute", end: 16 }, // was right: 16
 });

@@ -8,8 +8,6 @@ export function getCoffeeDiscount(
   categoryId: string,
   promotions: Promotion[],
 ): Promotion | null {
-  // Most-specific match wins: a promo targeted at this exact coffee beats a
-  // category-wide one, which beats a store-wide one.
   return (
     promotions.find((p) => p.scope === "coffee" && p.coffee_id === coffeeId) ??
     promotions.find(
@@ -27,9 +25,6 @@ export function applyDiscount(basePrice: number, promo: Promotion | null) {
   return { finalPrice, hasDiscount: true };
 }
 
-// Single source of truth for "coffee → card display data" — used by every
-// screen that renders a CoffeeCard, so pricing logic exists in exactly one
-// place instead of being copy-pasted into Home/Menu/Favorites independently.
 export function toCoffeeCardData(
   coffee: Coffee,
   promotions: Promotion[],

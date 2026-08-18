@@ -9,8 +9,6 @@ const METHODS = [
 ] as const;
 export type PaymentMethodValue = (typeof METHODS)[number]["value"];
 
-// No payment gateway is integrated — this records intent only, it does not
-// charge a card. See the note in chat; don't build on this assuming otherwise.
 export function PaymentMethodRow({
   value,
   onChange,
