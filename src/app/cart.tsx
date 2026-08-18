@@ -1,0 +1,166 @@
+// src/app/cart.tsx
+import { CoffeePrice } from "@/components/coffee/CoffeePrice";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { IconButton } from "@/components/ui/IconButton";
+import { CartLineItemCard } from "@/features/cart/components/CartLineItemCard";
+import {
+  CartLineItem,
+  selectCartSavings,
+  selectCartTotal,
+  useCartStore,
+} from "@/stores/cartStore";
+import { useTheme } from "@/theme";
+import { useRouter } from "expo-router";
+import { ChevronLeft, ShoppingBag } from "lucide-react-native";
+import { useCallback, useEffect } from "react";
+import { FlatList, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export default function CartScreen() {
+  const { colors, spacing, typography } = useTheme();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const items = useCartStore((s) => s.items);
+  const savings = useCartStore(selectCartSavings);
+
+  // Zustand actions defined inside create() are referentially stable across
+  // renders — no useCallback wrapper needed to keep the memo below effective.
+  const removeItem = useCartStore((s) => s.removeItem);
+  const setQuantity = useCartStore((s) => s.setQuantity);
+  const total = useCartStore(selectCartTotal);
+
+  const bump = useSharedValue(1);
+  useEffect(() => {
+    bump.value = withSequence(
+      withSpring(1.08, { damping: 8 }),
+      withSpring(1, { damping: 10 }),
+    );
+  }, [total, bump]);
+  const totalStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: bump.value }],
+  }));
+
+  const renderItem = useCallback(
+    ({ item }: { item: CartLineItem }) => (
+      <CartLineItemCard
+        item={item}
+        onRemove={removeItem}
+        onQuantityChange={setQuantity}
+      />
+    ),
+    [removeItem, setQuantity],
+  );
+
+  return (
+    <View
+      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: spacing.lg,
+        }}
+      >
+        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+          <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
+        </IconButton>
+        <Text
+          style={{
+            color: colors.ink,
+            fontSize: typography.subheading,
+            fontWeight: "800",
+            marginLeft: spacing.md,
+          }}
+        >
+          Your cart
+        </Text>
+      </View>
+
+      {items.length === 0 ? (
+        <EmptyState
+          icon={
+            <ShoppingBag size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="Your cart is empty"
+          description="Add something from the menu to get started."
+          actionLabel="Browse menu"
+          onAction={() => router.push("/(tabs)/menu")}
+        />
+      ) : (
+        <>
+          <FlatList
+            data={items}
+            keyExtractor={(i) => i.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+          />
+          <View
+            style={{
+              padding: spacing.xl,
+              borderTopWidth: 1,
+              borderTopColor: colors.line,
+              backgroundColor: colors.surface,
+            }}
+          >
+            {savings > 0 && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: spacing.xs,
+                }}
+              >
+                <Text
+                  style={{
+                    color: colors.green,
+                    fontSize: typography.caption,
+                    fontWeight: "600",
+                  }}
+                >
+                  You're saving
+                </Text>
+                <Text
+                  style={{
+                    color: colors.green,
+                    fontSize: typography.caption,
+                    fontWeight: "800",
+                  }}
+                >
+                  ${savings.toFixed(2)}
+                </Text>
+              </View>
+            )}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: spacing.md,
+              }}
+            >
+              <Text style={{ color: colors.muted, fontSize: typography.body }}>
+                Total
+              </Text>
+              <Animated.View style={totalStyle}>
+                <CoffeePrice value={total} size={22} />
+              </Animated.View>
+            </View>
+            <Button
+              label="Proceed to checkout"
+              onPress={() => router.push("/checkout")}
+              variant="primary"
+            />
+          </View>
+        </>
+      )}
+    </View>
+  );
+}

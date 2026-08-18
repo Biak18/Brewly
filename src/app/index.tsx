@@ -1,98 +1,142 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { CoffeeCard, CoffeeCardData } from "@/components/coffee/CoffeeCard";
+import { MOCK_COFFEE_ITEMS } from "@/constants/coffeeData";
+import { useThemeStore } from "@/theme/themeStore";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+// Separate Item Component to safely use 'useAnimatedStyle' hook
+function CarouselCard({
+  item,
+  index,
+  scrollX,
+  cardWidth,
+  snapInterval,
+}: {
+  item: CoffeeCardData;
+  index: number;
+  scrollX: SharedValue<number>;
+  cardWidth: number;
+  snapInterval: number;
+}) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      (index - 1) * snapInterval,
+      index * snapInterval,
+      (index + 1) * snapInterval,
+    ];
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+    // Smoothly push inactive cards down
+    const translateY = interpolate(
+      scrollX.value,
+      inputRange,
+      [16, 0, 16],
+      Extrapolation.CLAMP,
     );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+    // Scale down inactive cards slightly
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.9, 1, 0.9],
+      Extrapolation.CLAMP,
+    );
+
+    return {
+      transform: [{ translateY }, { scale }],
+    };
+  });
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <Animated.View
+      style={[
+        {
+          width: cardWidth,
+          justifyContent: "center",
+        },
+        animatedStyle,
+      ]}
+    >
+      <CoffeeCard
+        coffee={item}
+        liked={index % 2 === 0}
+        onPress={() => {}}
+        onAddToCart={() => {}}
+        onToggleFavorite={() => {}}
+      />
+    </Animated.View>
   );
 }
 
-export default function HomeScreen() {
+export default function Index() {
+  const { width } = useWindowDimensions();
+  const colors = useThemeStore((s) => s.colors);
+
+  const CARD_HEIGHT = 300;
+  const CARD_WIDTH = width * 0.6;
+  const GAP = 5;
+
+  const SIDE_INSET = (width - CARD_WIDTH) / 2;
+  const SNAP_INTERVAL = CARD_WIDTH + GAP;
+
+  // Reanimated Shared Value
+  const scrollX = useSharedValue(0);
+
+  // Reanimated Scroll Handler running directly on the UI thread
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <Animated.FlatList
+        data={MOCK_COFFEE_ITEMS}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={SNAP_INTERVAL}
+        decelerationRate="fast"
+        snapToAlignment="center"
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        style={{
+          width: width,
+          height: CARD_HEIGHT + 40,
+        }}
+        contentContainerStyle={[
+          styles.scrollContainer,
+          { paddingHorizontal: SIDE_INSET, gap: GAP },
+        ]}
+        renderItem={({ item, index }) => (
+          <CarouselCard
+            item={item}
+            index={index}
+            scrollX={scrollX}
+            cardWidth={CARD_WIDTH}
+            snapInterval={SNAP_INTERVAL}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  scrollContainer: {
+    paddingVertical: 16,
+    alignItems: "center",
   },
 });
