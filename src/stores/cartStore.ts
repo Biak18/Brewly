@@ -4,6 +4,7 @@ import { create } from "zustand";
 export type CartLineItem = {
   id: string;
   coffeeId: string;
+  storeId: string;
   name: string;
   imageUrl: string;
   unitPrice: number;

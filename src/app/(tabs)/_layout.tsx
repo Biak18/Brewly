@@ -3,7 +3,7 @@ import { useFavoriteIds } from "@/features/favorites/api/useFavorites";
 import { ThemeColors } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Tabs } from "expo-router";
-import { Coffee, Heart, Home, ReceiptText, User } from "lucide-react-native";
+import { Heart, Home, ReceiptText, Store, User } from "lucide-react-native";
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -72,12 +72,12 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="menu"
+          name="shops"
           options={{
-            title: "Menu",
+            title: "Shops",
             tabBarIcon: ({ size, focused }) => (
               <TabBarIcon focused={focused} colors={colors}>
-                <Coffee
+                <Store
                   color={focused ? colors.espresso : colors.muted}
                   size={size}
                   strokeWidth={1.8}

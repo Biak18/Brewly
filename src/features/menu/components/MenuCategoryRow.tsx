@@ -1,6 +1,6 @@
 // src/features/menu/components/MenuCategoryRow.tsx
 import { Chip } from "@/components/ui/Chip";
-import { Category, fetchCategories } from "@/services/coffees";
+import { Category, fetchCategoriesForStore } from "@/services/coffees";
 import { useTheme } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
@@ -9,17 +9,23 @@ import { FlatList, ListRenderItem } from "react-native";
 const ALL_ITEM: Category = { id: "__all__", name: "All", sort_order: -1 };
 
 export function MenuCategoryRow({
+  storeId,
   selectedId,
   onSelect,
 }: {
+  storeId: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
 }) {
   const { spacing } = useTheme();
 
+  // const { data: categories = [] } = useQuery({
+  //   queryKey: ["categories"],
+  //   queryFn: fetchCategories,
+  // });
   const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
+    queryKey: ["categories", storeId],
+    queryFn: () => fetchCategoriesForStore(storeId),
   });
   const items = [ALL_ITEM, ...categories];
 
