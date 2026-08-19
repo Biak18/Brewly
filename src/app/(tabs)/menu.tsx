@@ -110,27 +110,31 @@ export default function MenuScreen() {
       {isLoading ? (
         <MenuSkeleton />
       ) : isError ? (
-        <EmptyState
-          icon={
-            <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
-          }
-          title="Couldn't load the menu"
-          description="Check your connection and try again."
-          actionLabel="Retry"
-          onAction={() => refetch()}
-        />
+        <View style={{ flex: 1, backgroundColor: colors.bg }}>
+          <EmptyState
+            icon={
+              <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
+            }
+            title="Couldn't load the menu"
+            description="Check your connection and try again."
+            actionLabel="Retry"
+            onAction={() => refetch()}
+          />
+        </View>
       ) : coffees.length === 0 ? (
-        <EmptyState
-          icon={
-            <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
-          }
-          title="No coffee found"
-          description={
-            debouncedSearch
-              ? `Nothing matches "${debouncedSearch}".`
-              : "Try a different category."
-          }
-        />
+        <View style={{ flex: 1, backgroundColor: colors.bg }}>
+          <EmptyState
+            icon={
+              <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
+            }
+            title="No coffee found"
+            description={
+              debouncedSearch
+                ? `Nothing matches "${debouncedSearch}".`
+                : "Try a different category."
+            }
+          />
+        </View>
       ) : (
         <FlashList
           data={coffees}

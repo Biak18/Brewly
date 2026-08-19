@@ -1,4 +1,5 @@
 // src/app/(tabs)/orders.tsx
+import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pulse } from "@/components/ui/Pulse";
 import {
@@ -6,19 +7,35 @@ import {
   OrderCardData,
 } from "@/features/orders/components/OrderCard";
 import { useOrdersList } from "@/features/orders/hooks/useOrdersList";
-import { OrderSummary } from "@/services/orders";
+import { OrderStatus, OrderSummary } from "@/services/orders";
 import { useTheme } from "@/theme";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { ReceiptText } from "lucide-react-native";
-import { useCallback } from "react";
-import { View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "received", label: "Received" },
+  { value: "preparing", label: "Preparing" },
+  { value: "ready", label: "Ready" },
+  { value: "completed", label: "Completed" },
+];
 
 export default function OrdersScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const { data: orders = [], isLoading, isError, refetch } = useOrdersList();
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
+  const filteredOrders = useMemo(
+    () =>
+      statusFilter === "all"
+        ? orders
+        : orders.filter((o) => o.status === statusFilter),
+    [orders, statusFilter],
+  );
 
   const handlePress = useCallback(
     (id: string) => router.push(`/orders/${id}/tracking`),
@@ -73,23 +90,75 @@ export default function OrdersScreen() {
 
   if (orders.length === 0) {
     return (
-      <EmptyState
-        icon={
-          <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
-        }
-        title="No orders yet"
-        description="Orders you place will show up here."
-      />
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <EmptyState
+          icon={
+            <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="No orders yet"
+          description="Orders you place will show up here."
+        />
+      </View>
     );
   }
 
+  // if (filteredOrders.length === 0 && orders.length > 0) {
+  //   return (
+  //     <View style={{ flex: 1, backgroundColor: colors.bg }}>
+  //       <EmptyState
+  //         icon={
+  //           <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
+  //         }
+  //         title="No orders here"
+  //         description={`No ${statusFilter} orders right now.`}
+  //       />
+  //     </View>
+  //   );
+  // }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+      <View>
+        <FlatList
+          horizontal
+          data={FILTERS}
+          keyExtractor={(f) => f.value}
+          renderItem={({ item }) => (
+            <Chip
+              label={item.label}
+              active={statusFilter === item.value}
+              onPress={() => setStatusFilter(item.value)}
+            />
+          )}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.lg,
+            gap: spacing.sm,
+            marginBottom: spacing.md,
+            height: 38,
+            maxHeight: 38,
+          }}
+        />
+      </View>
+
       <FlashList
-        data={orders}
+        data={filteredOrders}
         keyExtractor={(o) => o.id}
         renderItem={renderItem}
         contentContainerStyle={{ padding: spacing.lg }}
+        ListEmptyComponent={() => (
+          <EmptyState
+            icon={
+              <ReceiptText
+                size={28}
+                color={colors.espresso}
+                strokeWidth={1.8}
+              />
+            }
+            title="No orders here"
+            description={`No ${statusFilter} orders right now.`}
+          />
+        )}
       />
     </SafeAreaView>
   );

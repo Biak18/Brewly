@@ -42,6 +42,7 @@ export async function placeOrder(params: {
       extras: i.extras ?? [],
       quantity: i.quantity,
       unit_price: i.unitPrice,
+      compare_at_price: i.compareAtUnitPrice ?? null,
     })),
   });
 
@@ -67,6 +68,7 @@ export type OrderWithItems = {
     extras: string[] | null;
     quantity: number;
     unit_price: number;
+    compare_at_price: number | null;
     coffees: { name: string; image_url: string | null } | null;
   }[];
 };
@@ -98,14 +100,15 @@ export async function fetchOrdersList(
   userId: string,
   role: "owner" | "staff",
 ): Promise<OrderSummary[]> {
-  let query = supabase
+  let listQuery = supabase
     .from("orders")
-    .select("id, status, total, placed_at, order_items(coffees(image_url))")
+    .select(
+      "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
+    )
+    .order("created_at", { referencedTable: "order_items", ascending: true })
     .order("placed_at", { ascending: false });
-
-  if (role !== "owner") query = query.eq("user_id", userId);
-
-  const { data, error } = await query;
+  if (role !== "owner") listQuery = listQuery.eq("user_id", userId);
+  const { data, error } = await listQuery;
   if (error) throw error;
   return (data ?? []).map((o: any) => ({
     id: o.id,

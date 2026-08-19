@@ -1,5 +1,6 @@
 // src/app/(tabs)/index.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Stagger } from "@/components/ui/Stagger";
 import { CategoryRow } from "@/features/home/components/CategoryRow";
 import { CoffeeRow } from "@/features/home/components/CoffeeRow";
 import { HomeHeader } from "@/features/home/components/HomeHeader";
@@ -72,13 +73,15 @@ export default function HomeScreen() {
 
   if (!hasAnyCoffees) {
     return (
-      <EmptyState
-        icon={
-          <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
-        }
-        title="Menu is empty"
-        description="Coffees added from the owner dashboard will show up here."
-      />
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <EmptyState
+          icon={
+            <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="Menu is empty"
+          description="Coffees added from the owner dashboard will show up here."
+        />
+      </View>
     );
   }
 
@@ -98,20 +101,33 @@ export default function HomeScreen() {
           />
         }
       >
-        <HomeHeader />
-
-        <PromoBanner />
-
-        <View style={{ marginTop: 10 }}>
-          <CategoryRow />
-        </View>
-        <CoffeeRow title="Featured" coffees={featured.data ?? []} />
-        <CoffeeRow title="Popular" coffees={popular.data ?? []} />
-        <CoffeeRow
-          title="Recommended for you"
-          coffees={recommended.data ?? []}
-        />
+        <Stagger index={0}>
+          <HomeHeader />
+        </Stagger>
+        <Stagger index={1}>
+          <PromoBanner />
+        </Stagger>
+        <Stagger index={2}>
+          <View style={{ marginTop: 10 }}>
+            <CategoryRow />
+          </View>
+        </Stagger>
+        <Stagger index={3}>
+          <CoffeeRow title="Featured" coffees={featured.data ?? []} />
+        </Stagger>
+        <Stagger index={4}>
+          <CoffeeRow title="Popular" coffees={popular.data ?? []} />
+        </Stagger>
+        <Stagger index={5}>
+          <CoffeeRow
+            title="Recommended for you"
+            coffees={recommended.data ?? []}
+          />
+        </Stagger>
         <RecentOrdersRow />
+        <Stagger index={6}>
+          <RecentOrdersRow />
+        </Stagger>
       </ScrollView>
     </SafeAreaView>
   );

@@ -11,13 +11,17 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
+type QuantityStepperProps = {
+  value: number;
+  onChange: (v: number) => void;
+  max?: number;
+};
+
 export function QuantityStepper({
   value,
   onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
+  max = 20,
+}: QuantityStepperProps) {
   const { colors, radius, spacing, typography } = useTheme();
   const bump = useSharedValue(1);
 
@@ -31,6 +35,8 @@ export function QuantityStepper({
   const numberStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bump.value }],
   }));
+
+  const atMax = value >= max;
 
   return (
     <View
@@ -74,9 +80,12 @@ export function QuantityStepper({
       </Animated.Text>
       <Pressable
         onPress={() => {
-          Haptics.selectionAsync();
-          onChange(value + 1);
+          if (!atMax) {
+            Haptics.selectionAsync();
+            onChange(value + 1);
+          }
         }}
+        disabled={atMax}
         hitSlop={8}
         style={{
           width: 32,
@@ -85,6 +94,7 @@ export function QuantityStepper({
           backgroundColor: colors.espresso,
           alignItems: "center",
           justifyContent: "center",
+          opacity: atMax ? 0.4 : 1,
         }}
       >
         <Plus size={16} color={colors.surface} strokeWidth={2} />

@@ -107,8 +107,12 @@ export async function fetchCoffeeById(id: string): Promise<Coffee> {
   return data;
 }
 
-export async function fetchCoffeeOptions(): Promise<CoffeeOption[]> {
-  const { data, error } = await supabase.from("coffee_options").select("*");
+export async function fetchCoffeeOptionsForCategory(
+  categoryId: string,
+): Promise<CoffeeOption[]> {
+  const { data, error } = await supabase.rpc("get_coffee_options", {
+    p_category_id: categoryId,
+  });
   if (error) throw error;
   return data;
 }

@@ -30,8 +30,14 @@ export function RecentOrdersRow() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, total, placed_at, order_items(coffees(image_url))")
+        .select(
+          "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
+        )
         .eq("user_id", userId!)
+        .order("created_at", {
+          referencedTable: "order_items",
+          ascending: true,
+        })
         .order("placed_at", { ascending: false })
         .limit(5);
       if (error) throw error;

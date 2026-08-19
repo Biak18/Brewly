@@ -1,14 +1,17 @@
 // src/app/sign-in.tsx
 import { Button } from "@/components/ui/Button";
+import { Stagger } from "@/components/ui/Stagger";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -51,107 +54,134 @@ export default function SignInScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={[styles.container, { paddingHorizontal: spacing.xl }]}>
-        <Text
-          style={{
-            color: colors.ink,
-            fontSize: typography.title,
-            fontWeight: "800",
-            marginBottom: spacing.xxl,
-          }}
-        >
-          Brewly
-        </Text>
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              placeholder="Email"
-              placeholderTextColor={colors.muted}
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.line,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginBottom: spacing.sm,
-                },
-              ]}
-            />
-          )}
-        />
-        {errors.email && (
-          <Text style={[styles.error, { color: colors.danger }]}>
-            {errors.email.message}
-          </Text>
-        )}
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              placeholder="Password"
-              placeholderTextColor={colors.muted}
-              secureTextEntry
-              autoComplete="password"
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.line,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginTop: spacing.sm,
-                  marginBottom: spacing.sm,
-                },
-              ]}
-            />
-          )}
-        />
-        {errors.password && (
-          <Text style={[styles.error, { color: colors.danger }]}>
-            {errors.password.message}
-          </Text>
-        )}
-        {serverError && (
+        <Stagger index={0}>
           <Text
-            style={[
-              styles.error,
-              { color: colors.danger, marginBottom: spacing.sm },
-            ]}
+            style={{
+              color: colors.ink,
+              fontSize: typography.title,
+              fontWeight: "800",
+              marginBottom: spacing.xxl,
+            }}
           >
-            {serverError}
+            Brewly
           </Text>
-        )}
+        </Stagger>
 
-        <Button
-          label="Sign in"
-          onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting}
-          variant="primary"
-        />
+        <Stagger index={1}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Email"
+                placeholderTextColor={colors.muted}
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                style={[
+                  styles.input,
+                  {
+                    borderColor: colors.line,
+                    color: colors.ink,
+                    borderRadius: radius.md,
+                    marginBottom: spacing.sm,
+                  },
+                ]}
+              />
+            )}
+          />
+          {errors.email && (
+            <Text style={[styles.error, { color: colors.danger }]}>
+              {errors.email.message}
+            </Text>
+          )}
+        </Stagger>
 
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.caption,
-            marginTop: spacing.xl,
-            textAlign: "center",
-          }}
-        >
-          No account? Ask the shop owner to invite you — there's no self
-          sign-up.
-        </Text>
+        <Stagger index={2}>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { value, onChange, onBlur } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Password"
+                placeholderTextColor={colors.muted}
+                secureTextEntry
+                autoComplete="password"
+                style={[
+                  styles.input,
+                  {
+                    borderColor: colors.line,
+                    color: colors.ink,
+                    borderRadius: radius.md,
+                    marginTop: spacing.sm,
+                    marginBottom: spacing.sm,
+                  },
+                ]}
+              />
+            )}
+          />
+          {errors.password && (
+            <Text style={[styles.error, { color: colors.danger }]}>
+              {errors.password.message}
+            </Text>
+          )}
+          {serverError && (
+            <Text
+              style={[
+                styles.error,
+                { color: colors.danger, marginBottom: spacing.sm },
+              ]}
+            >
+              {serverError}
+            </Text>
+          )}
+        </Stagger>
+
+        <Stagger index={3}>
+          <Button
+            label="Sign in"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+            variant="primary"
+          />
+        </Stagger>
+
+        <Stagger index={4}>
+          <Pressable
+            onPress={() => router.push("/forgot-password")}
+            style={{ marginTop: spacing.md, alignSelf: "center" }}
+          >
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.caption,
+                fontWeight: "600",
+              }}
+            >
+              Forgot password?
+            </Text>
+          </Pressable>
+        </Stagger>
+
+        <Stagger index={5}>
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.caption,
+              marginTop: spacing.xl,
+              textAlign: "center",
+            }}
+          >
+            No account? Ask the shop owner to invite you — there's no self
+            sign-up.
+          </Text>
+        </Stagger>
       </View>
     </KeyboardAvoidingView>
   );

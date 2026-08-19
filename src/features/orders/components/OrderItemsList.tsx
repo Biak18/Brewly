@@ -1,4 +1,5 @@
 // src/features/orders/components/OrderItemsList.tsx
+import { CoffeePrice } from "@/components/coffee/CoffeePrice";
 import { OrderWithItems } from "@/services/orders";
 import { useTheme } from "@/theme";
 import { Text, View } from "react-native";
@@ -47,15 +48,14 @@ export function OrderItemsList({
                 </Text>
               )}
             </View>
-            <Text
-              style={{
-                color: colors.ink,
-                fontSize: typography.bodySmall,
-                fontWeight: "600",
-              }}
-            >
-              ${(item.unit_price * item.quantity).toFixed(2)}
-            </Text>
+            <CoffeePrice
+              value={item.unit_price * item.quantity}
+              compareAtValue={
+                item.compare_at_price
+                  ? item.compare_at_price * item.quantity
+                  : undefined
+              }
+            />
           </View>
         );
       })}

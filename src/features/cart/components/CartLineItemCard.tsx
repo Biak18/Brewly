@@ -7,7 +7,7 @@ import { useTheme } from "@/theme";
 import * as Haptics from "expo-haptics";
 import { Trash2 } from "lucide-react-native";
 import { memo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { I18nManager, Pressable, StyleSheet, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
   FadeOut,
@@ -77,10 +77,29 @@ function CartLineItemCardComponent({
       layout={LinearTransition.springify()}
     >
       <ReanimatedSwipeable
-        renderRightActions={(progress) => (
-          <DeleteAction progress={progress} onPress={() => onRemove(item.id)} />
-        )}
-        overshootRight={false}
+        renderRightActions={
+          I18nManager.isRTL
+            ? undefined
+            : (progress) => (
+                <DeleteAction
+                  progress={progress}
+                  onPress={() => onRemove(item.id)}
+                />
+              )
+        }
+        renderLeftActions={
+          I18nManager.isRTL
+            ? (progress) => (
+                <DeleteAction
+                  progress={progress}
+                  onPress={() => onRemove(item.id)}
+                />
+              )
+            : undefined
+        }
+        overshootRight={!I18nManager.isRTL}
+        overshootLeft={I18nManager.isRTL}
+        overshootFriction={8}
       >
         <View
           style={[
@@ -155,5 +174,5 @@ export const CartLineItemCard = memo(
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", borderWidth: 1 },
-  deleteAction: { width: 56, marginLeft: 8, borderRadius: 14 },
+  deleteAction: { width: 56, marginHorizontal: 8, borderRadius: 14 }, // was marginLeft: 8
 });

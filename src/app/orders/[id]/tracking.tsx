@@ -219,6 +219,12 @@ export default function OrderTrackingScreen() {
     );
   }
 
+  const totalSavings = order.order_items.reduce(
+    (sum, i) =>
+      sum + ((i.compare_at_price ?? i.unit_price) - i.unit_price) * i.quantity,
+    0,
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
@@ -307,6 +313,30 @@ export default function OrderTrackingScreen() {
               ${order.tax.toFixed(2)}
             </Text>
           </View>
+          {totalSavings > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: spacing.xs,
+              }}
+            >
+              <Text
+                style={{ color: colors.green, fontSize: typography.bodySmall }}
+              >
+                You saved
+              </Text>
+              <Text
+                style={{
+                  color: colors.green,
+                  fontSize: typography.bodySmall,
+                  fontWeight: "800",
+                }}
+              >
+                ${totalSavings.toFixed(2)}
+              </Text>
+            </View>
+          )}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >

@@ -4,6 +4,7 @@ import { FloatingCartButton } from "@/components/cart/FloatingCartButton";
 import { ToastHost } from "@/components/ui/Toast";
 import { useOrdersRealtimeSync } from "@/features/orders/hooks/useOrdersRealtimeSync";
 import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromotionsRealtimeSync";
+import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/theme/themeStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,9 +25,11 @@ const queryClient = new QueryClient({
 function RootNavigator() {
   useOrdersRealtimeSync();
   usePromotionsRealtimeSync();
+  useAuthDeepLink();
   const colors = useThemeStore((s) => s.colors);
   const session = useAuthStore((s) => s.session);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
 
   useEffect(() => {
     if (!isLoading) SplashScreen.hideAsync();
@@ -42,15 +45,19 @@ function RootNavigator() {
           contentStyle: { backgroundColor: colors.bg },
         }}
       >
-        <Stack.Protected guard={!!session}>
+        <Stack.Protected guard={isPasswordRecovery}>
+          <Stack.Screen name="reset-password" />
+        </Stack.Protected>
+        <Stack.Protected guard={!!session && !isPasswordRecovery}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="coffee/[id]" />
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="orders/[id]/tracking" />
         </Stack.Protected>
-        <Stack.Protected guard={!session}>
+        <Stack.Protected guard={!session && !isPasswordRecovery}>
           <Stack.Screen name="sign-in" />
+          <Stack.Screen name="forgot-password" />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />

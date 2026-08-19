@@ -10,6 +10,7 @@ type AuthState = {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
+  isPasswordRecovery: boolean;
   signOut: () => Promise<void>;
 };
 
@@ -17,6 +18,7 @@ export const useAuthStore = create<AuthState>(() => ({
   session: null,
   profile: null,
   isLoading: true,
+  isPasswordRecovery: false,
   signOut: async () => {
     await supabase.auth.signOut();
   },
