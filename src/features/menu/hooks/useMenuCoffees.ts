@@ -5,14 +5,16 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 const PAGE_SIZE = 20;
 
 export function useMenuCoffees(
+  storeId: string,
   categoryId: string | null,
   search: string,
   sort: MenuSort,
 ) {
   return useInfiniteQuery({
-    queryKey: ["menu-coffees", categoryId, search, sort],
+    queryKey: ["menu-coffees", storeId, categoryId, search, sort],
     queryFn: ({ pageParam }) =>
       fetchMenuCoffees({
+        storeId,
         categoryId,
         search,
         sort,

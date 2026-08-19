@@ -11,7 +11,12 @@ import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
-import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
+import {
+  Easing,
+  FadeInUp,
+  FadeOutDown,
+  ZoomInEasyDown,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -106,8 +111,7 @@ export default function ForgotPasswordScreen() {
       <Stagger
         stagger={70}
         duration={420}
-        entering={() => ZoomInEasyDown.springify()}
-        exiting={() => FadeOutDown.springify()}
+        entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
         style={{
           flex: 1,
           paddingHorizontal: spacing.xl,

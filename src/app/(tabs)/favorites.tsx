@@ -55,8 +55,10 @@ export default function FavoritesScreen() {
         coffee,
         promotions,
       );
+
       addItem({
         coffeeId: coffee.id,
+        storeId: coffee.store_id,
         name: coffee.name,
         imageUrl: coffee.image_url ?? "",
         unitPrice,

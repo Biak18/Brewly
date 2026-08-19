@@ -13,6 +13,7 @@ export type CoffeeOption = {
 export type Coffee = {
   id: string;
   category_id: string;
+  store_id: string;
   name: string;
   description: string | null;
   base_price: number;
@@ -25,6 +26,18 @@ export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .order("sort_order");
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchCategoriesForStore(
+  storeId: string,
+): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("store_id", storeId)
     .order("sort_order");
   if (error) throw error;
   return data;
@@ -64,6 +77,7 @@ export async function fetchRecommendedCoffees(): Promise<Coffee[]> {
 }
 
 export async function fetchMenuCoffees(params: {
+  storeId: string;
   categoryId?: string | null;
   search?: string;
   sort?: MenuSort;
@@ -72,7 +86,11 @@ export async function fetchMenuCoffees(params: {
 }): Promise<Coffee[]> {
   const page = params.page ?? 0;
   const pageSize = params.pageSize ?? 20;
-  let query = supabase.from("coffees").select("*").eq("is_active", true);
+  let query = supabase
+    .from("coffees")
+    .select("*")
+    .eq("is_active", true)
+    .eq("store_id", params.storeId);
   if (params.categoryId) query = query.eq("category_id", params.categoryId);
   if (params.search?.trim()) {
     const term = params.search.trim();
