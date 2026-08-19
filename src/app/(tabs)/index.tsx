@@ -1,29 +1,31 @@
 // src/app/(tabs)/index.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Stagger } from "@/components/ui/Stagger";
 import { CategoryRow } from "@/features/home/components/CategoryRow";
 import { CoffeeRow } from "@/features/home/components/CoffeeRow";
 import { HomeHeader } from "@/features/home/components/HomeHeader";
 import { HomeSkeleton } from "@/features/home/components/HomeSkeleton";
 import { PromoBanner } from "@/features/home/components/PromoBanner";
 import { RecentOrdersRow } from "@/features/home/components/RecentOrdersRow";
+import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import {
   fetchFeaturedCoffees,
   fetchPopularCoffees,
   fetchRecommendedCoffees,
 } from "@/services/coffees";
 import { useThemeStore } from "@/theme/themeStore";
+import { Stagger } from "@animatereactnative/stagger";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
+import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const colors = useThemeStore((s) => s.colors);
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-
+  const promotions = useActivePromotions();
   const featured = useQuery({
     queryKey: ["coffees", "featured"],
     queryFn: fetchFeaturedCoffees,
@@ -38,7 +40,10 @@ export default function HomeScreen() {
   });
 
   const isLoading =
-    featured.isLoading || popular.isLoading || recommended.isLoading;
+    featured.isLoading ||
+    popular.isLoading ||
+    recommended.isLoading ||
+    promotions.isLoading;
   const isError = featured.isError || popular.isError || recommended.isError;
 
   const onRefresh = useCallback(async () => {
@@ -101,31 +106,25 @@ export default function HomeScreen() {
           />
         }
       >
-        <Stagger index={0}>
+        <Stagger
+          stagger={70}
+          duration={420}
+          entering={() => ZoomInEasyDown.springify()}
+          exiting={() => FadeOutDown.springify()}
+        >
           <HomeHeader />
-        </Stagger>
-        <Stagger index={1}>
+
           <PromoBanner />
-        </Stagger>
-        <Stagger index={2}>
+
           <View style={{ marginTop: 10 }}>
             <CategoryRow />
           </View>
-        </Stagger>
-        <Stagger index={3}>
           <CoffeeRow title="Featured" coffees={featured.data ?? []} />
-        </Stagger>
-        <Stagger index={4}>
           <CoffeeRow title="Popular" coffees={popular.data ?? []} />
-        </Stagger>
-        <Stagger index={5}>
           <CoffeeRow
             title="Recommended for you"
             coffees={recommended.data ?? []}
           />
-        </Stagger>
-        <RecentOrdersRow />
-        <Stagger index={6}>
           <RecentOrdersRow />
         </Stagger>
       </ScrollView>

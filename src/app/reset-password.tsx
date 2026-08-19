@@ -1,9 +1,9 @@
 // src/app/reset-password.tsx
 import { Button } from "@/components/ui/Button";
-import { Stagger } from "@/components/ui/Stagger";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
+import { Stagger } from "@animatereactnative/stagger";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { useCallback, useState } from "react";
@@ -15,6 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { z } from "zod";
 
 const schema = z
@@ -51,6 +52,9 @@ export default function ResetPasswordScreen() {
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // The recovery session IS a valid session the moment this succeeds —
+    // clearing the flag hands control back to the normal session guard,
+    // which drops them straight into the app. No second sign-in needed.
     useAuthStore.setState({ isPasswordRecovery: false });
   }, []);
 
@@ -59,26 +63,28 @@ export default function ResetPasswordScreen() {
       style={{ flex: 1, backgroundColor: colors.bg }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View
+      <Stagger
+        stagger={70}
+        duration={420}
+        entering={() => ZoomInEasyDown.springify()}
+        exiting={() => FadeOutDown.springify()}
         style={{
           flex: 1,
           paddingHorizontal: spacing.xl,
           justifyContent: "center",
         }}
       >
-        <Stagger index={0}>
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.title,
-              fontWeight: "800",
-              marginBottom: spacing.xl,
-            }}
-          >
-            Set a new password
-          </Text>
-        </Stagger>
-        <Stagger index={1}>
+        <Text
+          style={{
+            color: colors.ink,
+            fontSize: typography.title,
+            fontWeight: "800",
+            marginBottom: spacing.xl,
+          }}
+        >
+          Set a new password
+        </Text>
+        <View>
           <Controller
             control={control}
             name="password"
@@ -114,8 +120,8 @@ export default function ResetPasswordScreen() {
               {errors.password.message}
             </Text>
           )}
-        </Stagger>
-        <Stagger index={2}>
+        </View>
+        <View>
           <Controller
             control={control}
             name="confirmPassword"
@@ -163,16 +169,14 @@ export default function ResetPasswordScreen() {
               {serverError}
             </Text>
           )}
-        </Stagger>
-        <Stagger index={3}>
-          <Button
-            label="Update password"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            variant="primary"
-          />
-        </Stagger>
-      </View>
+        </View>
+        <Button
+          label="Update password"
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          variant="primary"
+        />
+      </Stagger>
     </KeyboardAvoidingView>
   );
 }
