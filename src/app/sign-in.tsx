@@ -1,8 +1,8 @@
 // src/app/sign-in.tsx
 import { Button } from "@/components/ui/Button";
-import { Stagger } from "@/components/ui/Stagger";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
+import { Stagger } from "@animatereactnative/stagger";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -15,8 +15,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from "react-native";
+import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { z } from "zod";
 
 const signInSchema = z.object({
@@ -53,143 +53,137 @@ export default function SignInScreen() {
       style={[styles.flex, { backgroundColor: colors.bg }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={[styles.container, { paddingHorizontal: spacing.xl }]}>
-        <Stagger index={0}>
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.title,
-              fontWeight: "800",
-              marginBottom: spacing.xxl,
-            }}
-          >
-            Brewly
-          </Text>
-        </Stagger>
+      <Stagger
+        stagger={70}
+        duration={420}
+        entering={() => ZoomInEasyDown.springify()}
+        exiting={() => FadeOutDown.springify()}
+        style={styles.container}
+      >
+        <Text
+          style={{
+            color: colors.ink,
+            fontSize: typography.title,
+            fontWeight: "800",
+            marginBottom: spacing.xxl,
+          }}
+        >
+          Brewly
+        </Text>
 
-        <Stagger index={1}>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="Email"
-                placeholderTextColor={colors.muted}
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                style={[
-                  styles.input,
-                  {
-                    borderColor: colors.line,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                    marginBottom: spacing.sm,
-                  },
-                ]}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text style={[styles.error, { color: colors.danger }]}>
-              {errors.email.message}
-            </Text>
-          )}
-        </Stagger>
-
-        <Stagger index={2}>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="Password"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                autoComplete="password"
-                style={[
-                  styles.input,
-                  {
-                    borderColor: colors.line,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                    marginTop: spacing.sm,
-                    marginBottom: spacing.sm,
-                  },
-                ]}
-              />
-            )}
-          />
-          {errors.password && (
-            <Text style={[styles.error, { color: colors.danger }]}>
-              {errors.password.message}
-            </Text>
-          )}
-          {serverError && (
-            <Text
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder="Email"
+              placeholderTextColor={colors.muted}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
               style={[
-                styles.error,
-                { color: colors.danger, marginBottom: spacing.sm },
+                styles.input,
+                {
+                  borderColor: colors.line,
+                  color: colors.ink,
+                  borderRadius: radius.md,
+                  marginBottom: spacing.sm,
+                },
               ]}
-            >
-              {serverError}
-            </Text>
+            />
           )}
-        </Stagger>
+        />
+        {errors.email && (
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.email.message}
+          </Text>
+        )}
 
-        <Stagger index={3}>
-          <Button
-            label="Sign in"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            variant="primary"
-          />
-        </Stagger>
-
-        <Stagger index={4}>
-          <Pressable
-            onPress={() => router.push("/forgot-password")}
-            style={{ marginTop: spacing.md, alignSelf: "center" }}
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder="Password"
+              placeholderTextColor={colors.muted}
+              secureTextEntry
+              autoComplete="password"
+              style={[
+                styles.input,
+                {
+                  borderColor: colors.line,
+                  color: colors.ink,
+                  borderRadius: radius.md,
+                  marginTop: spacing.sm,
+                  marginBottom: spacing.sm,
+                },
+              ]}
+            />
+          )}
+        />
+        {errors.password && (
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.password.message}
+          </Text>
+        )}
+        {serverError && (
+          <Text
+            style={[
+              styles.error,
+              { color: colors.danger, marginBottom: spacing.sm },
+            ]}
           >
-            <Text
-              style={{
-                color: colors.muted,
-                fontSize: typography.caption,
-                fontWeight: "600",
-              }}
-            >
-              Forgot password?
-            </Text>
-          </Pressable>
-        </Stagger>
+            {serverError}
+          </Text>
+        )}
 
-        <Stagger index={5}>
+        <Button
+          label="Sign in"
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          variant="primary"
+        />
+
+        <Pressable
+          onPress={() => router.push("/forgot-password")}
+          style={{ marginTop: spacing.md, alignSelf: "center" }}
+        >
           <Text
             style={{
               color: colors.muted,
               fontSize: typography.caption,
-              marginTop: spacing.xl,
-              textAlign: "center",
+              fontWeight: "600",
             }}
           >
-            No account? Ask the shop owner to invite you — there's no self
-            sign-up.
+            Forgot password?
           </Text>
-        </Stagger>
-      </View>
+        </Pressable>
+
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: typography.caption,
+            marginTop: spacing.xl,
+            textAlign: "center",
+          }}
+        >
+          No account? Ask the shop owner to invite you — there's no self
+          sign-up.
+        </Text>
+      </Stagger>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  container: { flex: 1, justifyContent: "center" },
+  container: { flex: 1, justifyContent: "center", paddingHorizontal: 20 },
   input: { borderWidth: 1, height: 48, paddingHorizontal: 14, fontSize: 14 },
   error: { fontSize: 11, marginBottom: 4 },
 });

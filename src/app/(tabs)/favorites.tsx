@@ -11,12 +11,16 @@ import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useTheme } from "@/theme";
 import { getCoffeePricing, toCoffeeCardData } from "@/utils/pricing";
-import { FlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { Heart } from "lucide-react-native";
 import { useCallback } from "react";
 import { View } from "react-native";
-import Animated, { FadeOut, LinearTransition } from "react-native-reanimated";
+import Animated, {
+  FadeOut,
+  LinearTransition,
+  ZoomInEasyDown,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FavoritesScreen() {
@@ -101,7 +105,7 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <FlashList
+      <AnimatedFlashList
         data={coffees}
         numColumns={2}
         keyExtractor={(item) => item.id}
@@ -114,6 +118,7 @@ export default function FavoritesScreen() {
           return (
             <Animated.View
               style={{ flex: 1, margin: spacing.xs }}
+              entering={ZoomInEasyDown.springify()}
               exiting={FadeOut.duration(100)}
               layout={LinearTransition.springify()}
             >

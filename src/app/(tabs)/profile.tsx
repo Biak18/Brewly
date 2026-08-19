@@ -5,9 +5,11 @@ import { SettingsRow } from "@/components/ui/SettingsRow";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
+import { Stagger } from "@animatereactnative/stagger";
 import { Coffee as CoffeeIcon, LogOut, Users } from "lucide-react-native";
 import { useCallback } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
+import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -46,174 +48,181 @@ export default function ProfileScreen() {
           paddingBottom: spacing.xxxl,
         }}
       >
-        <View style={{ alignItems: "center", marginBottom: spacing.xxl }}>
-          <View
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: 36,
-              backgroundColor: colors.cream,
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: spacing.md,
-            }}
-          >
+        <Stagger
+          stagger={70}
+          duration={420}
+          entering={() => ZoomInEasyDown.springify()}
+          exiting={() => FadeOutDown.springify()}
+        >
+          <View style={{ alignItems: "center", marginBottom: spacing.xxl }}>
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: colors.cream,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: spacing.md,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.espresso,
+                  fontSize: 28,
+                  fontWeight: "800",
+                }}
+              >
+                {firstInitial}
+              </Text>
+            </View>
             <Text
               style={{
-                color: colors.espresso,
-                fontSize: 28,
+                color: colors.ink,
+                fontSize: typography.subheading,
                 fontWeight: "800",
               }}
             >
-              {firstInitial}
+              {profile?.full_name ?? "Your account"}
             </Text>
-          </View>
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.subheading,
-              fontWeight: "800",
-            }}
-          >
-            {profile?.full_name ?? "Your account"}
-          </Text>
-          <Text
-            style={{
-              color: colors.muted,
-              fontSize: typography.caption,
-              marginTop: 2,
-            }}
-          >
-            {session?.user.email}
-          </Text>
-          <View
-            style={{
-              marginTop: spacing.sm,
-              paddingHorizontal: spacing.md,
-              paddingVertical: 4,
-              borderRadius: radius.pill,
-              backgroundColor: colors.greenSoft,
-            }}
-          >
-            <Text
-              style={{
-                color: colors.green,
-                fontSize: typography.micro,
-                fontWeight: "800",
-                textTransform: "capitalize",
-              }}
-            >
-              {profile?.role ?? "—"}
-            </Text>
-          </View>
-        </View>
-
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.caption,
-            fontWeight: "800",
-            textTransform: "uppercase",
-            letterSpacing: 1,
-            marginBottom: spacing.xs,
-          }}
-        >
-          Preferences
-        </Text>
-        <View
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.lg,
-            borderWidth: 1,
-            borderColor: colors.line,
-            padding: spacing.md,
-            marginBottom: spacing.xl,
-          }}
-        >
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.bodySmall,
-              fontWeight: "600",
-              marginBottom: spacing.sm,
-            }}
-          >
-            Appearance
-          </Text>
-          <View style={{ flexDirection: "row", gap: spacing.sm }}>
-            {(["system", "light", "dark"] as const).map((m) => (
-              <Chip
-                key={m}
-                label={m.charAt(0).toUpperCase() + m.slice(1)}
-                active={mode === m}
-                onPress={() => setMode(m)}
-              />
-            ))}
-          </View>
-        </View>
-
-        {profile?.role === "owner" && (
-          <>
             <Text
               style={{
                 color: colors.muted,
                 fontSize: typography.caption,
-                fontWeight: "800",
-                textTransform: "uppercase",
-                letterSpacing: 1,
-                marginBottom: spacing.xs,
+                marginTop: 2,
               }}
             >
-              Shop management
+              {session?.user.email}
             </Text>
             <View
               style={{
-                backgroundColor: colors.surface,
-                borderRadius: radius.lg,
-                borderWidth: 1,
-                borderColor: colors.line,
+                marginTop: spacing.sm,
                 paddingHorizontal: spacing.md,
-                marginBottom: spacing.xl,
+                paddingVertical: 4,
+                borderRadius: radius.pill,
+                backgroundColor: colors.greenSoft,
               }}
             >
-              <SettingsRow
-                icon={
-                  <Users size={18} color={colors.muted} strokeWidth={1.8} />
-                }
-                label="Manage staff"
-                value="Coming soon"
-                disabled
-              />
-              <View style={{ height: 1, backgroundColor: colors.line }} />
-              <SettingsRow
-                icon={
-                  <CoffeeIcon
-                    size={18}
-                    color={colors.muted}
-                    strokeWidth={1.8}
-                  />
-                }
-                label="Manage menu"
-                value="Coming soon"
-                disabled
-              />
+              <Text
+                style={{
+                  color: colors.green,
+                  fontSize: typography.micro,
+                  fontWeight: "800",
+                  textTransform: "capitalize",
+                }}
+              >
+                {profile?.role ?? "—"}
+              </Text>
             </View>
-          </>
-        )}
+          </View>
 
-        <Button
-          label="Sign out"
-          onPress={handleSignOut}
-          variant="soft"
-          icon={
-            <LogOut
-              size={16}
-              color={colors.ink}
-              strokeWidth={1.8}
-              style={{ marginRight: 6 }}
-            />
-          }
-        />
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.caption,
+              fontWeight: "800",
+              textTransform: "uppercase",
+              letterSpacing: 1,
+              marginBottom: spacing.xs,
+            }}
+          >
+            Preferences
+          </Text>
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              padding: spacing.md,
+              marginBottom: spacing.xl,
+            }}
+          >
+            <Text
+              style={{
+                color: colors.ink,
+                fontSize: typography.bodySmall,
+                fontWeight: "600",
+                marginBottom: spacing.sm,
+              }}
+            >
+              Appearance
+            </Text>
+            <View style={{ flexDirection: "row", gap: spacing.sm }}>
+              {(["system", "light", "dark"] as const).map((m) => (
+                <Chip
+                  key={m}
+                  label={m.charAt(0).toUpperCase() + m.slice(1)}
+                  active={mode === m}
+                  onPress={() => setMode(m)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {profile?.role === "owner" && (
+            <>
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  fontWeight: "800",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  marginBottom: spacing.xs,
+                }}
+              >
+                Shop management
+              </Text>
+              <View
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  borderColor: colors.line,
+                  paddingHorizontal: spacing.md,
+                  marginBottom: spacing.xl,
+                }}
+              >
+                <SettingsRow
+                  icon={
+                    <Users size={18} color={colors.muted} strokeWidth={1.8} />
+                  }
+                  label="Manage staff"
+                  value="Coming soon"
+                  disabled
+                />
+                <View style={{ height: 1, backgroundColor: colors.line }} />
+                <SettingsRow
+                  icon={
+                    <CoffeeIcon
+                      size={18}
+                      color={colors.muted}
+                      strokeWidth={1.8}
+                    />
+                  }
+                  label="Manage menu"
+                  value="Coming soon"
+                  disabled
+                />
+              </View>
+            </>
+          )}
+
+          <Button
+            label="Sign out"
+            onPress={handleSignOut}
+            variant="soft"
+            icon={
+              <LogOut
+                size={16}
+                color={colors.ink}
+                strokeWidth={1.8}
+                style={{ marginRight: 6 }}
+              />
+            }
+          />
+        </Stagger>
       </ScrollView>
     </SafeAreaView>
   );

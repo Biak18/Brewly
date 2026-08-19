@@ -18,11 +18,12 @@ import { useCartStore } from "@/stores/cartStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { getCoffeePricing, toCoffeeCardData } from "@/utils/pricing";
-import { FlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
+import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuScreen() {
@@ -37,7 +38,7 @@ export default function MenuScreen() {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState<MenuSort>("popular");
   const debouncedSearch = useDebouncedValue(searchText, 300);
-  const { data: promotions = [] } = useActivePromotions();
+  const promotions = useActivePromotions();
   useEffect(() => {
     if (params.category !== undefined) setCategoryId(params.category);
   }, [params.category]);
@@ -51,6 +52,7 @@ export default function MenuScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useMenuCoffees(categoryId, debouncedSearch, sort);
+  const combinedLoading = isLoading || promotions.isLoading;
   const coffees = useMemo(() => data?.pages.flat() ?? [], [data]);
 
   const { data: favoriteIds } = useFavoriteIds();
@@ -72,7 +74,7 @@ export default function MenuScreen() {
       if (!coffee) return;
       const { unitPrice, compareAtUnitPrice } = getCoffeePricing(
         coffee,
-        promotions,
+        promotions.data ?? [],
       );
       addItem({
         coffeeId: coffee.id,
@@ -99,7 +101,6 @@ export default function MenuScreen() {
 
         <MenuContent value={sort} onChange={setSort} />
       </View>
-
       <View>
         <View style={{ height: spacing.md }} />
         <MenuCategoryRow selectedId={categoryId} onSelect={setCategoryId} />
@@ -107,7 +108,7 @@ export default function MenuScreen() {
         <View style={{ height: spacing.md }} />
       </View>
 
-      {isLoading ? (
+      {combinedLoading ? (
         <MenuSkeleton />
       ) : isError ? (
         <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -136,7 +137,7 @@ export default function MenuScreen() {
           />
         </View>
       ) : (
-        <FlashList
+        <AnimatedFlashList
           data={coffees}
           numColumns={2}
           keyExtractor={(item) => item.id}
@@ -154,9 +155,12 @@ export default function MenuScreen() {
             paddingBottom: spacing.xxxl,
           }}
           renderItem={({ item }) => {
-            const data = toCoffeeCardData(item, promotions);
+            const data = toCoffeeCardData(item, promotions.data ?? []);
             return (
-              <View style={{ flex: 1, margin: spacing.xs }}>
+              <Animated.View
+                style={{ flex: 1, margin: spacing.xs }}
+                entering={ZoomInEasyDown.springify()}
+              >
                 <CoffeeCard
                   coffee={data}
                   layout="grid"
@@ -165,7 +169,7 @@ export default function MenuScreen() {
                   onToggleFavorite={handleToggleFavorite}
                   onAddToCart={handleAddToCart}
                 />
-              </View>
+              </Animated.View>
             );
           }}
         />
