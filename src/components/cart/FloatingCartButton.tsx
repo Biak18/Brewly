@@ -15,7 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const TAB_ROUTES = ["/", "/menu", "/orders", "/favorites", "/profile"];
+const TAB_ROUTES = ["/", "/shops", "/orders", "/favorites", "/profile"];
 
 const HIDDEN_ROUTE_PREFIXES = ["/cart", "/checkout", "/coffee"];
 

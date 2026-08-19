@@ -13,6 +13,7 @@ export type Promotion = {
   starts_at: string;
   ends_at: string;
   is_active: boolean;
+  store_id: string;
 };
 
 export async function fetchActivePromotions(): Promise<Promotion[]> {

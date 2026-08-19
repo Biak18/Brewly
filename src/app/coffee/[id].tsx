@@ -103,6 +103,7 @@ export default function CoffeeDetailScreen() {
     const promo = getCoffeeDiscount(
       coffee.data.id,
       coffee.data.category_id,
+      coffee.data.store_id,
       promotions,
     );
     const { finalPrice: discountedBase, hasDiscount } = applyDiscount(
@@ -130,17 +131,21 @@ export default function CoffeeDetailScreen() {
     const labelFor = (optId: string | null) =>
       allOptions.find((o) => o.id === optId)?.label;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
     addItem({
       coffeeId: coffee.data.id,
+      storeId: coffee.data.store_id,
       name: coffee.data.name,
       imageUrl: coffee.data.image_url ?? "",
       unitPrice,
+      compareAtUnitPrice: pricing.compareAtUnitPrice,
       quantity,
       size: labelFor(size),
       temperature: labelFor(temperature),
       milk: labelFor(milk),
       extras: extras.map(labelFor).filter(Boolean) as string[],
     });
+
     openCartPreview();
     // router.back();
   }, [
