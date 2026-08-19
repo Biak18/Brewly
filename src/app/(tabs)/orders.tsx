@@ -9,11 +9,12 @@ import {
 import { useOrdersList } from "@/features/orders/hooks/useOrdersList";
 import { OrderStatus, OrderSummary } from "@/services/orders";
 import { useTheme } from "@/theme";
-import { FlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { ReceiptText } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
+import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
@@ -52,7 +53,11 @@ export default function OrdersScreen() {
         itemCount: item.item_count,
         thumbnailUrl: item.thumbnail_url,
       };
-      return <OrderCard order={data} onPress={handlePress} layout="list" />;
+      return (
+        <Animated.View entering={ZoomInEasyDown.springify()}>
+          <OrderCard order={data} onPress={handlePress} layout="list" />
+        </Animated.View>
+      );
     },
     [handlePress],
   );
@@ -102,20 +107,6 @@ export default function OrdersScreen() {
     );
   }
 
-  // if (filteredOrders.length === 0 && orders.length > 0) {
-  //   return (
-  //     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-  //       <EmptyState
-  //         icon={
-  //           <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
-  //         }
-  //         title="No orders here"
-  //         description={`No ${statusFilter} orders right now.`}
-  //       />
-  //     </View>
-  //   );
-  // }
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View>
@@ -141,7 +132,7 @@ export default function OrdersScreen() {
         />
       </View>
 
-      <FlashList
+      <AnimatedFlashList
         data={filteredOrders}
         keyExtractor={(o) => o.id}
         renderItem={renderItem}

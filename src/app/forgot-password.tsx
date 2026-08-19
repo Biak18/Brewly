@@ -1,9 +1,9 @@
 // src/app/forgot-password.tsx
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
-import { Stagger } from "@/components/ui/Stagger";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
+import { Stagger } from "@animatereactnative/stagger";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -11,6 +11,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
+import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -50,7 +51,13 @@ export default function ForgotPasswordScreen() {
           padding: spacing.xl,
         }}
       >
-        <Stagger index={0}>
+        <Stagger
+          stagger={70}
+          duration={420}
+          entering={() => ZoomInEasyDown.springify()}
+          exiting={() => FadeOutDown.springify()}
+          style={{ alignItems: "center" }}
+        >
           <Text
             style={{
               color: colors.ink,
@@ -62,8 +69,6 @@ export default function ForgotPasswordScreen() {
           >
             Check your email
           </Text>
-        </Stagger>
-        <Stagger index={1}>
           <Text
             style={{
               color: colors.muted,
@@ -75,8 +80,6 @@ export default function ForgotPasswordScreen() {
             If an account exists for that address, we've sent a link to reset
             your password.
           </Text>
-        </Stagger>
-        <Stagger index={2}>
           <Button
             label="Back to sign in"
             onPress={() => router.replace("/sign-in")}
@@ -93,21 +96,25 @@ export default function ForgotPasswordScreen() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          paddingHorizontal: spacing.lg,
+          padding: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
       </View>
-      <View
+      <Stagger
+        stagger={70}
+        duration={420}
+        entering={() => ZoomInEasyDown.springify()}
+        exiting={() => FadeOutDown.springify()}
         style={{
           flex: 1,
           paddingHorizontal: spacing.xl,
           justifyContent: "center",
         }}
       >
-        <Stagger index={0}>
+        <View>
           <Text
             style={{
               color: colors.ink,
@@ -127,8 +134,8 @@ export default function ForgotPasswordScreen() {
           >
             Enter your email and we'll send you a reset link.
           </Text>
-        </Stagger>
-        <Stagger index={1}>
+        </View>
+        <View>
           <Controller
             control={control}
             name="email"
@@ -166,16 +173,14 @@ export default function ForgotPasswordScreen() {
               {errors.email.message}
             </Text>
           )}
-        </Stagger>
-        <Stagger index={2}>
-          <Button
-            label="Send reset link"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            variant="primary"
-          />
-        </Stagger>
-      </View>
+        </View>
+        <Button
+          label="Send reset link"
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          variant="primary"
+        />
+      </Stagger>
     </SafeAreaView>
   );
 }
