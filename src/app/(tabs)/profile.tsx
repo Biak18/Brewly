@@ -6,7 +6,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
-import { Coffee as CoffeeIcon, LogOut, Users } from "lucide-react-native";
+import { router } from "expo-router";
+import { Coffee as CoffeeIcon, LogOut, StoreIcon } from "lucide-react-native";
 import { useCallback } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
@@ -160,7 +161,7 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {profile?.role === "owner" && (
+          {profile?.role === "seller" && (
             <>
               <Text
                 style={{
@@ -186,11 +187,14 @@ export default function ProfileScreen() {
               >
                 <SettingsRow
                   icon={
-                    <Users size={18} color={colors.muted} strokeWidth={1.8} />
+                    <StoreIcon
+                      size={18}
+                      color={colors.muted}
+                      strokeWidth={1.8}
+                    />
                   }
-                  label="Manage staff"
-                  value="Coming soon"
-                  disabled
+                  label="My Store"
+                  onPress={() => router.push("/my-store")}
                 />
                 <View style={{ height: 1, backgroundColor: colors.line }} />
                 <SettingsRow

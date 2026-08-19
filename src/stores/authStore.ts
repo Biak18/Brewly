@@ -3,7 +3,7 @@ import { supabase } from "@/services/supabase";
 import { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 
-type Role = "owner" | "staff";
+type Role = "seller" | "customer";
 type Profile = { id: string; full_name: string | null; role: Role };
 
 type AuthState = {
@@ -30,6 +30,7 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
     .select("id, full_name, role")
     .eq("id", userId)
     .single();
+
   if (error) {
     console.warn("Failed to load profile", error.message);
     return null;

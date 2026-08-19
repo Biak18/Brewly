@@ -54,10 +54,13 @@ function RootNavigator() {
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="orders/[id]/tracking" />
+          <Stack.Screen name="shop/[id]" />
+          <Stack.Screen name="my-store" />
         </Stack.Protected>
         <Stack.Protected guard={!session && !isPasswordRecovery}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="forgot-password" />
+          <Stack.Screen name="sign-up" />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />

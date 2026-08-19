@@ -16,7 +16,7 @@ import {
   Text,
   TextInput,
 } from "react-native";
-import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
+import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
 const signInSchema = z.object({
@@ -56,8 +56,7 @@ export default function SignInScreen() {
       <Stagger
         stagger={70}
         duration={420}
-        entering={() => ZoomInEasyDown.springify()}
-        exiting={() => FadeOutDown.springify()}
+        entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
         style={styles.container}
       >
         <Text
@@ -165,17 +164,23 @@ export default function SignInScreen() {
           </Text>
         </Pressable>
 
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.caption,
-            marginTop: spacing.xl,
-            textAlign: "center",
-          }}
+        <Pressable
+          onPress={() => router.push("/sign-up")}
+          style={{ marginTop: spacing.sm, alignSelf: "center" }}
         >
-          No account? Ask the shop owner to invite you — there's no self
-          sign-up.
-        </Text>
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.caption,
+              fontWeight: "600",
+            }}
+          >
+            Don't have an account?{" "}
+            <Text style={{ color: colors.espresso, fontWeight: "800" }}>
+              Sign up
+            </Text>
+          </Text>
+        </Pressable>
       </Stagger>
     </KeyboardAvoidingView>
   );
