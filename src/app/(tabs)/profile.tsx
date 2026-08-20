@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
 import { useAuthStore } from "@/stores/authStore";
+import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
 import { router } from "expo-router";
 import { Coffee as CoffeeIcon, LogOut, StoreIcon } from "lucide-react-native";
 import { useCallback } from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import {
   SafeAreaView,
@@ -24,21 +25,21 @@ export default function ProfileScreen() {
   const signOut = useAuthStore((s) => s.signOut);
   const mode = useThemeStore((s) => s.mode);
   const setMode = useThemeStore((s) => s.setMode);
+  const showConfirm = useConfirmDialogStore((s) => s.show);
 
   const firstInitial = (profile?.full_name ??
     session?.user.email ??
     "?")[0]?.toUpperCase();
 
   const handleSignOut = useCallback(() => {
-    Alert.alert(
-      "Sign out?",
-      "You'll need to sign back in to place or manage orders.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Sign out", style: "destructive", onPress: () => signOut() },
-      ],
-    );
-  }, [signOut]);
+    showConfirm({
+      title: "Sign out?",
+      message: "You'll need to sign back in to place or manage orders.",
+      confirmLabel: "Sign out",
+      destructive: true,
+      onConfirm: () => signOut(),
+    });
+  }, [showConfirm, signOut]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>

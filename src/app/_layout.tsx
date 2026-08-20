@@ -1,6 +1,7 @@
 // src/app/_layout.tsx
 import { CartPreviewSheet } from "@/components/cart/CartPreviewSheet";
 import { FloatingCartButton } from "@/components/cart/FloatingCartButton";
+import { ConfirmDialogHost } from "@/components/ui/ConfirmDialog";
 import { ToastHost } from "@/components/ui/Toast";
 import { useOrdersRealtimeSync } from "@/features/orders/hooks/useOrdersRealtimeSync";
 import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromotionsRealtimeSync";
@@ -50,7 +51,7 @@ function RootNavigator() {
         </Stack.Protected>
         <Stack.Protected guard={!!session && !isPasswordRecovery}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="coffee/[id]" />
+          <Stack.Screen name="coffee/[id]" options={{ animation: "none" }} />
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="orders/[id]/tracking" />
@@ -66,6 +67,7 @@ function RootNavigator() {
       <CartPreviewSheet />
       <FloatingCartButton />
       <ToastHost />
+      <ConfirmDialogHost />
     </View>
   );
 }

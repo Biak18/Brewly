@@ -1,29 +1,27 @@
-// src/app/checkout.tsx
+// src/app/checkout.tsx — full replacement
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { FulfillmentToggle } from "@/features/checkout/components/FulfillmentToggle";
 import { OrderSummary } from "@/features/checkout/components/OrderSummary";
 import { PaymentMethodRow } from "@/features/checkout/components/PaymentMethodRow";
+import { PickupStoreDisplay } from "@/features/checkout/components/PickupStoreDisplay";
 import { PickupTimeRow } from "@/features/checkout/components/PickupTimeRow";
-import { StoreSelect } from "@/features/checkout/components/StoreSelect";
 import { placeOrder } from "@/services/orders";
+import { fetchStoreById } from "@/services/stores";
 import { useCartStore } from "@/stores/cartStore";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
-  storeId: z.string().min(1, "Select a store to continue"),
   pickupTime: z.enum(["asap", "15", "30", "60"]),
   paymentMethod: z.enum(["cash", "card"]),
 });
@@ -56,18 +54,18 @@ function Section({
 
 export default function CheckoutScreen() {
   const { colors, spacing, typography } = useTheme();
-  const justPlacedRef = useRef(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (items.length === 0 && !justPlacedRef.current) {
-      router.replace("/cart");
-    }
-  }, [items.length, router]);
+  const storeId = items[0]?.storeId;
+  const { data: store } = useQuery({
+    queryKey: ["store", storeId],
+    queryFn: () => fetchStoreById(storeId),
+    enabled: !!storeId,
+  });
 
   const {
     control,
@@ -75,20 +73,20 @@ export default function CheckoutScreen() {
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { storeId: "", pickupTime: "asap", paymentMethod: "cash" },
+    defaultValues: { pickupTime: "asap", paymentMethod: "cash" },
   });
 
   const onSubmit = useCallback(
     async (values: CheckoutForm) => {
+      if (!storeId) return;
       setServerError(null);
       try {
         const orderId = await placeOrder({
-          storeId: values.storeId,
+          storeId,
           fulfillment: "pickup",
           items,
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        justPlacedRef.current = true;
         clearCart();
         router.replace(`/orders/${orderId}/tracking`);
       } catch (err) {
@@ -98,16 +96,18 @@ export default function CheckoutScreen() {
         );
       }
     },
-    [items, clearCart, router],
+    [storeId, items, clearCart, router],
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View
+      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
+    >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          paddingHorizontal: spacing.lg,
+          padding: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
@@ -132,26 +132,8 @@ export default function CheckoutScreen() {
         <Section title="Fulfillment">
           <FulfillmentToggle />
         </Section>
-
-        <Section title="Store">
-          <Controller
-            control={control}
-            name="storeId"
-            render={({ field: { value, onChange } }) => (
-              <StoreSelect value={value} onChange={onChange} />
-            )}
-          />
-          {errors.storeId && (
-            <Text
-              style={{
-                color: colors.danger,
-                fontSize: typography.caption,
-                marginTop: spacing.xs,
-              }}
-            >
-              {errors.storeId.message}
-            </Text>
-          )}
+        <Section title="Pickup from">
+          <PickupStoreDisplay store={store} />
         </Section>
 
         <Section title="Pickup time">
@@ -203,10 +185,10 @@ export default function CheckoutScreen() {
           label={isSubmitting ? "Placing order…" : "Place order"}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
-          disabled={items.length === 0}
+          disabled={items.length === 0 || !storeId}
           variant="primary"
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
