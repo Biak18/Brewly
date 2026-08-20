@@ -1,6 +1,6 @@
 // src/utils/pricing.ts
 import { CoffeeCardData } from "@/components/coffee/CoffeeCard";
-import { Coffee } from "@/services/coffees";
+import { Coffee, CoffeeWithStoreName } from "@/services/coffees";
 import { Promotion } from "@/services/promotions";
 
 // export function getCoffeeDiscount(
@@ -87,4 +87,14 @@ export function getEffectivePrice(
   promotions: Promotion[],
 ): number {
   return getCoffeePricing(coffee, promotions).unitPrice;
+}
+
+export function toCoffeeCardDataWithShop(
+  coffee: CoffeeWithStoreName,
+  promotions: Promotion[],
+): CoffeeCardData {
+  return {
+    ...toCoffeeCardData(coffee, promotions),
+    shopName: coffee.stores?.name,
+  };
 }

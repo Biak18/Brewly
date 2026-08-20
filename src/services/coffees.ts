@@ -22,6 +22,8 @@ export type Coffee = {
   is_featured: boolean;
 };
 
+export type CoffeeWithStoreName = Coffee & { stores: { name: string } | null };
+
 export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
@@ -43,10 +45,10 @@ export async function fetchCategoriesForStore(
   return data;
 }
 
-export async function fetchFeaturedCoffees(): Promise<Coffee[]> {
+export async function fetchFeaturedCoffees(): Promise<CoffeeWithStoreName[]> {
   const { data, error } = await supabase
     .from("coffees")
-    .select("*")
+    .select("*, stores(name)")
     .eq("is_featured", true)
     .eq("is_active", true)
     .limit(10);
@@ -54,10 +56,10 @@ export async function fetchFeaturedCoffees(): Promise<Coffee[]> {
   return data;
 }
 
-export async function fetchPopularCoffees(): Promise<Coffee[]> {
+export async function fetchPopularCoffees(): Promise<CoffeeWithStoreName[]> {
   const { data, error } = await supabase
     .from("coffees")
-    .select("*")
+    .select("*, stores(name)")
     .eq("is_active", true)
     .order("rating", { ascending: false })
     .limit(10);
@@ -65,10 +67,12 @@ export async function fetchPopularCoffees(): Promise<Coffee[]> {
   return data;
 }
 
-export async function fetchRecommendedCoffees(): Promise<Coffee[]> {
+export async function fetchRecommendedCoffees(): Promise<
+  CoffeeWithStoreName[]
+> {
   const { data, error } = await supabase
     .from("coffees")
-    .select("*")
+    .select("*, stores(name)")
     .eq("is_featured", false)
     .eq("is_active", true)
     .limit(10);
@@ -115,10 +119,12 @@ export async function fetchMenuCoffees(params: {
   return data;
 }
 
-export async function fetchCoffeeById(id: string): Promise<Coffee> {
+export async function fetchCoffeeById(
+  id: string,
+): Promise<CoffeeWithStoreName> {
   const { data, error } = await supabase
     .from("coffees")
-    .select("*")
+    .select("*, stores(name)")
     .eq("id", id)
     .single();
   if (error) throw error;
@@ -135,10 +141,12 @@ export async function fetchCoffeeOptionsForCategory(
   return data;
 }
 
-export async function fetchFavoriteCoffees(userId: string): Promise<Coffee[]> {
+export async function fetchFavoriteCoffees(
+  userId: string,
+): Promise<CoffeeWithStoreName[]> {
   const { data, error } = await supabase
     .from("favorites")
-    .select("coffee_id, coffees(*)")
+    .select("coffee_id, coffees(*, stores(name))")
     .eq("user_id", userId);
   if (error) throw error;
   return (data ?? []).map((row: any) => row.coffees).filter(Boolean);
