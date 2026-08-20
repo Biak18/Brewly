@@ -49,7 +49,7 @@ export function PromoBanner() {
       </Text>
       <Button
         label={featured ? "Order now" : "Browse menu"}
-        onPress={() => router.push("/(tabs)/menu")}
+        onPress={() => router.push("/(tabs)/shops")}
         variant="light"
       />
     </View>

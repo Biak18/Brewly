@@ -7,10 +7,11 @@ import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
 import { OrderStatus, updateOrderStatus } from "@/services/orders";
+import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft, PackageX } from "lucide-react-native";
@@ -96,6 +97,12 @@ export default function OrderTrackingScreen() {
   const userId = useAuthStore((s) => s.session?.user.id);
 
   const { data: order, isLoading, isError, refetch } = useOrderTracking(id);
+  const { data: myStore } = useQuery({
+    queryKey: ["my-store", userId],
+    queryFn: () => fetchMyStore(userId!),
+    enabled: !!userId && profile?.role === "seller",
+  });
+
   const [isAdvancing, setIsAdvancing] = useState(false);
 
   const showToast = useToastStore((s) => s.show);
@@ -114,17 +121,17 @@ export default function OrderTrackingScreen() {
     prevStatusRef.current = order.status;
   }, [order, showToast]);
 
-  const canManage =
-    !!order && (order.user_id === userId || profile?.role === "owner");
   const currentIndex = order ? STATUS_FLOW.indexOf(order.status) : -1;
   const nextStatus =
     currentIndex >= 0 && currentIndex < STATUS_FLOW.length - 1
       ? STATUS_FLOW[currentIndex + 1]
       : null;
-
   const previousStatus =
     currentIndex > 0 ? STATUS_FLOW[currentIndex - 1] : null;
-  const canRevert = profile?.role === "owner" && !!previousStatus;
+
+  const canManage =
+    !!order && profile?.role === "seller" && myStore?.id === order.store_id;
+  const canRevert = canManage && !!previousStatus;
 
   const handleRevert = useCallback(() => {
     if (!order || !previousStatus) return;
