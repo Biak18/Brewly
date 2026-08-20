@@ -54,6 +54,7 @@ export type OrderWithItems = {
   id: string;
   status: OrderStatus;
   user_id: string;
+  store_id: string;
   fulfillment: string;
   subtotal: number;
   tax: number;
@@ -96,19 +97,14 @@ export async function updateOrderStatus(
   if (error) throw error;
 }
 
-export async function fetchOrdersList(
-  userId: string,
-  role: "owner" | "staff",
-): Promise<OrderSummary[]> {
-  let listQuery = supabase
+export async function fetchOrdersList(): Promise<OrderSummary[]> {
+  const { data, error } = await supabase
     .from("orders")
     .select(
       "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
     )
     .order("created_at", { referencedTable: "order_items", ascending: true })
     .order("placed_at", { ascending: false });
-  if (role !== "owner") listQuery = listQuery.eq("user_id", userId);
-  const { data, error } = await listQuery;
   if (error) throw error;
   return (data ?? []).map((o: any) => ({
     id: o.id,
