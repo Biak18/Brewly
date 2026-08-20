@@ -1,14 +1,15 @@
 // src/app/(tabs)/shops.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pulse } from "@/components/ui/Pulse";
+import { ShopCard } from "@/features/shops/components/ShopCard";
 import { fetchStores, Store } from "@/services/stores";
 import { useTheme } from "@/theme";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { MapPin, Store as StoreIcon } from "lucide-react-native";
+import { Store as StoreIcon } from "lucide-react-native";
 import { useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -86,67 +87,7 @@ export default function ShopsScreen() {
             style={{ flex: 1, margin: spacing.xs }}
             entering={ZoomInEasyDown.springify()}
           >
-            <Pressable
-              onPress={() => handlePress(item.id)}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                padding: spacing.md,
-                backgroundColor: colors.surface,
-                borderColor: colors.line,
-                borderWidth: 1,
-                borderRadius: radius.xl,
-                marginBottom: spacing.md,
-              }}
-            >
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: radius.lg,
-                  backgroundColor: colors.cream,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: spacing.md,
-                }}
-              >
-                <StoreIcon
-                  size={22}
-                  color={colors.espresso}
-                  strokeWidth={1.8}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    color: colors.ink,
-                    fontWeight: "800",
-                    fontSize: typography.body,
-                  }}
-                >
-                  {item.name}
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 2,
-                  }}
-                >
-                  <MapPin size={11} color={colors.muted} strokeWidth={1.8} />
-                  <Text
-                    style={{
-                      color: colors.muted,
-                      fontSize: typography.caption,
-                      marginLeft: 4,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {item.address}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
+            <ShopCard store={item} onPress={handlePress} layout="list" />
           </Animated.View>
         )}
       />

@@ -1,60 +1,46 @@
 // src/app/(tabs)/index.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
-import { CategoryRow } from "@/features/home/components/CategoryRow";
 import { CoffeeRow } from "@/features/home/components/CoffeeRow";
 import { HomeHeader } from "@/features/home/components/HomeHeader";
+import { HomeShopsRow } from "@/features/home/components/HomeShopsRow";
 import { HomeSkeleton } from "@/features/home/components/HomeSkeleton";
 import { PromoBanner } from "@/features/home/components/PromoBanner";
 import { RecentOrdersRow } from "@/features/home/components/RecentOrdersRow";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
-import {
-  fetchFeaturedCoffees,
-  fetchPopularCoffees,
-  fetchRecommendedCoffees,
-} from "@/services/coffees";
-import { useThemeStore } from "@/theme/themeStore";
+import { fetchPopularCoffees } from "@/services/coffees";
+import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
-import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
+import { RefreshControl, ScrollView } from "react-native";
+import { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const colors = useThemeStore((s) => s.colors);
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-  const promotions = useActivePromotions();
-  const featured = useQuery({
-    queryKey: ["coffees", "featured"],
-    queryFn: fetchFeaturedCoffees,
-  });
+
   const popular = useQuery({
     queryKey: ["coffees", "popular"],
     queryFn: fetchPopularCoffees,
   });
-  const recommended = useQuery({
-    queryKey: ["coffees", "recommended"],
-    queryFn: fetchRecommendedCoffees,
-  });
-
-  const isLoading =
-    featured.isLoading ||
-    popular.isLoading ||
-    recommended.isLoading ||
-    promotions.isLoading;
-  const isError = featured.isError || popular.isError || recommended.isError;
+  const promotions = useActivePromotions();
+  const isLoading = popular.isLoading || promotions.isLoading;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ["coffees"] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["coffees"] }),
+      queryClient.invalidateQueries({ queryKey: ["stores"] }),
+    ]);
     setRefreshing(false);
   }, [queryClient]);
 
   if (isLoading) return <HomeSkeleton />;
 
-  if (isError) {
+  if (popular.isError) {
     return (
       <EmptyState
         icon={
@@ -70,33 +56,10 @@ export default function HomeScreen() {
     );
   }
 
-  const hasAnyCoffees =
-    (featured.data?.length ?? 0) +
-      (popular.data?.length ?? 0) +
-      (recommended.data?.length ?? 0) >
-    0;
-
-  if (!hasAnyCoffees) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <EmptyState
-          icon={
-            <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
-          }
-          title="Menu is empty"
-          description="Coffees added from the owner dashboard will show up here."
-        />
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView
         style={{ backgroundColor: colors.bg }}
-        contentContainerStyle={{
-          paddingBottom: 20,
-        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -110,21 +73,11 @@ export default function HomeScreen() {
           stagger={70}
           duration={420}
           entering={() => ZoomInEasyDown.springify()}
-          exiting={() => FadeOutDown.springify()}
         >
           <HomeHeader />
-
           <PromoBanner />
-
-          <View style={{ marginTop: 10 }}>
-            <CategoryRow />
-          </View>
-          <CoffeeRow title="Featured" coffees={featured.data ?? []} />
+          <HomeShopsRow />
           <CoffeeRow title="Popular" coffees={popular.data ?? []} />
-          <CoffeeRow
-            title="Recommended for you"
-            coffees={recommended.data ?? []}
-          />
           <RecentOrdersRow />
         </Stagger>
       </ScrollView>
