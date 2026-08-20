@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const TAB_ROUTES = [
   "/",
   "/shops",
-  "/shops/[id]",
+  "/shop/[id]",
   "/orders",
   "/favorites",
   "/profile",
@@ -33,9 +33,9 @@ export function FloatingCartButton() {
   const insets = useSafeAreaInsets();
   const count = useCartStore(selectCartCount);
   const scale = useSharedValue(1);
-
   const isHidden = HIDDEN_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
-  const isOnTabScreen = TAB_ROUTES.includes(pathname);
+  const isOnTabScreen =
+    TAB_ROUTES.includes(pathname) || pathname.startsWith("/shop/");
 
   useEffect(() => {
     if (count > 0)
