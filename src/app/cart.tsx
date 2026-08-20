@@ -51,6 +51,7 @@ export default function CartScreen() {
           onAction: () =>
             addItem({
               coffeeId: removed.coffeeId,
+              storeId: removed.storeId,
               name: removed.name,
               imageUrl: removed.imageUrl,
               unitPrice: removed.unitPrice,
@@ -122,7 +123,7 @@ export default function CartScreen() {
           title="Your cart is empty"
           description="Add something from the menu to get started."
           actionLabel="Browse menu"
-          onAction={() => router.push("/(tabs)/menu")}
+          onAction={() => router.push("/(tabs)/shops")}
         />
       ) : (
         <>

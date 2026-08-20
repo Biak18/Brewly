@@ -144,6 +144,7 @@ export default function CoffeeDetailScreen() {
       temperature: labelFor(temperature),
       milk: labelFor(milk),
       extras: extras.map(labelFor).filter(Boolean) as string[],
+      force: true,
     });
 
     // router.back();

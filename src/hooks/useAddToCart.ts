@@ -6,6 +6,7 @@ import { Alert } from "react-native";
 
 type AddToCartInput = Omit<CartLineItem, "id" | "quantity"> & {
   quantity?: number;
+  force?: boolean;
 };
 
 export function useAddToCart() {
@@ -37,7 +38,7 @@ export function useAddToCart() {
         return;
       }
       addItem(input);
-      openCartPreview();
+      if (input.force) openCartPreview();
     },
     [items, addItem, clearCart, openCartPreview],
   );

@@ -2,13 +2,11 @@
 import { Pulse } from "@/components/ui/Pulse";
 import { useTheme } from "@/theme";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function HomeSkeleton() {
   const { spacing } = useTheme();
-  const insets = useSafeAreaInsets();
   return (
-    <View style={{ paddingTop: spacing.lg + insets.top }}>
+    <View style={{ paddingTop: spacing.lg }}>
       <Pulse
         style={{
           height: 40,
@@ -31,8 +29,8 @@ export function HomeSkeleton() {
           gap: spacing.sm,
         }}
       >
-        {[0, 1, 2, 3].map((i) => (
-          <Pulse key={i} style={{ height: 38, width: 80, borderRadius: 999 }} />
+        {[0, 1, 2].map((i) => (
+          <Pulse key={i} style={{ height: 90, width: 140, borderRadius: 18 }} />
         ))}
       </View>
     </View>
