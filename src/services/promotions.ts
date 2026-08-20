@@ -16,15 +16,32 @@ export type Promotion = {
   store_id: string;
 };
 
-export async function fetchActivePromotions(): Promise<Promotion[]> {
-  const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd, matches `date` column type
-  const { data, error } = await supabase
+// export async function fetchActivePromotions(): Promise<Promotion[]> {
+//   const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd, matches `date` column type
+//   const { data, error } = await supabase
+//     .from("promotions")
+//     .select("*")
+//     .eq("is_active", true)
+//     .lte("starts_at", today)
+//     .gte("ends_at", today)
+//     .order("created_at", { ascending: false });
+//   if (error) throw error;
+//   return data;
+// }
+
+export async function fetchActivePromotions(
+  storeId?: string,
+): Promise<Promotion[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  let query = supabase
     .from("promotions")
     .select("*")
     .eq("is_active", true)
     .lte("starts_at", today)
     .gte("ends_at", today)
     .order("created_at", { ascending: false });
+  if (storeId) query = query.eq("store_id", storeId);
+  const { data, error } = await query;
   if (error) throw error;
   return data;
 }

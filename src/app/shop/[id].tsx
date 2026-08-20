@@ -14,12 +14,11 @@ import { SearchBar } from "@/features/menu/components/SearchBar";
 import { SortSheet } from "@/features/menu/components/SortSheet";
 import { useMenuCoffees } from "@/features/menu/hooks/useMenuCoffees";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
+import { useAddToCart } from "@/hooks/useAddToCart";
 import { useCartAwareBottomInset } from "@/hooks/useCartAwareBottomInset";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { MenuSort } from "@/services/coffees";
 import { fetchStoreById } from "@/services/stores";
-import { useCartStore } from "@/stores/cartStore";
-import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { toCoffeeCardData } from "@/utils/pricing";
 import { Stagger } from "@animatereactnative/stagger";
@@ -61,7 +60,7 @@ export default function ShopMenuScreen() {
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
   const debouncedSearch = useDebouncedValue(searchText, 300);
 
-  const promotions = useActivePromotions();
+  const promotions = useActivePromotions(storeId);
   const {
     data,
     isLoading,
@@ -76,8 +75,7 @@ export default function ShopMenuScreen() {
 
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
-  const addItem = useCartStore((s) => s.addItem);
-  const openCartPreview = useUIStore((s) => s.openCartPreview);
+  const addToCart = useAddToCart();
 
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
@@ -93,7 +91,7 @@ export default function ShopMenuScreen() {
       const coffee = coffees.find((c) => c.id === id);
       if (!coffee) return;
       const card = toCoffeeCardData(coffee, promotions.data ?? []);
-      addItem({
+      addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
         name: coffee.name,
@@ -101,9 +99,8 @@ export default function ShopMenuScreen() {
         unitPrice: card.price,
         compareAtUnitPrice: card.compareAtPrice,
       });
-      openCartPreview();
     },
-    [coffees, promotions.data, addItem, openCartPreview],
+    [coffees, promotions.data, addToCart],
   );
 
   return (

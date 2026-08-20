@@ -2,10 +2,10 @@
 import { fetchActivePromotions } from "@/services/promotions";
 import { useQuery } from "@tanstack/react-query";
 
-export function useActivePromotions() {
+export function useActivePromotions(storeId?: string) {
   return useQuery({
-    queryKey: ["promotions", "active"],
-    queryFn: fetchActivePromotions,
+    queryKey: ["promotions", "active", storeId ?? "all"],
+    queryFn: () => fetchActivePromotions(storeId),
     refetchInterval: 5 * 60 * 1000,
   });
 }

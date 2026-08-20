@@ -13,7 +13,7 @@ import {
   useToggleFavorite,
 } from "@/features/favorites/api/useFavorites";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
-import { useCartStore } from "@/stores/cartStore";
+import { useAddToCart } from "@/hooks/useAddToCart";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { applyDiscount, getCoffeeDiscount } from "@/utils/pricing";
@@ -21,7 +21,7 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft, Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -39,9 +39,9 @@ export default function CoffeeDetailScreen() {
   const { coffee, options } = useCoffeeDetail(id);
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
-  const addItem = useCartStore((s) => s.addItem);
   const openCartPreview = useUIStore((s) => s.openCartPreview);
   const { data: promotions = [] } = useActivePromotions();
+  const addToCart = useAddToCart();
 
   const [size, setSize] = useState<string | null>(null);
   const [temperature, setTemperature] = useState<string | null>(null);
@@ -132,7 +132,7 @@ export default function CoffeeDetailScreen() {
       allOptions.find((o) => o.id === optId)?.label;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    addItem({
+    addToCart({
       coffeeId: coffee.data.id,
       storeId: coffee.data.store_id,
       name: coffee.data.name,
@@ -146,7 +146,6 @@ export default function CoffeeDetailScreen() {
       extras: extras.map(labelFor).filter(Boolean) as string[],
     });
 
-    openCartPreview();
     // router.back();
   }, [
     coffee.data,
@@ -157,9 +156,8 @@ export default function CoffeeDetailScreen() {
     extras,
     quantity,
     unitPrice,
-    addItem,
     router,
-    openCartPreview,
+    addToCart,
   ]);
 
   if (coffee.isLoading || options.isLoading) return <CoffeeDetailSkeleton />;
@@ -204,6 +202,22 @@ export default function CoffeeDetailScreen() {
         </View>
 
         <View style={{ padding: spacing.xl }}>
+          {coffee.data.stores?.name && (
+            <Pressable
+              onPress={() => router.push(`/shop/${coffee.data.store_id}`)}
+            >
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  marginBottom: 4,
+                  textDecorationLine: "underline",
+                }}
+              >
+                {coffee.data.stores.name}
+              </Text>
+            </Pressable>
+          )}
           <Text
             style={{
               color: colors.ink,
