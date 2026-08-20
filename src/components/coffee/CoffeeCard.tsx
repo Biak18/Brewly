@@ -19,6 +19,7 @@ export type CoffeeCardData = {
   price: number;
   imageUrl: string;
   compareAtPrice?: number;
+  shopName?: string;
 };
 
 type CoffeeCardProps = {
@@ -88,6 +89,18 @@ function CoffeeCardComponent({
         </View>
       </View>
       <View style={{ padding: spacing.md }}>
+        {coffee.shopName && (
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.micro,
+              marginBottom: 2,
+            }}
+            numberOfLines={1}
+          >
+            {coffee.shopName}
+          </Text>
+        )}
         <Text
           style={{
             color: colors.ink,

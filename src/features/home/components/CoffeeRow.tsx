@@ -5,24 +5,23 @@ import {
   useToggleFavorite,
 } from "@/features/favorites/api/useFavorites";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
-import { Coffee } from "@/services/coffees";
-import { useCartStore } from "@/stores/cartStore";
-import { useUIStore } from "@/stores/uiStore";
+import { useAddToCart } from "@/hooks/useAddToCart";
+import { CoffeeWithStoreName } from "@/services/coffees";
 import { useTheme } from "@/theme";
-import { getCoffeePricing, toCoffeeCardData } from "@/utils/pricing";
+import { toCoffeeCardDataWithShop } from "@/utils/pricing";
 import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import { FlatList, ListRenderItem, Text, View } from "react-native";
 
-type CoffeeRowProps = { title: string; coffees: Coffee[] };
+type CoffeeRowProps = { title: string; coffees: CoffeeWithStoreName[] };
 
 export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
-  const addItem = useCartStore((s) => s.addItem);
-  const openCartPreview = useUIStore((s) => s.openCartPreview);
+
+  const addToCart = useAddToCart();
 
   const { data: promotions = [] } = useActivePromotions();
 
@@ -40,26 +39,23 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
     (id: string) => {
       const coffee = coffees.find((c) => c.id === id);
       if (!coffee) return;
-      const { unitPrice, compareAtUnitPrice } = getCoffeePricing(
-        coffee,
-        promotions,
-      );
 
-      addItem({
+      const card = toCoffeeCardDataWithShop(coffee, promotions);
+      addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
         name: coffee.name,
         imageUrl: coffee.image_url ?? "",
-        unitPrice,
-        compareAtUnitPrice,
+        unitPrice: card.price,
+        compareAtUnitPrice: card.compareAtPrice,
       });
     },
-    [coffees, addItem, promotions],
+    [coffees, promotions, addToCart],
   );
 
-  const renderItem = useCallback<ListRenderItem<Coffee>>(
+  const renderItem = useCallback<ListRenderItem<CoffeeWithStoreName>>(
     ({ item }) => {
-      const data = toCoffeeCardData(item, promotions);
+      const data = toCoffeeCardDataWithShop(item, promotions);
       return (
         <CoffeeCard
           coffee={data}

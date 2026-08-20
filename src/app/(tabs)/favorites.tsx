@@ -7,10 +7,10 @@ import {
 } from "@/features/favorites/api/useFavorites";
 import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
+import { useAddToCart } from "@/hooks/useAddToCart";
 import { useAuthStore } from "@/stores/authStore";
-import { useCartStore } from "@/stores/cartStore";
 import { useTheme } from "@/theme";
-import { getCoffeePricing, toCoffeeCardData } from "@/utils/pricing";
+import { getCoffeePricing, toCoffeeCardDataWithShop } from "@/utils/pricing";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { Heart } from "lucide-react-native";
@@ -34,8 +34,8 @@ export default function FavoritesScreen() {
     refetch,
   } = useFavoriteCoffees(userId);
   const toggleFavorite = useToggleFavorite();
-  const addItem = useCartStore((s) => s.addItem);
   const { data: promotions = [] } = useActivePromotions();
+  const addToCart = useAddToCart();
 
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
@@ -55,8 +55,7 @@ export default function FavoritesScreen() {
         coffee,
         promotions,
       );
-
-      addItem({
+      addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
         name: coffee.name,
@@ -65,7 +64,7 @@ export default function FavoritesScreen() {
         compareAtUnitPrice,
       });
     },
-    [coffees, addItem, promotions],
+    [coffees, promotions, addToCart],
   );
 
   if (isLoading)
@@ -99,7 +98,7 @@ export default function FavoritesScreen() {
           title="No favorites yet"
           description="Tap the heart on any coffee to save it here."
           actionLabel="Browse menu"
-          onAction={() => router.push("/(tabs)/menu")}
+          onAction={() => router.push("/(tabs)/shops")}
         />
       </View>
     );
@@ -116,7 +115,7 @@ export default function FavoritesScreen() {
           paddingBottom: spacing.xxxl,
         }}
         renderItem={({ item }) => {
-          const data = toCoffeeCardData(item, promotions);
+          const data = toCoffeeCardDataWithShop(item, promotions ?? []);
           return (
             <Animated.View
               style={{ flex: 1, margin: spacing.xs }}
