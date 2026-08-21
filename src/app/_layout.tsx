@@ -29,6 +29,7 @@ function RootNavigator() {
   useAuthDeepLink();
   const colors = useThemeStore((s) => s.colors);
   const session = useAuthStore((s) => s.session);
+  const profile = useAuthStore((s) => s.profile);
   const isLoading = useAuthStore((s) => s.isLoading);
   const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
 
@@ -62,6 +63,12 @@ function RootNavigator() {
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="sign-up" />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={!!session && !isPasswordRecovery && profile?.role === "seller"}
+        >
+          <Stack.Screen name="seller/menu/index" />
+          <Stack.Screen name="seller/menu/coffee-form" />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />
