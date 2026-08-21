@@ -1,4 +1,5 @@
 // src/app/my-store.tsx
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
@@ -14,7 +15,10 @@ import {
   Store as StoreIcon,
 } from "lucide-react-native";
 import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function MyStoreScreen() {
   const { colors, spacing, radius, typography } = useTheme();
@@ -28,14 +32,12 @@ export default function MyStoreScreen() {
   });
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: spacing.lg,
+          paddingHorizontal: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
@@ -125,18 +127,16 @@ export default function MyStoreScreen() {
               </View>
             )}
           </View>
-          <Text
-            style={{
-              color: colors.muted,
-              fontSize: typography.caption,
-              marginTop: spacing.lg,
-              textAlign: "center",
-            }}
-          >
-            Editing your store and menu is coming soon.
-          </Text>
+
+          <View style={{ marginTop: spacing.lg }}>
+            <Button
+              label="Manage Menu"
+              onPress={() => router.push("/seller/menu")}
+              variant="primary"
+            />
+          </View>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

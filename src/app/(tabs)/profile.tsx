@@ -207,8 +207,7 @@ export default function ProfileScreen() {
                     />
                   }
                   label="Manage menu"
-                  value="Coming soon"
-                  disabled
+                  onPress={() => router.push("/seller/menu")}
                 />
               </View>
             </>
