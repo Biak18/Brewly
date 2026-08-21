@@ -3,6 +3,7 @@ import { CoffeeImage } from "@/components/coffee/CoffeeImage";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { CategoryPicker } from "@/features/seller/components/CategoryPicker";
+import { useImageUpload } from "@/features/seller/hooks/useImageUpload";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { fetchCoffeeById } from "@/services/coffees";
 import { createCoffee, updateCoffee } from "@/services/sellerMenu";
@@ -13,10 +14,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft, ImageOff } from "lucide-react-native";
+import { Camera, ChevronLeft, ImageOff } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ScrollView, Switch, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -55,11 +64,17 @@ export default function CoffeeFormScreen() {
     queryFn: () => fetchCoffeeById(id!),
     enabled: isEditing,
   });
+  const {
+    pickAndUpload,
+    isUploading,
+    error: uploadError,
+  } = useImageUpload(myStore?.id, id);
 
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -122,6 +137,11 @@ export default function CoffeeFormScreen() {
     [myStore, isEditing, id, queryClient, router],
   );
 
+  const handlePickImage = useCallback(async () => {
+    const url = await pickAndUpload();
+    if (url) setValue("imageUrl", url, { shouldValidate: true });
+  }, [pickAndUpload, setValue]);
+
   if (!myStore) return null;
 
   return (
@@ -151,33 +171,67 @@ export default function CoffeeFormScreen() {
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
         <View style={{ marginBottom: spacing.lg }}>
-          {previewUrl ? (
-            <CoffeeImage uri={previewUrl} height={180} radius={radius.xl} />
-          ) : (
-            <View
-              style={{
-                height: 180,
-                borderRadius: radius.xl,
-                backgroundColor: colors.surface2,
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 1,
-                borderColor: colors.line,
-                borderStyle: "dashed",
-              }}
-            >
-              <ImageOff size={28} color={colors.muted} strokeWidth={1.6} />
-              <Text
+          <Pressable onPress={handlePickImage} disabled={isUploading}>
+            <View style={{ marginBottom: spacing.sm }}>
+              {previewUrl ? (
+                <CoffeeImage uri={previewUrl} height={180} radius={radius.xl} />
+              ) : (
+                <View
+                  style={{
+                    height: 180,
+                    borderRadius: radius.xl,
+                    backgroundColor: colors.surface2,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: colors.line,
+                    borderStyle: "dashed",
+                  }}
+                >
+                  <ImageOff size={28} color={colors.muted} strokeWidth={1.6} />
+                  <Text
+                    style={{
+                      color: colors.muted,
+                      fontSize: typography.caption,
+                      marginTop: spacing.sm,
+                      fontWeight: "600",
+                    }}
+                  >
+                    No image yet
+                  </Text>
+                </View>
+              )}
+              <View
                 style={{
-                  color: colors.muted,
-                  fontSize: typography.caption,
-                  marginTop: spacing.sm,
-                  fontWeight: "600",
+                  position: "absolute",
+                  bottom: 10,
+                  right: 10,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.espresso,
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                No image yet
-              </Text>
+                {isUploading ? (
+                  <ActivityIndicator color={colors.surface} size="small" />
+                ) : (
+                  <Camera size={18} color={colors.surface} strokeWidth={1.8} />
+                )}
+              </View>
             </View>
+          </Pressable>
+          {uploadError && (
+            <Text
+              style={{
+                color: colors.danger,
+                fontSize: 11,
+                marginBottom: spacing.sm,
+              }}
+            >
+              {uploadError}
+            </Text>
           )}
         </View>
 
@@ -224,6 +278,7 @@ export default function CoffeeFormScreen() {
         >
           Paste a link for now — direct photo upload is next.
         </Text>
+
         <Controller
           control={control}
           name="name"
