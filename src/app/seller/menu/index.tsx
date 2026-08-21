@@ -7,19 +7,71 @@ import {
   useMyStoreCoffees,
   useToggleCoffeeActive,
 } from "@/features/seller/hooks/useMyStoreCoffees";
+import { Coffee } from "@/services/coffees";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
-import { FlashList } from "@shopify/flash-list";
+import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Coffee as CoffeeIcon, Plus } from "lucide-react-native";
 import { useCallback } from "react";
 import { Text, View } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  ZoomInEasyDown,
+} from "react-native-reanimated";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
+const ITEM_HEIGHT = 108;
+
+function AnimatedSellerCoffeeCard({
+  coffee,
+  index,
+  scrollY,
+  onPress,
+  onToggleActive,
+}: {
+  coffee: Coffee;
+  index: number;
+  scrollY: SharedValue<number>;
+  onPress: (id: string) => void;
+  onToggleActive: (id: string, next: boolean) => void;
+}) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const inputRange = [-1, 0, ITEM_HEIGHT * index, ITEM_HEIGHT * (index + 2)];
+
+    const scale = interpolate(
+      scrollY.value, // ← use the existing one
+      inputRange,
+      [1, 1, 1, 0],
+      Extrapolation.CLAMP,
+    );
+
+    return {
+      transform: [{ scale }],
+    };
+  });
+
+  return (
+    <Animated.View entering={ZoomInEasyDown.springify()}>
+      <Animated.View style={animatedStyle}>
+        <SellerCoffeeCard
+          coffee={coffee}
+          onPress={onPress}
+          onToggleActive={onToggleActive}
+        />
+      </Animated.View>
+    </Animated.View>
+  );
+}
 
 export default function ManageMenuScreen() {
   const { colors, spacing, typography } = useTheme();
@@ -46,6 +98,13 @@ export default function ManageMenuScreen() {
     (id: string, next: boolean) => toggleActive.mutate({ id, next }),
     [toggleActive],
   );
+
+  const scrollY = useSharedValue(0);
+
+  const handleScroll = useCallback((event: any) => {
+    // This runs on the JS thread – perfectly fine for this use case
+    scrollY.value = event.nativeEvent.contentOffset.y;
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -96,13 +155,17 @@ export default function ManageMenuScreen() {
           onAction={() => router.push("/seller/menu/coffee-form")}
         />
       ) : (
-        <FlashList
+        <AnimatedFlashList
           data={coffees}
           keyExtractor={(c) => c.id}
           contentContainerStyle={{ padding: spacing.lg }}
-          renderItem={({ item }) => (
-            <SellerCoffeeCard
+          scrollEventThrottle={16}
+          onScroll={handleScroll}
+          renderItem={({ item, index }) => (
+            <AnimatedSellerCoffeeCard
               coffee={item}
+              index={index}
+              scrollY={scrollY}
               onPress={handlePress}
               onToggleActive={handleToggleActive}
             />
