@@ -14,7 +14,12 @@ import { useTheme } from "@/theme";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { ChevronLeft, Coffee as CoffeeIcon, Plus } from "lucide-react-native";
+import {
+  ChevronLeft,
+  Coffee as CoffeeIcon,
+  Plus,
+  Sliders,
+} from "lucide-react-native";
 import { useCallback } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -49,7 +54,7 @@ function AnimatedSellerCoffeeCard({
     const inputRange = [-1, 0, ITEM_HEIGHT * index, ITEM_HEIGHT * (index + 2)];
 
     const scale = interpolate(
-      scrollY.value, // ← use the existing one
+      scrollY.value,
       inputRange,
       [1, 1, 1, 0],
       Extrapolation.CLAMP,
@@ -129,13 +134,21 @@ export default function ManageMenuScreen() {
         >
           Manage Menu
         </Text>
-        <IconButton
-          accessibilityLabel="Add coffee"
-          variant="filled"
-          onPress={() => router.push("/seller/menu/coffee-form")}
-        >
-          <Plus size={18} color={colors.espresso} strokeWidth={2} />
-        </IconButton>
+        <View style={{ flexDirection: "row", gap: 4 }}>
+          <IconButton
+            accessibilityLabel="Add coffee"
+            variant="filled"
+            onPress={() => router.push("/seller/menu/coffee-form")}
+          >
+            <Plus size={18} color={colors.espresso} strokeWidth={2} />
+          </IconButton>
+          <IconButton
+            accessibilityLabel="Manage options"
+            onPress={() => router.push("/seller/menu/options")}
+          >
+            <Sliders size={18} color={colors.espresso} strokeWidth={1.8} />
+          </IconButton>
+        </View>
       </View>
 
       {isLoading ? (
