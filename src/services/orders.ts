@@ -1,7 +1,8 @@
 // src/services/orders.ts
 import { CartLineItem } from "@/stores/cartStore";
+import { computeOrderTotals } from "@/utils/orderTotals";
 import { supabase } from "./supabase";
-
+export { computeOrderTotals } from "@/utils/orderTotals";
 export type OrderStatus = "received" | "preparing" | "ready" | "completed";
 export type OrderSummary = {
   id: string;
@@ -11,15 +12,6 @@ export type OrderSummary = {
   item_count: number;
   thumbnail_url: string | null;
 };
-
-const TAX_RATE = 0.08;
-
-export function computeOrderTotals(items: CartLineItem[]) {
-  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-  const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
-  const total = Math.round((subtotal + tax) * 100) / 100;
-  return { subtotal, tax, total };
-}
 
 export async function placeOrder(params: {
   storeId: string;
@@ -114,4 +106,45 @@ export async function fetchOrdersList(): Promise<OrderSummary[]> {
     item_count: o.order_items?.length ?? 0,
     thumbnail_url: o.order_items?.[0]?.coffees?.image_url ?? null,
   }));
+}
+
+function mapToOrderSummaries(data: any[]): OrderSummary[] {
+  return (data ?? []).map((o: any) => ({
+    id: o.id,
+    status: o.status,
+    total: o.total,
+    placed_at: o.placed_at,
+    item_count: o.order_items?.length ?? 0,
+    thumbnail_url: o.order_items?.[0]?.coffees?.image_url ?? null,
+  }));
+}
+
+export async function fetchMyPurchases(
+  userId: string,
+): Promise<OrderSummary[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { foreignTable: "order_items", ascending: true })
+    .order("placed_at", { ascending: false });
+  if (error) throw error;
+  return mapToOrderSummaries(data);
+}
+
+export async function fetchMyShopOrders(
+  storeId: string,
+): Promise<OrderSummary[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
+    )
+    .eq("store_id", storeId)
+    .order("created_at", { foreignTable: "order_items", ascending: true })
+    .order("placed_at", { ascending: false });
+  if (error) throw error;
+  return mapToOrderSummaries(data);
 }

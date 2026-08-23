@@ -1,10 +1,14 @@
 // src/app/_layout.tsx
 import { CartPreviewSheet } from "@/components/cart/CartPreviewSheet";
 import { FloatingCartButton } from "@/components/cart/FloatingCartButton";
+import { ConfirmDialogHost } from "@/components/ui/ConfirmDialog";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { ToastHost } from "@/components/ui/Toast";
 import { useOrdersRealtimeSync } from "@/features/orders/hooks/useOrdersRealtimeSync";
 import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromotionsRealtimeSync";
 import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
+import { useNetworkSync } from "@/hooks/useNetworkSync";
 import { useAuthStore } from "@/stores/authStore";
 import { useThemeStore } from "@/theme/themeStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,16 +30,19 @@ function RootNavigator() {
   useOrdersRealtimeSync();
   usePromotionsRealtimeSync();
   useAuthDeepLink();
+  useNetworkSync();
   const colors = useThemeStore((s) => s.colors);
   const session = useAuthStore((s) => s.session);
+  const profile = useAuthStore((s) => s.profile);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const hasThemeHydrated = useThemeStore((s) => s.hasHydrated);
   const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
 
   useEffect(() => {
-    if (!isLoading) SplashScreen.hideAsync();
-  }, [isLoading]);
+    if (!isLoading && hasThemeHydrated) SplashScreen.hideAsync();
+  }, [isLoading, hasThemeHydrated]);
 
-  if (isLoading) return null;
+  if (isLoading || !hasThemeHydrated) return <LoadingScreen />;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -50,22 +57,32 @@ function RootNavigator() {
         </Stack.Protected>
         <Stack.Protected guard={!!session && !isPasswordRecovery}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="coffee/[id]" />
+          <Stack.Screen name="coffee/[id]" options={{ animation: "none" }} />
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="orders/[id]/tracking" />
           <Stack.Screen name="shop/[id]" />
           <Stack.Screen name="my-store" />
+          <Stack.Screen name="become-seller" />
         </Stack.Protected>
         <Stack.Protected guard={!session && !isPasswordRecovery}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="sign-up" />
         </Stack.Protected>
+        <Stack.Protected
+          guard={!!session && !isPasswordRecovery && profile?.role === "seller"}
+        >
+          <Stack.Screen name="seller/menu/index" />
+          <Stack.Screen name="seller/menu/coffee-form" />
+          <Stack.Screen name="seller/menu/options" />
+        </Stack.Protected>
       </Stack>
       <CartPreviewSheet />
       <FloatingCartButton />
       <ToastHost />
+      <ConfirmDialogHost />
+      <OfflineBanner />
     </View>
   );
 }

@@ -9,6 +9,7 @@ import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
 import { OrderStatus, updateOrderStatus } from "@/services/orders";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,14 +17,7 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle2, ChevronLeft, PackageX } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  BackHandler,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -95,6 +89,7 @@ export default function OrderTrackingScreen() {
   const queryClient = useQueryClient();
   const profile = useAuthStore((s) => s.profile);
   const userId = useAuthStore((s) => s.session?.user.id);
+  const showConfirm = useConfirmDialogStore((s) => s.show);
 
   const { data: order, isLoading, isError, refetch } = useOrderTracking(id);
   const { data: myStore } = useQuery({
@@ -135,36 +130,29 @@ export default function OrderTrackingScreen() {
 
   const handleRevert = useCallback(() => {
     if (!order || !previousStatus) return;
-    Alert.alert(
-      "Revert status?",
-      `This moves the order back to "${previousStatus}".`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Revert",
-          style: "destructive",
-          onPress: async () => {
-            pendingSelfChangeRef.current = previousStatus;
-            setIsAdvancing(true);
-            try {
-              await updateOrderStatus(order.id, previousStatus);
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Warning,
-              );
-              queryClient.setQueryData(["orders", "detail", id], {
-                ...order,
-                status: previousStatus,
-              });
-            } catch {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            } finally {
-              setIsAdvancing(false);
-            }
-          },
-        },
-      ],
-    );
-  }, [order, previousStatus, queryClient, id]);
+    showConfirm({
+      title: "Revert status?",
+      message: `This moves the order back to "${previousStatus}".`,
+      confirmLabel: "Revert",
+      destructive: true,
+      onConfirm: async () => {
+        pendingSelfChangeRef.current = previousStatus;
+        setIsAdvancing(true);
+        try {
+          await updateOrderStatus(order.id, previousStatus);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          queryClient.setQueryData(["orders", "detail", id], {
+            ...order,
+            status: previousStatus,
+          });
+        } catch {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        } finally {
+          setIsAdvancing(false);
+        }
+      },
+    });
+  }, [order, previousStatus, queryClient, id, showConfirm]);
 
   useEffect(() => {
     const onBackPress = () => {

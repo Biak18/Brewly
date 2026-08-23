@@ -3,13 +3,19 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
 import { useAuthStore } from "@/stores/authStore";
+import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
 import { router } from "expo-router";
-import { Coffee as CoffeeIcon, LogOut, StoreIcon } from "lucide-react-native";
+import {
+  Coffee as CoffeeIcon,
+  LogOut,
+  Store,
+  StoreIcon,
+} from "lucide-react-native";
 import { useCallback } from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import {
   SafeAreaView,
@@ -24,21 +30,21 @@ export default function ProfileScreen() {
   const signOut = useAuthStore((s) => s.signOut);
   const mode = useThemeStore((s) => s.mode);
   const setMode = useThemeStore((s) => s.setMode);
+  const showConfirm = useConfirmDialogStore((s) => s.show);
 
   const firstInitial = (profile?.full_name ??
     session?.user.email ??
     "?")[0]?.toUpperCase();
 
   const handleSignOut = useCallback(() => {
-    Alert.alert(
-      "Sign out?",
-      "You'll need to sign back in to place or manage orders.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Sign out", style: "destructive", onPress: () => signOut() },
-      ],
-    );
-  }, [signOut]);
+    showConfirm({
+      title: "Sign out?",
+      message: "You'll need to sign back in to place or manage orders.",
+      confirmLabel: "Sign out",
+      destructive: true,
+      onConfirm: () => signOut(),
+    });
+  }, [showConfirm, signOut]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -206,8 +212,44 @@ export default function ProfileScreen() {
                     />
                   }
                   label="Manage menu"
-                  value="Coming soon"
-                  disabled
+                  onPress={() => router.push("/seller/menu")}
+                />
+              </View>
+            </>
+          )}
+
+          {profile?.role === "customer" && (
+            <>
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  fontWeight: "800",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  marginBottom: spacing.xs,
+                }}
+              >
+                Selling on Brewly
+              </Text>
+              <View
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  borderColor: colors.line,
+                  paddingHorizontal: spacing.md,
+                  marginBottom: spacing.xl,
+                }}
+              >
+                <SettingsRow
+                  icon={
+                    <Store size={18} color={colors.muted} strokeWidth={1.8} />
+                  }
+                  label="Become a Seller"
+                  onPress={() => {
+                    router.push("/become-seller");
+                  }}
                 />
               </View>
             </>

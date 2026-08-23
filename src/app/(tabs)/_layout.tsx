@@ -42,7 +42,7 @@ export default function TabsLayout() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Tabs
         screenOptions={{
-          // animation: "fade",
+          animation: "none",
           headerShown: false,
           tabBarActiveTintColor: colors.espresso,
           tabBarInactiveTintColor: colors.muted,
