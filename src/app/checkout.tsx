@@ -9,6 +9,7 @@ import { PickupTimeRow } from "@/features/checkout/components/PickupTimeRow";
 import { placeOrder } from "@/services/orders";
 import { fetchStoreById } from "@/services/stores";
 import { useCartStore } from "@/stores/cartStore";
+import { useNetworkStore } from "@/stores/networkStore";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -61,6 +62,8 @@ export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
+  const isOnline = useNetworkStore((s) => s.isOnline);
+
   const [serverError, setServerError] = useState<string | null>(null);
 
   const storeId = items[0]?.storeId;
@@ -106,6 +109,18 @@ export default function CheckoutScreen() {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
     >
+      {!isOnline && (
+        <Text
+          style={{
+            color: colors.danger,
+            fontSize: typography.caption,
+            textAlign: "center",
+            marginTop: spacing.sm,
+          }}
+        >
+          You're offline — connect to place your order.
+        </Text>
+      )}
       <View
         style={{
           flexDirection: "row",

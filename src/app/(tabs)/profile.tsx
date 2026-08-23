@@ -8,7 +8,12 @@ import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
 import { router } from "expo-router";
-import { Coffee as CoffeeIcon, LogOut, StoreIcon } from "lucide-react-native";
+import {
+  Coffee as CoffeeIcon,
+  LogOut,
+  Store,
+  StoreIcon,
+} from "lucide-react-native";
 import { useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
@@ -208,6 +213,43 @@ export default function ProfileScreen() {
                   }
                   label="Manage menu"
                   onPress={() => router.push("/seller/menu")}
+                />
+              </View>
+            </>
+          )}
+
+          {profile?.role === "customer" && (
+            <>
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  fontWeight: "800",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  marginBottom: spacing.xs,
+                }}
+              >
+                Selling on Brewly
+              </Text>
+              <View
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: radius.lg,
+                  borderWidth: 1,
+                  borderColor: colors.line,
+                  paddingHorizontal: spacing.md,
+                  marginBottom: spacing.xl,
+                }}
+              >
+                <SettingsRow
+                  icon={
+                    <Store size={18} color={colors.muted} strokeWidth={1.8} />
+                  }
+                  label="Become a Seller"
+                  onPress={() => {
+                    router.push("/become-seller");
+                  }}
                 />
               </View>
             </>
