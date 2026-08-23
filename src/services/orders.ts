@@ -121,17 +121,21 @@ function mapToOrderSummaries(data: any[]): OrderSummary[] {
 
 export async function fetchMyPurchases(
   userId: string,
+  limit?: number,
 ): Promise<OrderSummary[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("orders")
     .select(
       "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
     )
     .eq("user_id", userId)
-    .order("created_at", { foreignTable: "order_items", ascending: true })
+    .order("created_at", { referencedTable: "order_items", ascending: true })
     .order("placed_at", { ascending: false });
+  if (limit) query = query.limit(limit);
+  const { data, error } = await query;
   if (error) throw error;
-  return mapToOrderSummaries(data);
+
+  return mapToOrderSummaries(data as any);
 }
 
 export async function fetchMyShopOrders(
@@ -143,7 +147,7 @@ export async function fetchMyShopOrders(
       "id, status, total, placed_at, order_items(coffees(image_url), created_at)",
     )
     .eq("store_id", storeId)
-    .order("created_at", { foreignTable: "order_items", ascending: true })
+    .order("created_at", { referencedTable: "order_items", ascending: true })
     .order("placed_at", { ascending: false });
   if (error) throw error;
   return mapToOrderSummaries(data);
