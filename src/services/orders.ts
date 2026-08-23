@@ -1,7 +1,8 @@
 // src/services/orders.ts
 import { CartLineItem } from "@/stores/cartStore";
+import { computeOrderTotals } from "@/utils/orderTotals";
 import { supabase } from "./supabase";
-
+export { computeOrderTotals } from "@/utils/orderTotals";
 export type OrderStatus = "received" | "preparing" | "ready" | "completed";
 export type OrderSummary = {
   id: string;
@@ -11,15 +12,6 @@ export type OrderSummary = {
   item_count: number;
   thumbnail_url: string | null;
 };
-
-const TAX_RATE = 0.08;
-
-export function computeOrderTotals(items: CartLineItem[]) {
-  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
-  const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
-  const total = Math.round((subtotal + tax) * 100) / 100;
-  return { subtotal, tax, total };
-}
 
 export async function placeOrder(params: {
   storeId: string;
