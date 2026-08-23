@@ -7,6 +7,7 @@
     "@expo/ui": "~57.0.12",
     "@hookform/resolvers": "^5.8.0",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "12.0.1",
     "@shopify/flash-list": "2.0.2",
     "@supabase/supabase-js": "^2.109.0",
     "@tanstack/react-query": "^5.101.4",

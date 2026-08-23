@@ -1,5 +1,6 @@
 // src/app/sign-in.tsx
 import { Button } from "@/components/ui/Button";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
@@ -105,27 +106,19 @@ export default function SignInScreen() {
           control={control}
           name="password"
           render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
+            <PasswordInput
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
               placeholder="Password"
-              placeholderTextColor={colors.muted}
-              secureTextEntry
-              autoComplete="password"
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.line,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginTop: spacing.sm,
-                  marginBottom: spacing.sm,
-                },
-              ]}
+              containerStyle={{
+                marginTop: spacing.sm,
+                marginBottom: spacing.sm,
+              }}
             />
           )}
         />
+
         {errors.password && (
           <Text style={[styles.error, { color: colors.danger }]}>
             {errors.password.message}
