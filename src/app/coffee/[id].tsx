@@ -14,7 +14,6 @@ import {
 } from "@/features/favorites/api/useFavorites";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { applyDiscount, getCoffeeDiscount } from "@/utils/pricing";
 import * as Haptics from "expo-haptics";
@@ -23,11 +22,14 @@ import { ChevronLeft, Coffee as CoffeeIcon } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
+  Easing,
   Extrapolation,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  ZoomIn,
+  ZoomOut,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -39,7 +41,6 @@ export default function CoffeeDetailScreen() {
   const { coffee, options } = useCoffeeDetail(id);
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
-  const openCartPreview = useUIStore((s) => s.openCartPreview);
   const { data: promotions = [] } = useActivePromotions();
   const addToCart = useAddToCart();
 
@@ -161,7 +162,16 @@ export default function CoffeeDetailScreen() {
     addToCart,
   ]);
 
-  if (coffee.isLoading || options.isLoading) return <CoffeeDetailSkeleton />;
+  if (coffee.isLoading || options.isLoading)
+    return (
+      <Animated.View
+        entering={ZoomIn.duration(320).easing(Easing.out(Easing.cubic))}
+        exiting={ZoomOut.duration(220).easing(Easing.in(Easing.cubic))}
+        style={{ flex: 1, backgroundColor: colors.bg }}
+      >
+        <CoffeeDetailSkeleton />
+      </Animated.View>
+    );
 
   if (coffee.isError || !coffee.data) {
     return (
@@ -178,7 +188,11 @@ export default function CoffeeDetailScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <Animated.View
+      entering={ZoomIn.duration(320).easing(Easing.out(Easing.cubic))}
+      exiting={ZoomOut.duration(220).easing(Easing.in(Easing.cubic))}
+      style={{ flex: 1, backgroundColor: colors.bg }}
+    >
       <Animated.ScrollView
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -324,7 +338,7 @@ export default function CoffeeDetailScreen() {
         compareAtTotal={compareAtTotal}
         onAddToCart={handleAddToCart}
       />
-    </View>
+    </Animated.View>
   );
 }
 

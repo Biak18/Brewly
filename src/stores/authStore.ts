@@ -38,6 +38,13 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data as Profile;
 }
 
+export async function refreshProfile() {
+  const session = useAuthStore.getState().session;
+  if (!session) return;
+  const profile = await fetchProfile(session.user.id);
+  useAuthStore.setState({ profile });
+}
+
 async function handleSession(session: Session | null) {
   useAuthStore.setState({
     session,

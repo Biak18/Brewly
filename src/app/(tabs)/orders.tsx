@@ -1,4 +1,4 @@
-// src/app/(tabs)/orders.tsx
+// src/app/(tabs)/orders.tsx — full replacement
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pulse } from "@/components/ui/Pulse";
@@ -6,15 +6,18 @@ import {
   OrderCard,
   OrderCardData,
 } from "@/features/orders/components/OrderCard";
-import { useOrdersList } from "@/features/orders/hooks/useOrdersList";
+import { useMyPurchases } from "@/features/orders/hooks/useMyPurchases";
+import { useMyShopOrders } from "@/features/orders/hooks/useMyShopOrders";
 import { OrderStatus, OrderSummary } from "@/services/orders";
+import { fetchMyStore } from "@/services/stores";
+import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
-import { AnimatedFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ReceiptText } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
-import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
@@ -26,10 +29,38 @@ const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
 ];
 
 export default function OrdersScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing } = useTheme();
   const router = useRouter();
-  const { data: orders = [], isLoading, isError, refetch } = useOrdersList();
+  const profile = useAuthStore((s) => s.profile);
+  const userId = useAuthStore((s) => s.session?.user.id);
+  const isSeller = profile?.role === "seller";
+
+  const { data: myStore, isLoading: isMyStoreLoading } = useQuery({
+    queryKey: ["my-store", userId],
+    queryFn: () => fetchMyStore(userId!),
+    enabled: !!userId && isSeller,
+  });
+
+  // Sellers land on "shop" by default — orders needing fulfillment is the
+  // actionable view; their own purchase history is secondary.
+  const [viewMode, setViewMode] = useState<"purchases" | "shop">(
+    isSeller ? "shop" : "purchases",
+  );
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
+
+  const purchases = useMyPurchases();
+  const shopOrders = useMyShopOrders(isSeller ? myStore?.id : undefined);
+  const active = viewMode === "shop" ? shopOrders : purchases;
+  const { data: orders = [], isError, refetch } = active;
+
+  // "shop" mode has a two-stage dependency: know the store, then fetch its
+  // orders. Without accounting for the first stage, this would briefly show
+  // a false "No orders yet" while myStore is still resolving.
+  const isLoading =
+    viewMode === "shop"
+      ? isMyStoreLoading || active.isLoading
+      : active.isLoading;
+
   const filteredOrders = useMemo(
     () =>
       statusFilter === "all"
@@ -42,7 +73,6 @@ export default function OrdersScreen() {
     (id: string) => router.push(`/orders/${id}/tracking`),
     [router],
   );
-
   const renderItem = useCallback(
     ({ item }: { item: OrderSummary }) => {
       const data: OrderCardData = {
@@ -53,65 +83,39 @@ export default function OrdersScreen() {
         itemCount: item.item_count,
         thumbnailUrl: item.thumbnail_url,
       };
-      return (
-        <Animated.View entering={ZoomInEasyDown.springify()}>
-          <OrderCard order={data} onPress={handlePress} layout="list" />
-        </Animated.View>
-      );
+      return <OrderCard order={data} onPress={handlePress} layout="list" />;
     },
     [handlePress],
   );
 
-  if (isLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bg,
-          padding: spacing.lg,
-          gap: spacing.md,
-        }}
-      >
-        {[0, 1, 2, 3].map((i) => (
-          <Pulse key={i} style={{ height: 76 }} />
-        ))}
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <EmptyState
-        icon={
-          <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
-        }
-        title="Couldn't load orders"
-        description="Check your connection and try again."
-        actionLabel="Retry"
-        onAction={() => refetch()}
-      />
-    );
-  }
-
-  if (orders.length === 0) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <EmptyState
-          icon={
-            <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
-          }
-          title="No orders yet"
-          description="Orders you place will show up here."
-        />
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View>
+      {isSeller && (
+        <View
+          style={{
+            flexDirection: "row",
+            gap: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            marginBottom: spacing.md,
+          }}
+        >
+          <Chip
+            label="My Shop"
+            active={viewMode === "shop"}
+            onPress={() => setViewMode("shop")}
+          />
+          <Chip
+            label="My Purchases"
+            active={viewMode === "purchases"}
+            onPress={() => setViewMode("purchases")}
+          />
+        </View>
+      )}
+
+      <View style={{ paddingBottom: spacing.md }}>
         <FlatList
           horizontal
+          style={{ height: 38 }}
           data={FILTERS}
           keyExtractor={(f) => f.value}
           renderItem={({ item }) => (
@@ -126,31 +130,53 @@ export default function OrdersScreen() {
             paddingHorizontal: spacing.lg,
             gap: spacing.sm,
             marginBottom: spacing.md,
-            height: 38,
-            maxHeight: 38,
           }}
         />
       </View>
-
-      <AnimatedFlashList
-        data={filteredOrders}
-        keyExtractor={(o) => o.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: spacing.lg }}
-        ListEmptyComponent={() => (
-          <EmptyState
-            icon={
-              <ReceiptText
-                size={28}
-                color={colors.espresso}
-                strokeWidth={1.8}
-              />
-            }
-            title="No orders here"
-            description={`No ${statusFilter} orders right now.`}
-          />
-        )}
-      />
+      {isLoading ? (
+        <View style={{ padding: spacing.lg, gap: spacing.md }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Pulse key={i} style={{ height: 76 }} />
+          ))}
+        </View>
+      ) : isError ? (
+        <EmptyState
+          icon={
+            <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="Couldn't load orders"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => refetch()}
+        />
+      ) : orders.length === 0 ? (
+        <EmptyState
+          icon={
+            <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="No orders yet"
+          description={
+            viewMode === "shop"
+              ? "Orders placed at your shop will show up here."
+              : "Orders you place will show up here."
+          }
+        />
+      ) : filteredOrders.length === 0 ? (
+        <EmptyState
+          icon={
+            <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
+          title="No orders here"
+          description={`No ${statusFilter} orders right now.`}
+        />
+      ) : (
+        <FlashList
+          data={filteredOrders}
+          keyExtractor={(o) => o.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: spacing.lg }}
+        />
+      )}
     </SafeAreaView>
   );
 }

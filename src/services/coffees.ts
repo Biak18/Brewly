@@ -20,6 +20,7 @@ export type Coffee = {
   image_url: string | null;
   rating: number | null;
   is_featured: boolean;
+  is_active: boolean;
 };
 
 export type CoffeeWithStoreName = Coffee & { stores: { name: string } | null };

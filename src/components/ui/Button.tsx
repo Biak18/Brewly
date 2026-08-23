@@ -15,7 +15,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-type ButtonVariant = "primary" | "light" | "soft";
+type ButtonVariant = "primary" | "light" | "soft" | "danger";
 
 type ButtonProps = {
   label: string;
@@ -63,11 +63,14 @@ export function Button({
     primary: colors.espresso,
     light: "#fff9ef",
     soft: colors.surface2,
+    danger: colors.danger,
   }[variant];
+
   const textColor = {
     primary: colors.surface,
     light: "#4a2f24",
     soft: colors.ink,
+    danger: colors.surface,
   }[variant];
 
   return (

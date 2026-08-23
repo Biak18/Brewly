@@ -1,5 +1,6 @@
 // src/app/sign-up.tsx
 import { Button } from "@/components/ui/Button";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
@@ -233,21 +234,12 @@ export default function SignUpScreen() {
             control={control}
             name="password"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <PasswordInput
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder="Password"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
+                containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
                 }}
@@ -272,21 +264,12 @@ export default function SignUpScreen() {
             control={control}
             name="confirmPassword"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <PasswordInput
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder="Confirm password"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
+                containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
                 }}

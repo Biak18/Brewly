@@ -1,5 +1,6 @@
 // src/app/reset-password.tsx
 import { Button } from "@/components/ui/Button";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
@@ -8,13 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { z } from "zod";
 
@@ -89,21 +84,13 @@ export default function ResetPasswordScreen() {
             control={control}
             name="password"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <PasswordInput
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder="New password"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
+                containerStyle={{
+                  marginTop: spacing.sm,
                   marginBottom: spacing.sm,
                 }}
               />
@@ -126,21 +113,12 @@ export default function ResetPasswordScreen() {
             control={control}
             name="confirmPassword"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <PasswordInput
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder="Confirm new password"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
+                containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
                 }}

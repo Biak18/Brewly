@@ -109,7 +109,7 @@ export default function ShopMenuScreen() {
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: spacing.lg,
+          paddingHorizontal: spacing.lg,
         }}
       >
         <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
