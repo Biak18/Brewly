@@ -3,7 +3,12 @@ import { CartLineItem } from "@/stores/cartStore";
 import { computeOrderTotals } from "@/utils/orderTotals";
 import { supabase } from "./supabase";
 export { computeOrderTotals } from "@/utils/orderTotals";
-export type OrderStatus = "received" | "preparing" | "ready" | "completed";
+export type OrderStatus =
+  | "received"
+  | "preparing"
+  | "ready"
+  | "completed"
+  | "cancelled";
 export type OrderSummary = {
   id: string;
   status: OrderStatus;
@@ -86,6 +91,15 @@ export async function updateOrderStatus(
     .from("orders")
     .update({ status })
     .eq("id", orderId);
+  if (error) throw error;
+}
+
+// Server-guarded: the RPC re-checks ownership and that the order is still in
+// "received" before flipping it to "cancelled" — never trust the client alone.
+export async function cancelOrder(orderId: string): Promise<void> {
+  const { error } = await supabase.rpc("cancel_order", {
+    p_order_id: orderId,
+  });
   if (error) throw error;
 }
 
