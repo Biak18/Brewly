@@ -1,6 +1,6 @@
 {
   "name": "grab-coffee",
-  "main": "expo-router/entry",
+  "main": "./src/entry.tsx",
   "version": "1.0.0",
   "dependencies": {
     "@animatereactnative/stagger": "^0.3.0",
@@ -8,6 +8,7 @@
     "@hookform/resolvers": "^5.8.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "12.0.1",
+    "@sentry/react-native": "~7.11.0",
     "@shopify/flash-list": "2.0.2",
     "@supabase/supabase-js": "^2.109.0",
     "@tanstack/react-query": "^5.101.4",
