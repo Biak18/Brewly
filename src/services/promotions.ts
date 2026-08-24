@@ -1,20 +1,24 @@
 // src/services/promotions.ts
+import { Tables } from "@/types/database";
 import { supabase } from "./supabase";
 
 export type PromotionScope = "all" | "category" | "coffee";
-export type Promotion = {
-  id: number;
-  title: string;
-  description: string;
-  discount_percent: number;
+export type Promotion = Omit<Tables<"promotions">, "scope"> & {
   scope: PromotionScope;
-  category_id: string | null;
-  coffee_id: string | null;
-  starts_at: string;
-  ends_at: string;
-  is_active: boolean;
-  store_id: string;
 };
+// export type Promotion = {
+//   id: number;
+//   title: string;
+//   description: string;
+//   discount_percent: number;
+//   scope: PromotionScope;
+//   category_id: string | null;
+//   coffee_id: string | null;
+//   starts_at: string;
+//   ends_at: string;
+//   is_active: boolean;
+//   store_id: string;
+// };
 
 // export async function fetchActivePromotions(): Promise<Promotion[]> {
 //   const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd, matches `date` column type
