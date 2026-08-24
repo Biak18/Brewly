@@ -47,6 +47,41 @@ export async function placeOrder(params: {
   return data as string; // create_order returns the new order's id
 }
 
+export type PaymentMethod = "cash" | "kpay" | "mmqr";
+export type PaymentStatus =
+  | "unpaid"
+  | "awaiting_verification"
+  | "verified";
+
+// Customer attaches their transfer proof right after placing the order.
+// Server-guarded: only the buyer, only while status is still "received"
+// and payment hasn't been set before.
+export async function attachPayment(
+  orderId: string,
+  method: Exclude<PaymentMethod, "cash">,
+  ref: string,
+): Promise<void> {
+  const { error } = await supabase.rpc("attach_payment", {
+    p_order_id: orderId,
+    p_method: method,
+    p_ref: ref,
+  });
+  if (error) throw error;
+}
+
+// Seller confirms or rejects a pending transfer. Rejected payments fall back
+// to "unpaid" so the buyer can resubmit a correct transaction ID.
+export async function setPaymentVerified(
+  orderId: string,
+  verified: boolean,
+): Promise<void> {
+  const { error } = await supabase.rpc("set_payment_verified", {
+    p_order_id: orderId,
+    p_verified: verified,
+  });
+  if (error) throw error;
+}
+
 export type OrderWithItems = {
   id: string;
   status: OrderStatus;
@@ -57,6 +92,9 @@ export type OrderWithItems = {
   tax: number;
   total: number;
   placed_at: string;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  payment_ref: string | null;
   order_items: {
     id: string;
     coffee_id: string;

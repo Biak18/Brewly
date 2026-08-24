@@ -6,7 +6,13 @@ import { Pulse } from "@/components/ui/Pulse";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
-import { OrderStatus, cancelOrder, updateOrderStatus } from "@/services/orders";
+import {
+  OrderStatus,
+  PaymentStatus,
+  cancelOrder,
+  setPaymentVerified,
+  updateOrderStatus,
+} from "@/services/orders";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
@@ -71,6 +77,48 @@ function CompletedBanner() {
         Order complete — enjoy!
       </Text>
     </Animated.View>
+  );
+}
+
+function PaymentStatusChip({ status }: { status: PaymentStatus }) {
+  const { colors, radius, typography } = useTheme();
+  const label =
+    status === "verified"
+      ? "Paid"
+      : status === "awaiting_verification"
+        ? "Verifying"
+        : "Unpaid";
+  const fg =
+    status === "verified"
+      ? colors.green
+      : status === "awaiting_verification"
+        ? colors.espresso
+        : colors.muted;
+  const bg =
+    status === "verified"
+      ? colors.greenSoft
+      : status === "awaiting_verification"
+        ? colors.cream
+        : colors.surface2;
+  return (
+    <View
+      style={{
+        backgroundColor: bg,
+        borderRadius: radius.pill,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+      }}
+    >
+      <Text
+        style={{
+          color: fg,
+          fontSize: typography.micro,
+          fontWeight: "800",
+        }}
+      >
+        {label}
+      </Text>
+    </View>
   );
 }
 
@@ -229,6 +277,34 @@ export default function OrderTrackingScreen() {
       },
     });
   }, [order, showConfirm, queryClient, id, showToast]);
+
+  const handleSetPayment = useCallback(
+    async (verified: boolean) => {
+      if (!order) return;
+      setIsAdvancing(true);
+      try {
+        await setPaymentVerified(order.id, verified);
+        Haptics.notificationAsync(
+          verified
+            ? Haptics.NotificationFeedbackType.Success
+            : Haptics.NotificationFeedbackType.Warning,
+        );
+        queryClient.setQueryData(["orders", "detail", id], {
+          ...order,
+          payment_status: verified ? "verified" : "unpaid",
+          paid_at: verified ? new Date().toISOString() : null,
+        });
+        queryClient.invalidateQueries({ queryKey: ["orders"] });
+        showToast(verified ? "Payment confirmed" : "Payment rejected");
+      } catch {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        showToast("Could not update payment");
+      } finally {
+        setIsAdvancing(false);
+      }
+    },
+    [order, queryClient, id, showToast],
+  );
 
   useEffect(() => {
     const onBackPress = () => {
@@ -436,6 +512,52 @@ export default function OrderTrackingScreen() {
               ${order.total.toFixed(2)}
             </Text>
           </View>
+
+          <View
+            style={{
+              height: 1,
+              backgroundColor: colors.line,
+              marginVertical: spacing.xl,
+            }}
+          />
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.bodySmall,
+                textTransform: "capitalize",
+              }}
+            >
+              Payment · {order.payment_method === "cash" ? "Cash on pickup" : order.payment_method.toUpperCase()}
+            </Text>
+            <PaymentStatusChip status={order.payment_status} />
+          </View>
+          {order.payment_method !== "cash" && !!order.payment_ref && (
+            <Text
+              selectable
+              style={{ color: colors.muted, fontSize: typography.micro, marginTop: spacing.xs }}
+            >
+              TRX ID: {order.payment_ref}
+            </Text>
+          )}
+          {!canManage &&
+            order.payment_status === "awaiting_verification" && (
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.micro,
+                  marginTop: spacing.xs,
+                }}
+              >
+                Waiting for the shop to confirm your payment.
+              </Text>
+            )}
         </View>
       </ScrollView>
 
@@ -457,7 +579,39 @@ export default function OrderTrackingScreen() {
         </View>
       )} */}
 
-      {order.status === "completed" ? (
+      {canManage && order.payment_status === "awaiting_verification" ? (
+        <View
+          style={{
+            padding: spacing.xl,
+            borderTopWidth: 1,
+            borderTopColor: colors.line,
+            backgroundColor: colors.surface,
+            gap: spacing.sm,
+          }}
+        >
+          <Button
+            label="Confirm payment received"
+            onPress={() => handleSetPayment(true)}
+            loading={isAdvancing}
+            variant="primary"
+          />
+          <Pressable
+            onPress={() => handleSetPayment(false)}
+            style={{ alignSelf: "center", paddingVertical: 4 }}
+            disabled={isAdvancing}
+          >
+            <Text
+              style={{
+                color: colors.danger,
+                fontSize: typography.caption,
+                fontWeight: "600",
+              }}
+            >
+              Reject — wrong TRX ID
+            </Text>
+          </Pressable>
+        </View>
+      ) : order.status === "completed" ? (
         <View
           style={{
             padding: spacing.xl,

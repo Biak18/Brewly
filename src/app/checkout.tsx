@@ -2,14 +2,16 @@
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { FulfillmentToggle } from "@/features/checkout/components/FulfillmentToggle";
+import { KpayPanel } from "@/features/checkout/components/KpayPanel";
 import { OrderSummary } from "@/features/checkout/components/OrderSummary";
 import { PaymentMethodRow } from "@/features/checkout/components/PaymentMethodRow";
 import { PickupStoreDisplay } from "@/features/checkout/components/PickupStoreDisplay";
 import { PickupTimeRow } from "@/features/checkout/components/PickupTimeRow";
-import { placeOrder } from "@/services/orders";
+import { attachPayment, placeOrder } from "@/services/orders";
 import { fetchStoreById } from "@/services/stores";
 import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
+import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -25,10 +27,21 @@ import {
 } from "react-native-safe-area-context";
 import { z } from "zod";
 
-const checkoutSchema = z.object({
-  pickupTime: z.enum(["asap", "15", "30", "60"]),
-  paymentMethod: z.enum(["cash", "card"]),
-});
+const checkoutSchema = z
+  .object({
+    pickupTime: z.enum(["asap", "15", "30", "60"]),
+    paymentMethod: z.enum(["cash", "kpay", "mmqr"]),
+    paymentRef: z.string().trim(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.paymentMethod !== "cash" && v.paymentRef.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["paymentRef"],
+        message: "Enter your transaction ID",
+      });
+    }
+  });
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 function Section({
@@ -63,6 +76,7 @@ export default function CheckoutScreen() {
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
   const isOnline = useNetworkStore((s) => s.isOnline);
+  const showToast = useToastStore((s) => s.show);
 
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -76,10 +90,15 @@ export default function CheckoutScreen() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { pickupTime: "asap", paymentMethod: "cash" },
+    defaultValues: {
+      pickupTime: "asap",
+      paymentMethod: "cash",
+      paymentRef: "",
+    },
   });
 
   const onSubmit = useCallback(
@@ -92,6 +111,19 @@ export default function CheckoutScreen() {
           fulfillment: "pickup",
           items,
         });
+        if (values.paymentMethod !== "cash") {
+          // Order is already placed; a failed proof attach must not lose it —
+          // the seller simply sees it as unpaid and can coordinate manually.
+          try {
+            await attachPayment(
+              orderId,
+              values.paymentMethod,
+              values.paymentRef.trim(),
+            );
+          } catch {
+            showToast?.("Order placed, but payment proof failed to save");
+          }
+        }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         clearCart();
         router.replace(`/orders/${orderId}/tracking`);
@@ -106,9 +138,7 @@ export default function CheckoutScreen() {
   );
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       {!isOnline && (
         <Text
           style={{
@@ -172,6 +202,23 @@ export default function CheckoutScreen() {
               <PaymentMethodRow value={value} onChange={onChange} />
             )}
           />
+          {watch("paymentMethod") !== "cash" && (
+            <View style={{ marginTop: spacing.md }}>
+              <Controller
+                control={control}
+                name="paymentRef"
+                render={({ field: { value, onChange } }) => (
+                  <KpayPanel
+                    store={store}
+                    method={watch("paymentMethod") as "kpay" | "mmqr"}
+                    value={value}
+                    onChangeText={onChange}
+                    error={errors.paymentRef?.message}
+                  />
+                )}
+              />
+            </View>
+          )}
         </Section>
 
         <Section title="Order summary">

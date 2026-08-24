@@ -1,11 +1,12 @@
 // src/features/checkout/components/PaymentMethodRow.tsx
 import { useTheme } from "@/theme";
-import { Banknote, Check, CreditCard } from "lucide-react-native";
+import { Banknote, Check, QrCode, Smartphone } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 const METHODS = [
   { value: "cash", label: "Cash on pickup", icon: Banknote },
-  { value: "card", label: "Card on pickup", icon: CreditCard },
+  { value: "kpay", label: "KPay transfer", icon: Smartphone },
+  { value: "mmqr", label: "MMQR / scan to pay", icon: QrCode },
 ] as const;
 export type PaymentMethodValue = (typeof METHODS)[number]["value"];
 
