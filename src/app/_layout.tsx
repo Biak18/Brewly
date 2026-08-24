@@ -76,6 +76,8 @@ function RootNavigator() {
           <Stack.Screen name="seller/menu/index" />
           <Stack.Screen name="seller/menu/coffee-form" />
           <Stack.Screen name="seller/menu/options" />
+          <Stack.Screen name="seller/promotions/index" />
+          <Stack.Screen name="seller/promotions/form" />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />
