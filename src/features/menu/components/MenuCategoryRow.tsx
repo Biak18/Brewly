@@ -6,7 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { FlatList, ListRenderItem } from "react-native";
 
-const ALL_ITEM: Category = { id: "__all__", name: "All", sort_order: -1 };
+const ALL_ITEM: Category = {
+  id: "__all__",
+  name: "All",
+  sort_order: -1,
+  store_id: "",
+};
 
 export function MenuCategoryRow({
   storeId,

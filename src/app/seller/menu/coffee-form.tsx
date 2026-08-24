@@ -102,9 +102,9 @@ export default function CoffeeFormScreen() {
         description: existingCoffee.description ?? "",
         basePrice: String(existingCoffee.base_price),
         imageUrl: existingCoffee.image_url ?? "",
-        categoryId: existingCoffee.category_id,
-        isFeatured: existingCoffee.is_featured,
-        isActive: existingCoffee.is_active,
+        categoryId: existingCoffee.category_id ?? "",
+        isFeatured: existingCoffee.is_featured ?? false,
+        isActive: existingCoffee.is_active ?? true,
       });
     }
   }, [existingCoffee, reset]);

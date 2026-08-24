@@ -1,7 +1,10 @@
 // src/services/coffees.ts
+import type { Tables } from "@/types/database";
 import { supabase } from "./supabase";
 
-export type Category = { id: string; name: string; sort_order: number };
+export type Category = Tables<"categories">;
+export type Coffee = Tables<"coffees">;
+
 export type MenuSort = "popular" | "price_asc" | "price_desc" | "name";
 export type CoffeeOption = {
   id: string;
@@ -10,20 +13,8 @@ export type CoffeeOption = {
   price_delta: number;
 };
 
-export type Coffee = {
-  id: string;
-  category_id: string;
-  store_id: string;
-  name: string;
-  description: string | null;
-  base_price: number;
-  image_url: string | null;
-  rating: number | null;
-  is_featured: boolean;
-  is_active: boolean;
-};
-
-export type CoffeeWithStoreName = Coffee & { stores: { name: string } | null };
+// export type CoffeeWithStoreName = Coffee & { stores: { name: string } | null };
+export type CoffeeWithStoreName = Awaited<ReturnType<typeof fetchCoffeeById>>;
 
 export async function fetchCategories(): Promise<Category[]> {
   const { data, error } = await supabase
@@ -120,9 +111,7 @@ export async function fetchMenuCoffees(params: {
   return data;
 }
 
-export async function fetchCoffeeById(
-  id: string,
-): Promise<CoffeeWithStoreName> {
+export async function fetchCoffeeById(id: string) {
   const { data, error } = await supabase
     .from("coffees")
     .select("*, stores(name)")
