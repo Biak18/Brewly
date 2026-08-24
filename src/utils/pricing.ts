@@ -18,9 +18,33 @@ import { Promotion } from "@/services/promotions";
 //   );
 // }
 
+// export function getCoffeeDiscount(
+//   coffeeId: string,
+//   categoryId: string,
+//   storeId: string,
+//   promotions: Promotion[],
+// ): Promotion | null {
+//   return (
+//     promotions.find(
+//       (p) =>
+//         p.scope === "coffee" &&
+//         p.coffee_id === coffeeId &&
+//         p.store_id === storeId,
+//     ) ??
+//     promotions.find(
+//       (p) =>
+//         p.scope === "category" &&
+//         p.category_id === categoryId &&
+//         p.store_id === storeId,
+//     ) ??
+//     promotions.find((p) => p.scope === "all" && p.store_id === storeId) ??
+//     null
+//   );
+// }
+
 export function getCoffeeDiscount(
   coffeeId: string,
-  categoryId: string,
+  categoryId: string | null,
   storeId: string,
   promotions: Promotion[],
 ): Promotion | null {
@@ -31,12 +55,14 @@ export function getCoffeeDiscount(
         p.coffee_id === coffeeId &&
         p.store_id === storeId,
     ) ??
-    promotions.find(
-      (p) =>
-        p.scope === "category" &&
-        p.category_id === categoryId &&
-        p.store_id === storeId,
-    ) ??
+    (categoryId
+      ? promotions.find(
+          (p) =>
+            p.scope === "category" &&
+            p.category_id === categoryId &&
+            p.store_id === storeId,
+        )
+      : undefined) ??
     promotions.find((p) => p.scope === "all" && p.store_id === storeId) ??
     null
   );

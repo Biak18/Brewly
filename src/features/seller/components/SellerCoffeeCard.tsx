@@ -147,7 +147,7 @@ function SellerCoffeeCardComponent({
 
         <View style={{ alignItems: "center" }}>
           <Switch
-            value={coffee.is_active}
+            value={coffee.is_active ?? false}
             onValueChange={handleToggle}
             trackColor={{ true: colors.green, false: colors.line }}
           />
