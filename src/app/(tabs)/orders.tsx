@@ -26,6 +26,7 @@ const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
   { value: "preparing", label: "Preparing" },
   { value: "ready", label: "Ready" },
   { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 export default function OrdersScreen() {
