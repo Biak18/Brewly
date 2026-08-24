@@ -139,6 +139,11 @@ export default function MyStoreScreen() {
               onPress={() => router.push("/seller/promotions")}
               variant="soft"
             />
+            <Button
+              label="Store settings"
+              onPress={() => router.push("/my-store/edit")}
+              variant="soft"
+            />
           </View>
         </View>
       )}

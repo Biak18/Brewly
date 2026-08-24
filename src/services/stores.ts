@@ -37,3 +37,22 @@ export async function fetchMyStore(userId: string): Promise<Store> {
   if (error) throw error;
   return data!;
 }
+
+export type StoreUpdateInput = {
+  name: string;
+  address: string;
+  hours: { open: string; close: string } | null;
+  kpay_phone: string | null;
+  payment_note: string | null;
+};
+
+export async function updateMyStore(
+  storeId: string,
+  patch: StoreUpdateInput,
+): Promise<void> {
+  const { error } = await supabase
+    .from("stores")
+    .update(patch)
+    .eq("id", storeId);
+  if (error) throw error;
+}
