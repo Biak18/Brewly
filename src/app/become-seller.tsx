@@ -1,8 +1,9 @@
 // src/app/become-seller.tsx
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
+import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { supabase } from "@/services/supabase";
-import { refreshProfile } from "@/stores/authStore";
+import { refreshProfile, useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
@@ -22,6 +23,8 @@ const schema = z.object({
   address: z.string().min(1, "Enter your shop address"),
   openTime: z.string().optional(),
   closeTime: z.string().optional(),
+  kpayPhone: z.string(),
+  paymentNote: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -37,7 +40,14 @@ export default function BecomeSellerScreen() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { storeName: "", address: "", openTime: "", closeTime: "" },
+    defaultValues: {
+      storeName: "",
+      address: "",
+      openTime: "",
+      closeTime: "",
+      kpayPhone: "",
+      paymentNote: "",
+    },
   });
 
   const onSubmit = useCallback(
@@ -65,6 +75,24 @@ export default function BecomeSellerScreen() {
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await refreshProfile();
+      // Attach KPay receiving details without touching the become_seller RPC.
+      // Failure here must never block shop creation — sellers can edit later
+      // in Store settings.
+      try {
+        const userId = useAuthStore.getState().session?.user.id;
+        if (userId) {
+          const store = await fetchMyStore(userId);
+          if (store) {
+            await updateMyStore(store.id, {
+              name: values.storeName.trim(),
+              address: values.address.trim(),
+              hours,
+              kpay_phone: values.kpayPhone.trim() || null,
+              payment_note: values.paymentNote.trim() || null,
+            });
+          }
+        }
+      } catch {}
       router.replace("/my-store");
     },
     [router],
@@ -239,6 +267,76 @@ export default function BecomeSellerScreen() {
           }}
         >
           Hours are optional — you can skip these for now.
+        </Text>
+
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: typography.caption,
+            fontWeight: "800",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+            marginBottom: spacing.sm,
+          }}
+        >
+          KPay / MMQR receiving
+        </Text>
+        <Controller
+          control={control}
+          name="kpayPhone"
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              placeholder="KBZPay number (e.g. 09XXXXXXXXX)"
+              placeholderTextColor={colors.muted}
+              keyboardType="phone-pad"
+              style={{
+                borderWidth: 1,
+                borderColor: colors.line,
+                height: 48,
+                paddingHorizontal: 14,
+                fontSize: 14,
+                color: colors.ink,
+                borderRadius: radius.md,
+                marginBottom: spacing.sm,
+              }}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="paymentNote"
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              placeholder="Note for customers (account name, MMQR hint…)"
+              placeholderTextColor={colors.muted}
+              multiline
+              style={{
+                borderWidth: 1,
+                borderColor: colors.line,
+                minHeight: 72,
+                padding: 12,
+                fontSize: 14,
+                color: colors.ink,
+                borderRadius: radius.md,
+                textAlignVertical: "top",
+                marginBottom: spacing.xs,
+              }}
+            />
+          )}
+        />
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: typography.micro,
+            marginBottom: spacing.xl,
+          }}
+        >
+          Customers see this at checkout when paying by KPay or MMQR. Optional —
+          you can change it later in Store settings.
         </Text>
 
         {serverError && (
