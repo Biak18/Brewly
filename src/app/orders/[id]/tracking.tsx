@@ -6,7 +6,7 @@ import { Pulse } from "@/components/ui/Pulse";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
-import { OrderStatus, updateOrderStatus } from "@/services/orders";
+import { OrderStatus, cancelOrder, updateOrderStatus } from "@/services/orders";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
@@ -15,7 +15,7 @@ import { useTheme } from "@/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CheckCircle2, ChevronLeft, PackageX } from "lucide-react-native";
+import { CheckCircle2, ChevronLeft, PackageX, XCircle } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
@@ -81,6 +81,51 @@ const STATUS_FLOW: OrderStatus[] = [
   "completed",
 ];
 
+function CancelledBanner() {
+  const { colors, spacing, radius, typography } = useTheme();
+  const scale = useSharedValue(0.8);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withSpring(1, { damping: 10 });
+    opacity.value = withTiming(1, { duration: 300 });
+  }, [scale, opacity]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          marginHorizontal: spacing.xl,
+          marginBottom: spacing.lg,
+          padding: spacing.md,
+          borderRadius: radius.lg,
+          backgroundColor: colors.surface2,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sm,
+        },
+        style,
+      ]}
+    >
+      <XCircle size={20} color={colors.danger} strokeWidth={2} />
+      <Text
+        style={{
+          color: colors.danger,
+          fontWeight: "800",
+          fontSize: typography.bodySmall,
+        }}
+      >
+        This order was cancelled
+      </Text>
+    </Animated.View>
+  );
+}
+
 export default function OrderTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -127,6 +172,9 @@ export default function OrderTrackingScreen() {
   const canManage =
     !!order && profile?.role === "seller" && myStore?.id === order.store_id;
   const canRevert = canManage && !!previousStatus;
+  // Customers may cancel only their own order, and only before the shop
+  // starts preparing it. The RPC enforces this server-side too.
+  const canCancel = !!order && order.user_id === userId && order.status === "received";
 
   const handleRevert = useCallback(() => {
     if (!order || !previousStatus) return;
@@ -153,6 +201,34 @@ export default function OrderTrackingScreen() {
       },
     });
   }, [order, previousStatus, queryClient, id, showConfirm]);
+
+  const handleCancel = useCallback(() => {
+    if (!order) return;
+    showConfirm({
+      title: "Cancel this order?",
+      message: "The shop hasn't started preparing it yet.",
+      confirmLabel: "Cancel order",
+      destructive: true,
+      onConfirm: async () => {
+        setIsAdvancing(true);
+        try {
+          await cancelOrder(order.id);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          queryClient.setQueryData(["orders", "detail", id], {
+            ...order,
+            status: "cancelled" as OrderStatus,
+          });
+          queryClient.invalidateQueries({ queryKey: ["orders"] });
+          showToast("Order cancelled");
+        } catch {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          showToast("Could not cancel the order");
+        } finally {
+          setIsAdvancing(false);
+        }
+      },
+    });
+  }, [order, showConfirm, queryClient, id, showToast]);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -252,9 +328,15 @@ export default function OrderTrackingScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={{ paddingVertical: spacing.xl }}>
-          <StatusTimeline status={order.status} />
-          <View style={{ marginTop: spacing.md }} />
-          {order.status === "completed" && <CompletedBanner />}
+          {order.status === "cancelled" ? (
+            <CancelledBanner />
+          ) : (
+            <>
+              <StatusTimeline status={order.status} />
+              <View style={{ marginTop: spacing.md }} />
+              {order.status === "completed" && <CompletedBanner />}
+            </>
+          )}
         </View>
 
         <View style={{ paddingHorizontal: spacing.xl }}>
@@ -390,6 +472,21 @@ export default function OrderTrackingScreen() {
             variant="primary"
           />
         </View>
+      ) : order.status === "cancelled" ? (
+        <View
+          style={{
+            padding: spacing.xl,
+            borderTopWidth: 1,
+            borderTopColor: colors.line,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <Button
+            label="Done"
+            onPress={() => router.back()}
+            variant="soft"
+          />
+        </View>
       ) : canManage && nextStatus ? (
         <View
           style={{
@@ -421,6 +518,22 @@ export default function OrderTrackingScreen() {
               </Text>
             </Pressable>
           )}
+        </View>
+      ) : canCancel ? (
+        <View
+          style={{
+            padding: spacing.xl,
+            borderTopWidth: 1,
+            borderTopColor: colors.line,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <Button
+            label="Cancel order"
+            onPress={handleCancel}
+            loading={isAdvancing}
+            variant="soft"
+          />
         </View>
       ) : null}
     </SafeAreaView>

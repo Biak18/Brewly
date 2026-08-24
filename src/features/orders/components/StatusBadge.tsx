@@ -3,11 +3,12 @@ import { OrderStatus } from "@/services/orders";
 import { useTheme } from "@/theme";
 import { Text, View } from "react-native";
 
-const TONE: Record<OrderStatus, "active" | "ready" | "done"> = {
+const TONE: Record<OrderStatus, "active" | "ready" | "done" | "cancelled"> = {
   received: "active",
   preparing: "active",
   ready: "ready",
   completed: "done",
+  cancelled: "cancelled",
 };
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
@@ -24,7 +25,9 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
       ? colors.green
       : tone === "done"
         ? colors.muted
-        : colors.espresso;
+        : tone === "cancelled"
+          ? colors.danger
+          : colors.espresso;
   return (
     <View
       style={{
