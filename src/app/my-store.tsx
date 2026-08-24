@@ -128,11 +128,16 @@ export default function MyStoreScreen() {
             )}
           </View>
 
-          <View style={{ marginTop: spacing.lg }}>
+          <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
             <Button
               label="Manage Menu"
               onPress={() => router.push("/seller/menu")}
               variant="primary"
+            />
+            <Button
+              label="Manage Promotions"
+              onPress={() => router.push("/seller/promotions")}
+              variant="soft"
             />
           </View>
         </View>
