@@ -6,8 +6,8 @@ import {
   OrderCard,
   OrderCardData,
 } from "@/features/orders/components/OrderCard";
-import { useMyPurchases } from "@/features/orders/hooks/useMyPurchases";
-import { useMyShopOrders } from "@/features/orders/hooks/useMyShopOrders";
+import { useMyPurchasesInfinite } from "@/features/orders/hooks/useMyPurchasesInfinite";
+import { useMyShopOrdersInfinite } from "@/features/orders/hooks/useMyShopOrdersInfinite";
 import { OrderStatus, OrderSummary } from "@/services/orders";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
@@ -49,10 +49,17 @@ export default function OrdersScreen() {
   );
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
 
-  const purchases = useMyPurchases();
-  const shopOrders = useMyShopOrders(isSeller ? myStore?.id : undefined);
+  const purchases = useMyPurchasesInfinite();
+  const shopOrders = useMyShopOrdersInfinite(
+    isSeller ? myStore?.id : undefined,
+  );
   const active = viewMode === "shop" ? shopOrders : purchases;
-  const { data: orders = [], isError, refetch } = active;
+  const { isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    active;
+  const orders = useMemo(
+    () => active.data?.pages.flatMap((p) => p.orders) ?? [],
+    [active.data],
+  );
 
   // "shop" mode has a two-stage dependency: know the store, then fetch its
   // orders. Without accounting for the first stage, this would briefly show
@@ -61,6 +68,10 @@ export default function OrdersScreen() {
     viewMode === "shop"
       ? isMyStoreLoading || active.isLoading
       : active.isLoading;
+
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const filteredOrders = useMemo(
     () =>
@@ -176,6 +187,11 @@ export default function OrdersScreen() {
           keyExtractor={(o) => o.id}
           renderItem={renderItem}
           contentContainerStyle={{ padding: spacing.lg }}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? <Pulse style={{ height: 76 }} /> : null
+          }
         />
       )}
     </SafeAreaView>

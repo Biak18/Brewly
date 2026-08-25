@@ -1,4 +1,5 @@
 // src/hooks/useAddToCart.ts
+import { track } from "@/lib/analytics";
 import { CartLineItem, useCartStore } from "@/stores/cartStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -29,12 +30,23 @@ export function useAddToCart() {
           onConfirm: () => {
             clearCart();
             addItem(input);
+            track("add_to_cart", {
+              coffee_id: input.coffeeId,
+              store_id: input.storeId,
+              quantity: input.quantity ?? 1,
+              cleared_cart: true,
+            });
             openCartPreview();
           },
         });
         return;
       }
       addItem(input);
+      track("add_to_cart", {
+        coffee_id: input.coffeeId,
+        store_id: input.storeId,
+        quantity: input.quantity ?? 1,
+      });
       if (input.force) openCartPreview();
     },
     [items, addItem, clearCart, openCartPreview, showConfirm],

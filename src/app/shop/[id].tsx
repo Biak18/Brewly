@@ -19,6 +19,7 @@ import { useCartAwareBottomInset } from "@/hooks/useCartAwareBottomInset";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { MenuSort } from "@/services/coffees";
 import { fetchStoreById } from "@/services/stores";
+import { track } from "@/lib/analytics";
 import { useTheme } from "@/theme";
 import { toCoffeeCardData } from "@/utils/pricing";
 import { Stagger } from "@animatereactnative/stagger";
@@ -30,7 +31,7 @@ import {
   Coffee as CoffeeIcon,
   SlidersHorizontal,
 } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -48,6 +49,10 @@ export default function ShopMenuScreen() {
   const insets = useSafeAreaInsets();
   const { colors, spacing, typography } = useTheme();
   const bottomInset = useCartAwareBottomInset();
+
+  useEffect(() => {
+    if (storeId) track("shop_viewed", { store_id: storeId });
+  }, [storeId]);
 
   const { data: store } = useQuery({
     queryKey: ["store", storeId],

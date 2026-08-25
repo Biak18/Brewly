@@ -13,6 +13,7 @@ import {
   finalizeRedemption,
 } from "@/services/loyalty";
 import { fetchStoreById } from "@/services/stores";
+import { track } from "@/lib/analytics";
 import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useToastStore } from "@/stores/toastStore";
@@ -22,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Check, ChevronLeft, Gift } from "lucide-react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import {
@@ -84,6 +85,12 @@ export default function CheckoutScreen() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const storeId = items[0]?.storeId;
+
+  useEffect(() => {
+    track("checkout_started", { store_id: storeId, item_count: items.length });
+    // Fired once per checkout visit — cart contents at entry are the props.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { data: store } = useQuery({
     queryKey: ["store", storeId],
     queryFn: () => fetchStoreById(storeId),
@@ -127,6 +134,13 @@ export default function CheckoutScreen() {
           fulfillment: "pickup",
           items,
           loyaltyDiscount: freeDrinkDiscount,
+        });
+        track("order_placed", {
+          order_id: orderId,
+          store_id: storeId,
+          item_count: items.length,
+          payment_method: values.paymentMethod,
+          redeemed_free_coffee: freeDrinkDiscount > 0,
         });
         if (freeDrinkDiscount > 0) {
           // Order is placed with the discounted total; this just burns the

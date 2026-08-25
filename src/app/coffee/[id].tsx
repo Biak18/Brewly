@@ -15,6 +15,7 @@ import {
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { CoffeeReviews } from "@/features/reviews/components/CoffeeReviews";
+import { track } from "@/lib/analytics";
 import { useTheme } from "@/theme";
 import { applyDiscount, getCoffeeDiscount } from "@/utils/pricing";
 import * as Haptics from "expo-haptics";
@@ -55,6 +56,11 @@ export default function CoffeeDetailScreen() {
   const scrollHandler = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
+
+  useEffect(() => {
+    if (id) track("coffee_viewed", { coffee_id: id });
+  }, [id]);
+
   const headerStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
       scrollY.value,

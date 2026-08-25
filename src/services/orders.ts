@@ -205,3 +205,64 @@ export async function fetchMyShopOrders(
   if (error) throw error;
   return mapToOrderSummaries(data);
 }
+
+// ---------------------------------------------------------------------
+// Paginated variants — used by the Orders screen's infinite scroll.
+// Fetching one extra row beyond the window lets us detect "hasMore"
+// without a separate count query. Existing non-paginated fetches above
+// are kept for callers that want the full list (e.g. home).
+// ---------------------------------------------------------------------
+
+export const ORDERS_PAGE_SIZE = 20;
+
+export type OrderSummaryPage = {
+  orders: OrderSummary[];
+  hasMore: boolean;
+};
+
+const ORDER_SUMMARY_SELECT =
+  "id, status, total, placed_at, order_items(coffees(image_url), created_at)";
+
+function baseOrderSummaryQuery() {
+  return supabase
+    .from("orders")
+    .select(ORDER_SUMMARY_SELECT)
+    .order("created_at", { referencedTable: "order_items", ascending: true })
+    .order("placed_at", { ascending: false });
+}
+
+export async function fetchMyPurchasesPage(
+  userId: string,
+  page: number,
+): Promise<OrderSummaryPage> {
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  const from = page * ORDERS_PAGE_SIZE;
+  const { data, error } = await baseOrderSummaryQuery()
+    .eq("user_id", userId)
+    .range(from, from + ORDERS_PAGE_SIZE);
+  if (error) throw error;
+
+  const rows = (data ?? []) as any[];
+  return {
+    orders: mapToOrderSummaries(rows.slice(0, ORDERS_PAGE_SIZE)),
+    hasMore: rows.length > ORDERS_PAGE_SIZE,
+  };
+}
+
+export async function fetchMyShopOrdersPage(
+  storeId: string,
+  page: number,
+): Promise<OrderSummaryPage> {
+  const from = page * ORDERS_PAGE_SIZE;
+  const { data, error } = await baseOrderSummaryQuery()
+    .eq("store_id", storeId)
+    .range(from, from + ORDERS_PAGE_SIZE);
+  if (error) throw error;
+
+  const rows = (data ?? []) as any[];
+  return {
+    orders: mapToOrderSummaries(rows.slice(0, ORDERS_PAGE_SIZE)),
+    hasMore: rows.length > ORDERS_PAGE_SIZE,
+  };
+}
