@@ -555,6 +555,46 @@ export default function OrderTrackingScreen() {
               </Text>
             </View>
           )}
+          {(order.delivery_fee ?? 0) > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: spacing.xs,
+              }}
+            >
+              <Text
+                style={{ color: colors.muted, fontSize: typography.bodySmall }}
+              >
+                Delivery fee
+              </Text>
+              <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
+                ${order.delivery_fee.toFixed(2)}
+              </Text>
+            </View>
+          )}
+          {order.fulfillment === "delivery" && !!order.delivery_address && (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: spacing.xs,
+                }}
+              >
+                <Text
+                  style={{ color: colors.muted, fontSize: typography.bodySmall }}
+                >
+                  Delivery to
+                </Text>
+              </View>
+              <Text
+                style={{ color: colors.muted, fontSize: typography.caption }}
+              >
+                {order.delivery_address}
+              </Text>
+            </>
+          )}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >

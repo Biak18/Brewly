@@ -163,6 +163,8 @@ export type Database = {
           subtotal: number;
           tax: number;
           total: number;
+          delivery_fee: number;
+          delivery_address: string | null;
           user_id: string;
         };
         Insert: {
@@ -176,6 +178,8 @@ export type Database = {
           subtotal: number;
           tax: number;
           total: number;
+          delivery_fee?: number;
+          delivery_address?: string | null;
           user_id: string;
         };
         Update: {
@@ -189,6 +193,8 @@ export type Database = {
           subtotal?: number;
           tax?: number;
           total?: number;
+          delivery_fee?: number;
+          delivery_address?: string | null;
           user_id?: string;
         };
       };
@@ -308,6 +314,44 @@ export type Database = {
         Update: {
           user_id?: string;
           store_id?: string;
+          created_at?: string;
+        };
+      };
+      addresses: {
+        Row: {
+          id: string;
+          user_id: string;
+          label: string;
+          full_name: string;
+          phone: string;
+          address: string;
+          lat: number | null;
+          lng: number | null;
+          is_default: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          label?: string;
+          full_name?: string;
+          phone?: string;
+          address: string;
+          lat?: number | null;
+          lng?: number | null;
+          is_default?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          label?: string;
+          full_name?: string;
+          phone?: string;
+          address?: string;
+          lat?: number | null;
+          lng?: number | null;
+          is_default?: boolean;
           created_at?: string;
         };
       };

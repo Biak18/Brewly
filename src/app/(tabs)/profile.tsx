@@ -13,6 +13,7 @@ import {
   Coffee as CoffeeIcon,
   Gift,
   LogOut,
+  MapPin,
   Settings,
   Store,
   StoreIcon,
@@ -163,6 +164,14 @@ export default function ProfileScreen() {
               icon={<Gift size={18} color={colors.muted} strokeWidth={1.8} />}
               label="Loyalty cards"
               onPress={() => router.push("/loyalty")}
+            />
+            <View style={{ height: 1, backgroundColor: colors.line }} />
+            <SettingsRow
+              icon={
+                <MapPin size={18} color={colors.muted} strokeWidth={1.8} />
+              }
+              label="Delivery addresses"
+              onPress={() => router.push("/addresses")}
             />
             <View style={{ height: 1, backgroundColor: colors.line }} />
             <SettingsRow

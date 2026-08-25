@@ -11,8 +11,13 @@ import {
   AppliedPromo,
   PromoCodeInput,
 } from "@/features/checkout/components/PromoCodeInput";
+import { DeliveryAddressPicker } from "@/features/checkout/components/DeliveryAddressPicker";
 import { TipJar } from "@/features/checkout/components/TipJar";
-import { attachPayment, placeOrder } from "@/services/orders";
+import {
+  useAddresses,
+} from "@/features/account/hooks/useAddresses";
+import { formatAddressSnapshot } from "@/services/addresses";
+import { attachPayment, placeOrder, DELIVERY_FEE } from "@/services/orders";
 import {
   fetchCardForStore,
   finalizeRedemption,
@@ -127,6 +132,26 @@ export default function CheckoutScreen() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoBusy, setPromoBusy] = useState(false);
 
+  const [fulfillment, setFulfillment] = useState<"pickup" | "delivery">(
+    "pickup",
+  );
+  const { data: addresses = [] } = useAddresses();
+  const defaultAddress = addresses.find((a) => a.is_default) ?? addresses[0];
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
+  // Auto-pick the user's default address once loaded.
+  useEffect(() => {
+    if (!selectedAddressId && defaultAddress) {
+      setSelectedAddressId(defaultAddress.id);
+    }
+  }, [defaultAddress, selectedAddressId]);
+  const selectedAddress =
+    addresses.find((a) => a.id === selectedAddressId) ?? null;
+  const deliveryFee = fulfillment === "delivery" ? DELIVERY_FEE : 0;
+  const needsAddress =
+    fulfillment === "delivery" && !selectedAddress;
+
   const handleApplyPromo = useCallback(async () => {
     if (!storeId) return;
     setPromoBusy(true);
@@ -174,16 +199,19 @@ export default function CheckoutScreen() {
 
   const onSubmit = useCallback(
     async (values: CheckoutForm) => {
-      if (!storeId || isShopClosed) return;
+      if (!storeId || isShopClosed || needsAddress) return;
       setServerError(null);
       try {
         const orderId = await placeOrder({
           storeId,
-          fulfillment: "pickup",
+          fulfillment,
           items,
           loyaltyDiscount: freeDrinkDiscount + promoDiscount,
           tip,
           promoCode: appliedPromo?.code ?? null,
+          deliveryAddress: selectedAddress
+            ? formatAddressSnapshot(selectedAddress)
+            : null,
         });
         track("order_placed", {
           order_id: orderId,
@@ -193,6 +221,7 @@ export default function CheckoutScreen() {
           redeemed_free_coffee: freeDrinkDiscount > 0,
           promo_code: appliedPromo?.code ?? null,
           tip_amount: tip,
+          fulfillment,
         });
         if (freeDrinkDiscount > 0) {
           // Order is placed with the discounted total; this just burns the
@@ -227,7 +256,21 @@ export default function CheckoutScreen() {
         );
       }
     },
-    [storeId, items, clearCart, router, freeDrinkDiscount, promoDiscount, tip, appliedPromo, showToast, isShopClosed],
+    [
+      storeId,
+      items,
+      clearCart,
+      router,
+      freeDrinkDiscount,
+      promoDiscount,
+      tip,
+      appliedPromo,
+      showToast,
+      isShopClosed,
+      fulfillment,
+      selectedAddress,
+      needsAddress,
+    ],
   );
 
   return (
@@ -284,11 +327,31 @@ export default function CheckoutScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Section title="Fulfillment">
-          <FulfillmentToggle />
+          <FulfillmentToggle value={fulfillment} onChange={setFulfillment} />
         </Section>
-        <Section title="Pickup from">
-          <PickupStoreDisplay store={store} />
-        </Section>
+        {fulfillment === "pickup" ? (
+          <Section title="Pickup from">
+            <PickupStoreDisplay store={store} />
+          </Section>
+        ) : (
+          <Section title="Deliver to">
+            <DeliveryAddressPicker
+              addresses={addresses}
+              selectedId={selectedAddress?.id ?? null}
+              onSelect={setSelectedAddressId}
+              onManage={() => router.push("/addresses")}
+            />
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.micro,
+                marginTop: spacing.sm,
+              }}
+            >
+              Flat ${DELIVERY_FEE.toFixed(2)} delivery fee applies.
+            </Text>
+          </Section>
+        )}
 
         <Section title="Pickup time">
           <Controller
@@ -349,6 +412,7 @@ export default function CheckoutScreen() {
             items={items}
             tip={tip}
             discount={freeDrinkDiscount + promoDiscount}
+            fee={deliveryFee}
           />
           {hasFreeCoffee && (
             <Pressable
@@ -420,7 +484,9 @@ export default function CheckoutScreen() {
           label={isSubmitting ? "Placing order…" : "Place order"}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
-          disabled={items.length === 0 || !storeId || isShopClosed}
+          disabled={
+            items.length === 0 || !storeId || isShopClosed || needsAddress
+          }
           variant="primary"
         />
       </View>

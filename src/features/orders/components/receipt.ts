@@ -39,6 +39,9 @@ export function buildReceiptText(
     `Placed: ${placedAt}`,
   ];
   if (storeName) lines.push(`Shop: ${storeName}`);
+  if (order.fulfillment === "delivery" && order.delivery_address) {
+    lines.push(`Delivery to: ${order.delivery_address}`);
+  }
   if (STATUS_LABELS[order.status])
     lines.push(`Status: ${STATUS_LABELS[order.status]}`);
 
@@ -51,6 +54,8 @@ export function buildReceiptText(
       `Discount${order.promo_code ? ` (${order.promo_code})` : ""}   -$${order.discount.toFixed(2)}`,
     );
   if ((order.tip ?? 0) > 0) lines.push(`Tip             $${order.tip.toFixed(2)}`);
+  if ((order.delivery_fee ?? 0) > 0)
+    lines.push(`Delivery fee    $${order.delivery_fee.toFixed(2)}`);
   lines.push(`TOTAL           $${Number(order.total).toFixed(2)}`);
 
   lines.push("");

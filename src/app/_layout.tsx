@@ -70,6 +70,7 @@ function RootNavigator() {
           <Stack.Screen name="coffee/[id]" options={{ animation: "none" }} />
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
+          <Stack.Screen name="addresses" />
           <Stack.Screen name="orders/[id]/tracking" />
           <Stack.Screen name="shop/[id]" />
           <Stack.Screen name="my-store" />

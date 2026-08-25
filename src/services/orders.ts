@@ -1,8 +1,8 @@
 // src/services/orders.ts
 import { CartLineItem } from "@/stores/cartStore";
-import { computeOrderTotals } from "@/utils/orderTotals";
+import { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
 import { supabase } from "./supabase";
-export { computeOrderTotals } from "@/utils/orderTotals";
+export { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
 export type OrderStatus =
   | "received"
   | "preparing"
@@ -25,11 +25,19 @@ export async function placeOrder(params: {
   loyaltyDiscount?: number;
   tip?: number;
   promoCode?: string | null;
+  /** Required snapshot string when fulfillment is "delivery". */
+  deliveryAddress?: string | null;
 }): Promise<string> {
   const { subtotal, tax, total } = computeOrderTotals(params.items);
   const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
   const tip = Math.max(params.tip ?? 0, 0);
-  const grandTotal = Math.round((total - discount + tip) * 100) / 100;
+  const deliveryFee =
+    params.fulfillment === "delivery" ? DELIVERY_FEE : 0;
+  if (params.fulfillment === "delivery" && !params.deliveryAddress) {
+    throw new Error("Delivery address required");
+  }
+  const grandTotal =
+    Math.round((total - discount + tip + deliveryFee) * 100) / 100;
 
   const { data, error } = await supabase.rpc("create_order", {
     p_store_id: params.storeId,
@@ -50,6 +58,8 @@ export async function placeOrder(params: {
     p_tip: tip,
     p_promo_code: params.promoCode ?? null,
     p_discount: discount,
+    p_delivery_fee: deliveryFee,
+    p_delivery_address: params.deliveryAddress ?? null,
   });
 
   if (error) throw error;
@@ -100,6 +110,8 @@ export type OrderWithItems = {
   discount: number;
   tip: number;
   promo_code: string | null;
+  delivery_fee: number;
+  delivery_address: string | null;
   placed_at: string;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;

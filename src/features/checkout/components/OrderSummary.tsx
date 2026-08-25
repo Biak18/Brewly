@@ -50,16 +50,18 @@ export function OrderSummary({
   items,
   tip = 0,
   discount = 0,
+  fee = 0,
 }: {
   items: CartLineItem[];
   tip?: number;
   discount?: number;
+  fee?: number;
 }) {
   const { colors, spacing, radius } = useTheme();
   const { subtotal, tax, total } = computeOrderTotals(items);
   const savings = computeCartSavings(items);
   const grandTotal =
-    Math.round((total - Math.min(discount, total) + tip) * 100) / 100;
+    Math.round((total - Math.min(discount, total) + tip + fee) * 100) / 100;
 
   return (
     <View
@@ -90,6 +92,7 @@ export function OrderSummary({
           color={colors.green}
         />
       )}
+      {fee > 0 && <Row label="Delivery fee" value={`$${fee.toFixed(2)}`} />}
       {tip > 0 && <Row label="Tip" value={`$${tip.toFixed(2)}`} />}
       <View
         style={{
