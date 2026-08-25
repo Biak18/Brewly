@@ -1,35 +1,57 @@
 // src/app/my-store/edit.tsx
 import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 import { IconButton } from "@/components/ui/IconButton";
+import { TimeField } from "@/features/seller/components/TimeField";
+import { TimePickerSheet } from "@/features/seller/components/TimePickerSheet";
 import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { getStoreOpenState } from "@/utils/storeHours";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-const schema = z.object({
-  name: z.string().min(1, "Enter your shop name"),
-  address: z.string().min(1, "Enter your shop address"),
-  openTime: z
-    .string()
-    .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
-  closeTime: z
-    .string()
-    .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
-  kpayPhone: z.string(),
-  paymentNote: z.string(),
-});
+const schema = z
+  .object({
+    name: z.string().min(1, "Enter your shop name"),
+    address: z.string().min(1, "Enter your shop address"),
+    openTime: z
+      .string()
+      .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
+    closeTime: z
+      .string()
+      .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
+    kpayPhone: z.string(),
+    paymentNote: z.string(),
+  })
+  .superRefine((v, ctx) => {
+    const oneSet = !!v.openTime !== !!v.closeTime;
+    if (oneSet) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [v.openTime ? "closeTime" : "openTime"],
+        message: "Set both times or leave both empty",
+      });
+    }
+    if (v.openTime && v.closeTime && v.openTime === v.closeTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["closeTime"],
+        message: "Closing must differ from opening",
+      });
+    }
+  });
 type FormValues = z.infer<typeof schema>;
 
 export default function EditStoreScreen() {
@@ -48,6 +70,7 @@ export default function EditStoreScreen() {
   const {
     control,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
@@ -102,6 +125,16 @@ export default function EditStoreScreen() {
     },
   });
 
+  // Hours editor: tap-to-pick fields, presets, and a live preview of the
+  // exact Open/Closed badge customers see (same storeHours logic).
+  const [pickerField, setPickerField] = useState<"open" | "close" | null>(null);
+  const openTime = useWatch({ control, name: "openTime" });
+  const closeTime = useWatch({ control, name: "closeTime" });
+  const draftHours =
+    openTime && closeTime ? { open: openTime, close: closeTime } : null;
+  const openState = getStoreOpenState(draftHours);
+  const isOvernight = !!draftHours && openTime >= closeTime;
+
   if (!store) return null;
 
   return (
@@ -128,7 +161,6 @@ export default function EditStoreScreen() {
           Store settings
         </Text>
       </View>
-
       <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
         <Text
           style={{
@@ -196,62 +228,112 @@ export default function EditStoreScreen() {
           Opening hours
         </Text>
         <View style={{ flexDirection: "row", gap: spacing.sm }}>
-          {(
-            [
-              {
-                name: "openTime",
-                placeholder: "Opens (07:00)",
-                err: errors.openTime,
-              },
-              {
-                name: "closeTime",
-                placeholder: "Closes (19:00)",
-                err: errors.closeTime,
-              },
-            ] as const
-          ).map((f) => (
-            <View key={f.name} style={{ flex: 1 }}>
-              <Controller
-                control={control}
-                name={f.name}
-                render={({ field: { value, onChange } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder={f.placeholder}
-                    placeholderTextColor={colors.muted}
-                    keyboardType="numbers-and-punctuation"
-                    style={{
-                      borderWidth: 1,
-                      borderColor: f.err ? colors.danger : colors.line,
-                      height: 48,
-                      paddingHorizontal: 14,
-                      fontSize: 14,
-                      color: colors.ink,
-                      borderRadius: radius.md,
-                    }}
-                  />
-                )}
+          <Controller
+            control={control}
+            name="openTime"
+            render={({ field: { value } }) => (
+              <TimeField
+                label="Opens"
+                value={value}
+                error={errors.openTime?.message}
+                onPress={() => setPickerField("open")}
               />
-              {!!f.err && (
-                <Text
-                  style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}
-                >
-                  {f.err.message}
-                </Text>
-              )}
-            </View>
-          ))}
+            )}
+          />
+          <Controller
+            control={control}
+            name="closeTime"
+            render={({ field: { value } }) => (
+              <TimeField
+                label="Closes"
+                value={value}
+                error={errors.closeTime?.message}
+                onPress={() => setPickerField("close")}
+              />
+            )}
+          />
         </View>
-        <Text
+        <View
           style={{
-            color: colors.muted,
-            fontSize: typography.micro,
-            marginTop: spacing.xs,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: spacing.sm,
+            marginTop: spacing.md,
           }}
         >
-          Leave both empty if you don't want to show hours.
-        </Text>
+          {(
+            [
+              ["08:00", "17:00", "08–17"],
+              ["09:00", "21:00", "09–21"],
+              ["10:00", "22:00", "10–22"],
+            ] as const
+          ).map(([o, c, label]) => (
+            <Chip
+              key={label}
+              label={label}
+              active={openTime === o && closeTime === c}
+              onPress={() => {
+                setValue("openTime", o, { shouldValidate: true });
+                setValue("closeTime", c, { shouldValidate: true });
+              }}
+            />
+          ))}
+          <Chip
+            label="No hours"
+            active={!openTime && !closeTime}
+            onPress={() => {
+              setValue("openTime", "");
+              setValue("closeTime", "");
+            }}
+          />
+        </View>
+
+        <View
+          style={{
+            marginTop: spacing.md,
+            padding: spacing.md,
+            borderRadius: radius.md,
+            backgroundColor: colors.surface2,
+          }}
+        >
+          {draftHours ? (
+            <>
+              <Text
+                style={{
+                  color: openState.isOpen ? colors.green : colors.muted,
+                  fontWeight: "800",
+                  fontSize: typography.caption,
+                }}
+              >
+                {openState.isOpen
+                  ? `Open now — customers see "Open · until ${closeTime}"`
+                  : `Closed now — customers see "Closed · opens ${openTime}"`}
+              </Text>
+              {isOvernight && (
+                <Text
+                  style={{
+                    color: colors.muted,
+                    fontSize: typography.micro,
+                    marginTop: 4,
+                  }}
+                >
+                  Overnight window — this shop closes past midnight.
+                </Text>
+              )}
+            </>
+          ) : (
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.caption,
+                fontWeight: "600",
+              }}
+            >
+              No hours set — no Open/Closed badge is shown and ordering never
+              blocks.
+            </Text>
+          )}
+        </View>
 
         <Text
           style={{
@@ -322,6 +404,19 @@ export default function EditStoreScreen() {
           />
         </View>
       </ScrollView>
+
+      <TimePickerSheet
+        visible={pickerField === "open"}
+        value={openTime || null}
+        onSelect={(t) => setValue("openTime", t, { shouldValidate: true })}
+        onClose={() => setPickerField(null)}
+      />
+      <TimePickerSheet
+        visible={pickerField === "close"}
+        value={closeTime || null}
+        onSelect={(t) => setValue("closeTime", t, { shouldValidate: true })}
+        onClose={() => setPickerField(null)}
+      />
     </SafeAreaView>
   );
 }
