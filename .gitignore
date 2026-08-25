@@ -42,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# auth
+.opencode/supabase-auth.json
