@@ -4,7 +4,12 @@ import { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 
 type Role = "seller" | "customer";
-type Profile = { id: string; full_name: string | null; role: Role };
+type Profile = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: Role;
+};
 
 type AuthState = {
   session: Session | null;
@@ -27,7 +32,7 @@ export const useAuthStore = create<AuthState>(() => ({
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name, avatar_url, role")
     .eq("id", userId)
     .single();
 

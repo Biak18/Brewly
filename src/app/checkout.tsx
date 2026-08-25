@@ -18,6 +18,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { getStoreOpenState } from "@/utils/storeHours";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -97,6 +98,10 @@ export default function CheckoutScreen() {
     enabled: !!storeId,
   });
 
+  // Closed shops block checkout. Unknown/missing hours never block.
+  const openState = getStoreOpenState(store?.hours);
+  const isShopClosed = !!store && openState.isKnown && !openState.isOpen;
+
   const { data: loyaltyCard } = useQuery({
     queryKey: ["loyalty", "card", storeId],
     queryFn: () => fetchCardForStore(storeId!),
@@ -126,7 +131,7 @@ export default function CheckoutScreen() {
 
   const onSubmit = useCallback(
     async (values: CheckoutForm) => {
-      if (!storeId) return;
+      if (!storeId || isShopClosed) return;
       setServerError(null);
       try {
         const orderId = await placeOrder({
@@ -175,7 +180,7 @@ export default function CheckoutScreen() {
         );
       }
     },
-    [storeId, items, clearCart, router, freeDrinkDiscount, showToast],
+    [storeId, items, clearCart, router, freeDrinkDiscount, showToast, isShopClosed],
   );
 
   return (
@@ -190,6 +195,19 @@ export default function CheckoutScreen() {
           }}
         >
           You're offline — connect to place your order.
+        </Text>
+      )}
+      {isShopClosed && (
+        <Text
+          style={{
+            color: colors.danger,
+            fontSize: typography.caption,
+            fontWeight: "600",
+            textAlign: "center",
+            marginTop: spacing.sm,
+          }}
+        >
+          {store?.name} is closed right now — opens at {openState.opensAt}.
         </Text>
       )}
       <View
@@ -334,7 +352,7 @@ export default function CheckoutScreen() {
           label={isSubmitting ? "Placing order…" : "Place order"}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
-          disabled={items.length === 0 || !storeId}
+          disabled={items.length === 0 || !storeId || isShopClosed}
           variant="primary"
         />
       </View>

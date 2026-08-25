@@ -28,7 +28,12 @@ describe("<OrdersScreen />", () => {
   it("shows the seller view toggle with the shop-orders empty state", async () => {
     useAuthStore.setState({
       session: { user: { id: "u1" } } as any,
-      profile: { id: "u1", full_name: null, role: "seller" },
+      profile: {
+        id: "u1",
+        full_name: null,
+        avatar_url: null,
+        role: "seller",
+      },
     });
     const { findByText, getByText } = renderScreen(<OrdersScreen />);
     expect(await findByText("My Shop")).toBeTruthy();

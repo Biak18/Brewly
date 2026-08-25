@@ -3,7 +3,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
 import { useRouter } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import { MapPin, Search } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 
 export function HomeHeader() {
@@ -43,14 +43,24 @@ export function HomeHeader() {
           Hello, {firstName}
         </Text>
       </View>
-      <IconButton
-        accessibilityLabel="Open profile"
-        onPress={() => router.push("/(tabs)/profile")}
-      >
-        <Text style={{ color: colors.espresso, fontWeight: "800" }}>
-          {firstName[0]?.toUpperCase()}
-        </Text>
-      </IconButton>
+      <View style={styles.actions}>
+        <View style={{ marginRight: 8 }}>
+          <IconButton
+            accessibilityLabel="Search"
+            onPress={() => router.push("/search")}
+          >
+            <Search size={18} color={colors.espresso} strokeWidth={2} />
+          </IconButton>
+        </View>
+        <IconButton
+          accessibilityLabel="Open profile"
+          onPress={() => router.push("/(tabs)/profile")}
+        >
+          <Text style={{ color: colors.espresso, fontWeight: "800" }}>
+            {firstName[0]?.toUpperCase()}
+          </Text>
+        </IconButton>
+      </View>
     </View>
   );
 }
@@ -62,4 +72,5 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   locationRow: { flexDirection: "row", alignItems: "center" },
+  actions: { flexDirection: "row", alignItems: "center" },
 });

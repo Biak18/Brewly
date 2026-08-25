@@ -7,11 +7,13 @@ import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import {
   Coffee as CoffeeIcon,
   Gift,
   LogOut,
+  Settings,
   Store,
   StoreIcon,
 } from "lucide-react-native";
@@ -72,17 +74,26 @@ export default function ProfileScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: spacing.md,
+                overflow: "hidden",
               }}
             >
-              <Text
-                style={{
-                  color: colors.espresso,
-                  fontSize: 28,
-                  fontWeight: "800",
-                }}
-              >
-                {firstInitial}
-              </Text>
+              {profile?.avatar_url ? (
+                <Image
+                  source={{ uri: profile.avatar_url }}
+                  style={{ width: 72, height: 72 }}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text
+                  style={{
+                    color: colors.espresso,
+                    fontSize: 28,
+                    fontWeight: "800",
+                  }}
+                >
+                  {firstInitial}
+                </Text>
+              )}
             </View>
             <Text
               style={{
@@ -152,6 +163,14 @@ export default function ProfileScreen() {
               icon={<Gift size={18} color={colors.muted} strokeWidth={1.8} />}
               label="Loyalty cards"
               onPress={() => router.push("/loyalty")}
+            />
+            <View style={{ height: 1, backgroundColor: colors.line }} />
+            <SettingsRow
+              icon={
+                <Settings size={18} color={colors.muted} strokeWidth={1.8} />
+              }
+              label="Account settings"
+              onPress={() => router.push("/account")}
             />
           </View>
 
