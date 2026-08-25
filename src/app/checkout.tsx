@@ -8,6 +8,10 @@ import { PaymentMethodRow } from "@/features/checkout/components/PaymentMethodRo
 import { PickupStoreDisplay } from "@/features/checkout/components/PickupStoreDisplay";
 import { PickupTimeRow } from "@/features/checkout/components/PickupTimeRow";
 import { attachPayment, placeOrder } from "@/services/orders";
+import {
+  fetchCardForStore,
+  finalizeRedemption,
+} from "@/services/loyalty";
 import { fetchStoreById } from "@/services/stores";
 import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
@@ -17,10 +21,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { Check, ChevronLeft, Gift } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { ScrollView, Text, View } from "react-native";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -70,11 +74,10 @@ function Section({
 }
 
 export default function CheckoutScreen() {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const items = useCartStore((s) => s.items);
-  const clearCart = useCartStore((s) => s.clear);
+  const items = useCartStore((s) => s.items);  const clearCart = useCartStore((s) => s.clear);
   const isOnline = useNetworkStore((s) => s.isOnline);
   const showToast = useToastStore((s) => s.show);
 
@@ -86,6 +89,19 @@ export default function CheckoutScreen() {
     queryFn: () => fetchStoreById(storeId),
     enabled: !!storeId,
   });
+
+  const { data: loyaltyCard } = useQuery({
+    queryKey: ["loyalty", "card", storeId],
+    queryFn: () => fetchCardForStore(storeId!),
+    enabled: !!storeId,
+  });
+  const hasFreeCoffee =
+    (loyaltyCard?.stamps ?? 0) >= 10 && items.length > 0;
+  const [redeemFree, setRedeemFree] = useState(false);
+  const freeDrinkDiscount =
+    redeemFree && hasFreeCoffee
+      ? Math.min(...items.map((i) => i.unitPrice))
+      : 0;
 
   const {
     control,
@@ -110,7 +126,18 @@ export default function CheckoutScreen() {
           storeId,
           fulfillment: "pickup",
           items,
+          loyaltyDiscount: freeDrinkDiscount,
         });
+        if (freeDrinkDiscount > 0) {
+          // Order is placed with the discounted total; this just burns the
+          // stamps. A rare concurrent-redeem failure must not lose the order —
+          // seller sees the discounted total and can adjust manually.
+          try {
+            await finalizeRedemption(storeId, orderId);
+          } catch {
+            showToast("Order placed, but free coffee could not be marked used");
+          }
+        }
         if (values.paymentMethod !== "cash") {
           // Order is already placed; a failed proof attach must not lose it —
           // the seller simply sees it as unpaid and can coordinate manually.
@@ -134,7 +161,7 @@ export default function CheckoutScreen() {
         );
       }
     },
-    [storeId, items, clearCart, router],
+    [storeId, items, clearCart, router, freeDrinkDiscount, showToast],
   );
 
   return (
@@ -223,6 +250,49 @@ export default function CheckoutScreen() {
 
         <Section title="Order summary">
           <OrderSummary items={items} />
+          {hasFreeCoffee && (
+            <Pressable
+              onPress={() => setRedeemFree((v) => !v)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: spacing.sm,
+                padding: spacing.md,
+                borderRadius: radius.lg,
+                borderWidth: 1,
+                borderColor: redeemFree ? colors.espresso : colors.line,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <Gift size={18} color={colors.espresso} strokeWidth={1.8} />
+              <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                <Text
+                  style={{
+                    color: colors.ink,
+                    fontWeight: "800",
+                    fontSize: typography.bodySmall,
+                  }}
+                >
+                  Use my free coffee
+                </Text>
+                <Text
+                  style={{
+                    color: colors.muted,
+                    fontSize: typography.micro,
+                  }}
+                >
+                  10 stamps · −$
+                  {Math.min(
+                    ...items.map((i) => i.unitPrice),
+                  ).toFixed(2)}{" "}
+                  off your cheapest drink
+                </Text>
+              </View>
+              {redeemFree && (
+                <Check size={18} color={colors.espresso} strokeWidth={2} />
+              )}
+            </Pressable>
+          )}
         </Section>
 
         {serverError && (

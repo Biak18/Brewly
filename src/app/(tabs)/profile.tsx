@@ -10,6 +10,7 @@ import { Stagger } from "@animatereactnative/stagger";
 import { router } from "expo-router";
 import {
   Coffee as CoffeeIcon,
+  Gift,
   LogOut,
   Store,
   StoreIcon,
@@ -121,6 +122,37 @@ export default function ProfileScreen() {
                 {profile?.role ?? "—"}
               </Text>
             </View>
+          </View>
+
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.caption,
+              fontWeight: "800",
+              textTransform: "uppercase",
+              letterSpacing: 1,
+              marginBottom: spacing.xs,
+            }}
+          >
+            Rewards
+          </Text>
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              paddingHorizontal: spacing.md,
+              marginTop: spacing.md,
+              marginBottom: spacing.md,
+              justifyContent: "center",
+            }}
+          >
+            <SettingsRow
+              icon={<Gift size={18} color={colors.muted} strokeWidth={1.8} />}
+              label="Loyalty cards"
+              onPress={() => router.push("/loyalty")}
+            />
           </View>
 
           <Text

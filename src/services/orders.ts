@@ -22,15 +22,18 @@ export async function placeOrder(params: {
   storeId: string;
   fulfillment: "pickup" | "delivery";
   items: CartLineItem[];
+  loyaltyDiscount?: number;
 }): Promise<string> {
   const { subtotal, tax, total } = computeOrderTotals(params.items);
+  const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
+  const grandTotal = Math.round((total - discount) * 100) / 100;
 
   const { data, error } = await supabase.rpc("create_order", {
     p_store_id: params.storeId,
     p_fulfillment: params.fulfillment,
     p_subtotal: subtotal,
     p_tax: tax,
-    p_total: total,
+    p_total: grandTotal,
     p_items: params.items.map((i) => ({
       coffee_id: i.coffeeId,
       size: i.size ?? null,
@@ -48,10 +51,7 @@ export async function placeOrder(params: {
 }
 
 export type PaymentMethod = "cash" | "kpay" | "mmqr";
-export type PaymentStatus =
-  | "unpaid"
-  | "awaiting_verification"
-  | "verified";
+export type PaymentStatus = "unpaid" | "awaiting_verification" | "verified";
 
 // Customer attaches their transfer proof right after placing the order.
 // Server-guarded: only the buyer, only while status is still "received"
@@ -91,6 +91,7 @@ export type OrderWithItems = {
   subtotal: number;
   tax: number;
   total: number;
+  discount: number;
   placed_at: string;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;

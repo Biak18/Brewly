@@ -500,6 +500,34 @@ export default function OrderTrackingScreen() {
               </Text>
             </View>
           )}
+          {(order.discount ?? 0) > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: spacing.xs,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.green,
+                  fontSize: typography.bodySmall,
+                  fontWeight: "600",
+                }}
+              >
+                Free coffee (loyalty)
+              </Text>
+              <Text
+                style={{
+                  color: colors.green,
+                  fontSize: typography.bodySmall,
+                  fontWeight: "800",
+                }}
+              >
+                -${order.discount.toFixed(2)}
+              </Text>
+            </View>
+          )}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
