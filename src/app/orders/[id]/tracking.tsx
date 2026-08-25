@@ -5,6 +5,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
+import { OrderReviewSection } from "@/features/reviews/components/OrderReviewSection";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
 import {
   OrderStatus,
@@ -411,6 +412,15 @@ export default function OrderTrackingScreen() {
               <StatusTimeline status={order.status} />
               <View style={{ marginTop: spacing.md }} />
               {order.status === "completed" && <CompletedBanner />}
+              {order.status === "completed" &&
+                order.user_id === userId && (
+                  <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}>
+                    <OrderReviewSection
+                      orderId={order.id}
+                      items={order.order_items}
+                    />
+                  </View>
+                )}
             </>
           )}
         </View>

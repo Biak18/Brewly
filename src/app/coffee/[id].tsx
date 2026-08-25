@@ -14,6 +14,7 @@ import {
 } from "@/features/favorites/api/useFavorites";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAddToCart } from "@/hooks/useAddToCart";
+import { CoffeeReviews } from "@/features/reviews/components/CoffeeReviews";
 import { useTheme } from "@/theme";
 import { applyDiscount, getCoffeeDiscount } from "@/utils/pricing";
 import * as Haptics from "expo-haptics";
@@ -281,6 +282,8 @@ export default function CoffeeDetailScreen() {
             selected={extras}
             onSelect={toggleExtra}
           />
+
+          <CoffeeReviews coffeeId={id} />
 
           <View
             style={{
