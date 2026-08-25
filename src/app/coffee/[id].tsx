@@ -13,8 +13,8 @@ import {
   useToggleFavorite,
 } from "@/features/favorites/api/useFavorites";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
-import { useAddToCart } from "@/hooks/useAddToCart";
 import { CoffeeReviews } from "@/features/reviews/components/CoffeeReviews";
+import { useAddToCart } from "@/hooks/useAddToCart";
 import { track } from "@/lib/analytics";
 import { useTheme } from "@/theme";
 import { applyDiscount, getCoffeeDiscount } from "@/utils/pricing";
@@ -330,6 +330,7 @@ export default function CoffeeDetailScreen() {
             color: colors.ink,
             fontWeight: "800",
             fontSize: typography.body,
+            paddingBottom: spacing.xs,
           }}
           numberOfLines={1}
         >

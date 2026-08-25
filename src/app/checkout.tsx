@@ -7,11 +7,17 @@ import { OrderSummary } from "@/features/checkout/components/OrderSummary";
 import { PaymentMethodRow } from "@/features/checkout/components/PaymentMethodRow";
 import { PickupStoreDisplay } from "@/features/checkout/components/PickupStoreDisplay";
 import { PickupTimeRow } from "@/features/checkout/components/PickupTimeRow";
+import {
+  AppliedPromo,
+  PromoCodeInput,
+} from "@/features/checkout/components/PromoCodeInput";
+import { TipJar } from "@/features/checkout/components/TipJar";
 import { attachPayment, placeOrder } from "@/services/orders";
 import {
   fetchCardForStore,
   finalizeRedemption,
 } from "@/services/loyalty";
+import { lookupPromoCode } from "@/services/promotions";
 import { fetchStoreById } from "@/services/stores";
 import { track } from "@/lib/analytics";
 import { useCartStore } from "@/stores/cartStore";
@@ -115,6 +121,43 @@ export default function CheckoutScreen() {
       ? Math.min(...items.map((i) => i.unitPrice))
       : 0;
 
+  const [tip, setTip] = useState(0);
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoBusy, setPromoBusy] = useState(false);
+
+  const handleApplyPromo = useCallback(async () => {
+    if (!storeId) return;
+    setPromoBusy(true);
+    setPromoError(null);
+    try {
+      const promo = await lookupPromoCode(storeId, promoInput);
+      if (!promo || !promo.code) {
+        setPromoError("That code isn't valid for this shop right now.");
+        return;
+      }
+      setAppliedPromo({
+        code: promo.code,
+        title: promo.title,
+        discountPercent: Number(promo.discount_percent),
+      });
+      setPromoInput("");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      setPromoError("Couldn't check that code — try again.");
+    } finally {
+      setPromoBusy(false);
+    }
+  }, [storeId, promoInput]);
+
+  // Promo codes take a percentage off the item subtotal, on top of any
+  // loyalty free-drink discount.
+  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+  const promoDiscount = appliedPromo
+    ? Math.round(subtotal * (appliedPromo.discountPercent / 100) * 100) / 100
+    : 0;
+
   const {
     control,
     handleSubmit,
@@ -138,7 +181,9 @@ export default function CheckoutScreen() {
           storeId,
           fulfillment: "pickup",
           items,
-          loyaltyDiscount: freeDrinkDiscount,
+          loyaltyDiscount: freeDrinkDiscount + promoDiscount,
+          tip,
+          promoCode: appliedPromo?.code ?? null,
         });
         track("order_placed", {
           order_id: orderId,
@@ -146,6 +191,8 @@ export default function CheckoutScreen() {
           item_count: items.length,
           payment_method: values.paymentMethod,
           redeemed_free_coffee: freeDrinkDiscount > 0,
+          promo_code: appliedPromo?.code ?? null,
+          tip_amount: tip,
         });
         if (freeDrinkDiscount > 0) {
           // Order is placed with the discounted total; this just burns the
@@ -180,7 +227,7 @@ export default function CheckoutScreen() {
         );
       }
     },
-    [storeId, items, clearCart, router, freeDrinkDiscount, showToast, isShopClosed],
+    [storeId, items, clearCart, router, freeDrinkDiscount, promoDiscount, tip, appliedPromo, showToast, isShopClosed],
   );
 
   return (
@@ -253,6 +300,10 @@ export default function CheckoutScreen() {
           />
         </Section>
 
+        <Section title="Add a tip">
+          <TipJar value={tip} onChange={setTip} />
+        </Section>
+
         <Section title="Payment">
           <Controller
             control={control}
@@ -281,7 +332,24 @@ export default function CheckoutScreen() {
         </Section>
 
         <Section title="Order summary">
-          <OrderSummary items={items} />
+          <PromoCodeInput
+            value={promoInput}
+            onChangeText={setPromoInput}
+            applied={appliedPromo}
+            error={promoError}
+            busy={promoBusy}
+            onApply={handleApplyPromo}
+            onRemove={() => {
+              setAppliedPromo(null);
+              setPromoError(null);
+            }}
+          />
+          <View style={{ height: spacing.md }} />
+          <OrderSummary
+            items={items}
+            tip={tip}
+            discount={freeDrinkDiscount + promoDiscount}
+          />
           {hasFreeCoffee && (
             <Pressable
               onPress={() => setRedeemFree((v) => !v)}

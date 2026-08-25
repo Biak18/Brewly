@@ -49,3 +49,26 @@ export async function fetchActivePromotions(
   if (error) throw error;
   return data;
 }
+
+// Resolves a voucher code for this store among currently active promotions.
+// Returns null when the code doesn't match anything live.
+export async function lookupPromoCode(
+  storeId: string,
+  code: string,
+): Promise<Promotion | null> {
+  const clean = code.trim();
+  if (!storeId || clean.length === 0) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from("promotions")
+    .select("*")
+    .eq("store_id", storeId)
+    .eq("is_active", true)
+    .not("code", "is", null)
+    .ilike("code", clean)
+    .lte("starts_at", today)
+    .gte("ends_at", today)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}

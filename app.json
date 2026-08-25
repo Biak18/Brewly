@@ -33,6 +33,12 @@
           "resizeMode": "contain"
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Brewly to find coffee shops near you."
+        }
+      ],
       "expo-image",
       "expo-secure-store",
       "expo-font",

@@ -230,6 +230,7 @@ export type Database = {
           store_id: string;
           target_key: string | null;
           title: string;
+          code: string | null;
         };
         Insert: {
           category_id?: string | null;
@@ -245,6 +246,7 @@ export type Database = {
           store_id: string;
           target_key?: string | null;
           title: string;
+          code?: string | null;
         };
         Update: {
           category_id?: string | null;
@@ -260,6 +262,7 @@ export type Database = {
           store_id?: string;
           target_key?: string | null;
           title?: string;
+          code?: string | null;
         };
       };
       stores: {
@@ -289,6 +292,23 @@ export type Database = {
           lng?: number | null;
           name?: string;
           owner_id?: string;
+        };
+      };
+      store_favorites: {
+        Row: {
+          user_id: string;
+          store_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          store_id: string;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          store_id?: string;
+          created_at?: string;
         };
       };
     };

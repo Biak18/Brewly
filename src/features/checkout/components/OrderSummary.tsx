@@ -4,20 +4,19 @@ import { CartLineItem, computeCartSavings } from "@/stores/cartStore";
 import { useTheme } from "@/theme";
 import { Text, View } from "react-native";
 
-export function OrderSummary({ items }: { items: CartLineItem[] }) {
-  const { colors, spacing, radius, typography } = useTheme();
-  const { subtotal, tax, total } = computeOrderTotals(items);
-  const savings = computeCartSavings(items);
-
-  const Row = ({
-    label,
-    value,
-    bold,
-  }: {
-    label: string;
-    value: string;
-    bold?: boolean;
-  }) => (
+function Row({
+  label,
+  value,
+  bold,
+  color,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+  color?: string;
+}) {
+  const { colors, spacing, typography } = useTheme();
+  return (
     <View
       style={{
         flexDirection: "row",
@@ -27,7 +26,7 @@ export function OrderSummary({ items }: { items: CartLineItem[] }) {
     >
       <Text
         style={{
-          color: bold ? colors.ink : colors.muted,
+          color: color ?? (bold ? colors.ink : colors.muted),
           fontWeight: bold ? "800" : "500",
           fontSize: typography.bodySmall,
         }}
@@ -36,7 +35,7 @@ export function OrderSummary({ items }: { items: CartLineItem[] }) {
       </Text>
       <Text
         style={{
-          color: colors.ink,
+          color: color ?? colors.ink,
           fontWeight: bold ? "800" : "500",
           fontSize: typography.bodySmall,
         }}
@@ -45,6 +44,22 @@ export function OrderSummary({ items }: { items: CartLineItem[] }) {
       </Text>
     </View>
   );
+}
+
+export function OrderSummary({
+  items,
+  tip = 0,
+  discount = 0,
+}: {
+  items: CartLineItem[];
+  tip?: number;
+  discount?: number;
+}) {
+  const { colors, spacing, radius } = useTheme();
+  const { subtotal, tax, total } = computeOrderTotals(items);
+  const savings = computeCartSavings(items);
+  const grandTotal =
+    Math.round((total - Math.min(discount, total) + tip) * 100) / 100;
 
   return (
     <View
@@ -61,7 +76,21 @@ export function OrderSummary({ items }: { items: CartLineItem[] }) {
         value={`$${subtotal.toFixed(2)}`}
       />
       <Row label="Tax" value={`$${tax.toFixed(2)}`} />
-      {savings > 0 && <Row label="Savings" value={`-$${savings.toFixed(2)}`} />}
+      {savings > 0 && (
+        <Row
+          label="Savings"
+          value={`-$${savings.toFixed(2)}`}
+          color={colors.green}
+        />
+      )}
+      {discount > 0 && (
+        <Row
+          label="Discounts"
+          value={`-$${Math.min(discount, total).toFixed(2)}`}
+          color={colors.green}
+        />
+      )}
+      {tip > 0 && <Row label="Tip" value={`$${tip.toFixed(2)}`} />}
       <View
         style={{
           height: 1,
@@ -69,7 +98,7 @@ export function OrderSummary({ items }: { items: CartLineItem[] }) {
           marginVertical: spacing.sm,
         }}
       />
-      <Row label="Total" value={`$${total.toFixed(2)}`} bold />
+      <Row label="Total" value={`$${grandTotal.toFixed(2)}`} bold />
     </View>
   );
 }

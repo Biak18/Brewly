@@ -22,6 +22,7 @@ export type PromotionInput = {
   starts_at: string;
   ends_at: string;
   is_active: boolean;
+  code?: string | null;
 };
 
 export async function createPromotion(storeId: string, input: PromotionInput) {

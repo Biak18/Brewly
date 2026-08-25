@@ -8,6 +8,10 @@ import {
   useFavoriteIds,
   useToggleFavorite,
 } from "@/features/favorites/api/useFavorites";
+import {
+  useFavoriteStoreIds,
+  useToggleStoreFavorite,
+} from "@/features/favorites/api/useStoreFavorites";
 import { MenuCategoryRow } from "@/features/menu/components/MenuCategoryRow";
 import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { SearchBar } from "@/features/menu/components/SearchBar";
@@ -21,6 +25,7 @@ import { MenuSort } from "@/services/coffees";
 import { fetchStoreById } from "@/services/stores";
 import { track } from "@/lib/analytics";
 import { useTheme } from "@/theme";
+import { getStoreOpenState } from "@/utils/storeHours";
 import { toCoffeeCardData } from "@/utils/pricing";
 import { Stagger } from "@animatereactnative/stagger";
 import { AnimatedFlashList } from "@shopify/flash-list";
@@ -28,7 +33,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ChevronLeft,
+  Clock,
   Coffee as CoffeeIcon,
+  Heart,
   SlidersHorizontal,
 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -47,7 +54,7 @@ export default function ShopMenuScreen() {
   const { id: storeId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, radius, typography } = useTheme();
   const bottomInset = useCartAwareBottomInset();
 
   useEffect(() => {
@@ -81,6 +88,14 @@ export default function ShopMenuScreen() {
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
   const addToCart = useAddToCart();
+
+  const { data: favoriteStoreIds } = useFavoriteStoreIds();
+  const toggleStoreFavorite = useToggleStoreFavorite();
+  const storeFavorited = favoriteStoreIds?.has(storeId) ?? false;
+  const handleToggleStoreFavorite = useCallback(() => {
+    if (!storeId) return;
+    toggleStoreFavorite.mutate({ storeId, liked: !storeFavorited });
+  }, [storeId, storeFavorited, toggleStoreFavorite]);
 
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
@@ -117,7 +132,10 @@ export default function ShopMenuScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton
+          accessibilityLabel="Go back"
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -126,11 +144,25 @@ export default function ShopMenuScreen() {
             fontSize: typography.subheading,
             fontWeight: "800",
             marginLeft: spacing.md,
+            flex: 1,
           }}
           numberOfLines={1}
         >
           {store?.name ?? "Menu"}
         </Text>
+        <IconButton
+          accessibilityLabel={
+            storeFavorited ? "Remove shop from favorites" : "Save shop"
+          }
+          onPress={handleToggleStoreFavorite}
+        >
+          <Heart
+            size={20}
+            color={storeFavorited ? colors.danger : colors.ink}
+            fill={storeFavorited ? colors.danger : "transparent"}
+            strokeWidth={2}
+          />
+        </IconButton>
       </View>
 
       <Stagger
@@ -138,6 +170,36 @@ export default function ShopMenuScreen() {
         duration={420}
         entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
       >
+        {(() => {
+          const openState = getStoreOpenState(store?.hours);
+          if (!openState.isKnown || openState.isOpen) return null;
+          return (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: spacing.sm,
+                marginHorizontal: spacing.xl,
+                marginBottom: spacing.md,
+                padding: spacing.md,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface2,
+              }}
+            >
+              <Clock size={16} color={colors.muted} strokeWidth={1.8} />
+              <Text
+                style={{
+                  color: colors.muted,
+                  fontSize: typography.caption,
+                  fontWeight: "600",
+                  flex: 1,
+                }}
+              >
+                Closed now — opens at {openState.opensAt}. You can still browse.
+              </Text>
+            </View>
+          );
+        })()}
         <View
           style={{
             flexDirection: "row",

@@ -370,3 +370,23 @@ jest.mock("expo-haptics", () => ({
     Heavy: "heavy",
   },
 }));
+
+/* ------------------------------------------------------------------ */
+/* expo-location — permission denied, no fix                           */
+/* ------------------------------------------------------------------ */
+jest.mock("expo-location", () => ({
+  __esModule: true,
+  requestForegroundPermissionsAsync: jest.fn(async () => ({
+    status: "denied",
+    granted: false,
+  })),
+  getCurrentPositionAsync: jest.fn(async () => {
+    throw new Error("No location available");
+  }),
+  PermissionStatus: {
+    GRANTED: "granted",
+    DENIED: "denied",
+    UNDETERMINED: "undetermined",
+  },
+  Accuracy: { Lowest: 1, Low: 2, Balanced: 3, High: 4, Highest: 5, BestForNavigation: 6 },
+}));

@@ -23,10 +23,13 @@ export async function placeOrder(params: {
   fulfillment: "pickup" | "delivery";
   items: CartLineItem[];
   loyaltyDiscount?: number;
+  tip?: number;
+  promoCode?: string | null;
 }): Promise<string> {
   const { subtotal, tax, total } = computeOrderTotals(params.items);
   const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
-  const grandTotal = Math.round((total - discount) * 100) / 100;
+  const tip = Math.max(params.tip ?? 0, 0);
+  const grandTotal = Math.round((total - discount + tip) * 100) / 100;
 
   const { data, error } = await supabase.rpc("create_order", {
     p_store_id: params.storeId,
@@ -44,6 +47,9 @@ export async function placeOrder(params: {
       unit_price: i.unitPrice,
       compare_at_price: i.compareAtUnitPrice ?? null,
     })),
+    p_tip: tip,
+    p_promo_code: params.promoCode ?? null,
+    p_discount: discount,
   });
 
   if (error) throw error;
@@ -92,6 +98,8 @@ export type OrderWithItems = {
   tax: number;
   total: number;
   discount: number;
+  tip: number;
+  promo_code: string | null;
   placed_at: string;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;

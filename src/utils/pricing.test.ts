@@ -18,6 +18,7 @@ function makePromotion(overrides: Partial<Promotion>): Promotion {
     store_id: "store-a",
     created_at: "2020-01-01",
     target_key: null,
+    code: null,
     ...overrides,
   };
 }

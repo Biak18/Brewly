@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
+import { ShareReceiptButton } from "@/features/orders/components/ShareReceiptButton";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { OrderReviewSection } from "@/features/reviews/components/OrderReviewSection";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
@@ -14,7 +15,7 @@ import {
   setPaymentVerified,
   updateOrderStatus,
 } from "@/services/orders";
-import { fetchMyStore } from "@/services/stores";
+import { fetchMyStore, fetchStoreById } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
@@ -190,6 +191,12 @@ export default function OrderTrackingScreen() {
     queryKey: ["my-store", userId],
     queryFn: () => fetchMyStore(userId!),
     enabled: !!userId && profile?.role === "seller",
+  });
+  const isCustomerOrder = !!order && order.user_id === userId;
+  const { data: receiptStore } = useQuery({
+    queryKey: ["store", order?.store_id],
+    queryFn: () => fetchStoreById(order!.store_id),
+    enabled: !!order && isCustomerOrder,
   });
 
   const [isAdvancing, setIsAdvancing] = useState(false);
@@ -515,7 +522,9 @@ export default function OrderTrackingScreen() {
                   fontWeight: "600",
                 }}
               >
-                Free coffee (loyalty)
+                {order.promo_code
+                  ? `Promo · ${order.promo_code}`
+                  : "Free coffee (loyalty)"}
               </Text>
               <Text
                 style={{
@@ -525,6 +534,24 @@ export default function OrderTrackingScreen() {
                 }}
               >
                 -${order.discount.toFixed(2)}
+              </Text>
+            </View>
+          )}
+          {(order.tip ?? 0) > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: spacing.xs,
+              }}
+            >
+              <Text
+                style={{ color: colors.muted, fontSize: typography.bodySmall }}
+              >
+                Tip
+              </Text>
+              <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
+                ${order.tip.toFixed(2)}
               </Text>
             </View>
           )}
@@ -656,8 +683,15 @@ export default function OrderTrackingScreen() {
             borderTopWidth: 1,
             borderTopColor: colors.line,
             backgroundColor: colors.surface,
+            gap: spacing.sm,
           }}
         >
+          {isCustomerOrder && (
+            <ShareReceiptButton
+              order={order}
+              storeName={receiptStore?.name}
+            />
+          )}
           <Button
             label="Done"
             onPress={() => router.back()}
@@ -671,8 +705,15 @@ export default function OrderTrackingScreen() {
             borderTopWidth: 1,
             borderTopColor: colors.line,
             backgroundColor: colors.surface,
+            gap: spacing.sm,
           }}
         >
+          {isCustomerOrder && (
+            <ShareReceiptButton
+              order={order}
+              storeName={receiptStore?.name}
+            />
+          )}
           <Button
             label="Done"
             onPress={() => router.back()}

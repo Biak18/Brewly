@@ -10,6 +10,7 @@ import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromot
 import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
 import { useNetworkSync } from "@/hooks/useNetworkSync";
 import { useAuthStore } from "@/stores/authStore";
+import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/theme/themeStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -36,13 +37,17 @@ function RootNavigator() {
   const profile = useAuthStore((s) => s.profile);
   const isLoading = useAuthStore((s) => s.isLoading);
   const hasThemeHydrated = useThemeStore((s) => s.hasHydrated);
+  const hasOnboardingHydrated = useOnboardingStore((s) => s.hasHydrated);
+  const hasOnboarded = useOnboardingStore((s) => s.hasOnboarded);
   const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
 
   useEffect(() => {
-    if (!isLoading && hasThemeHydrated) SplashScreen.hideAsync();
-  }, [isLoading, hasThemeHydrated]);
+    if (!isLoading && hasThemeHydrated && hasOnboardingHydrated)
+      SplashScreen.hideAsync();
+  }, [isLoading, hasThemeHydrated, hasOnboardingHydrated]);
 
-  if (isLoading || !hasThemeHydrated) return <LoadingScreen />;
+  if (isLoading || !hasThemeHydrated || !hasOnboardingHydrated)
+    return <LoadingScreen />;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -55,7 +60,12 @@ function RootNavigator() {
         <Stack.Protected guard={isPasswordRecovery}>
           <Stack.Screen name="reset-password" />
         </Stack.Protected>
-        <Stack.Protected guard={!!session && !isPasswordRecovery}>
+        <Stack.Protected guard={!hasOnboarded && !isPasswordRecovery}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={!!session && !isPasswordRecovery && hasOnboarded}
+        >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="coffee/[id]" options={{ animation: "none" }} />
           <Stack.Screen name="cart" />
@@ -65,7 +75,9 @@ function RootNavigator() {
           <Stack.Screen name="my-store" />
           <Stack.Screen name="become-seller" />
         </Stack.Protected>
-        <Stack.Protected guard={!session && !isPasswordRecovery}>
+        <Stack.Protected
+          guard={!session && !isPasswordRecovery && hasOnboarded}
+        >
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="forgot-password" />
           <Stack.Screen name="sign-up" />

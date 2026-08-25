@@ -30,7 +30,7 @@ export async function searchStores(term: string): Promise<Store[]> {
   if (clean.length < MIN_TERM_LENGTH) return [];
   const { data, error } = await supabase
     .from("stores")
-    .select("id, name, address, hours, kpay_phone, payment_note")
+    .select("id, name, address, hours, kpay_phone, payment_note, lat, lng")
     .or(`name.ilike.%${clean}%,address.ilike.%${clean}%`)
     .order("name", { ascending: true })
     .limit(10);

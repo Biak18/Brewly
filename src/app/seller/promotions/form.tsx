@@ -43,6 +43,7 @@ const schema = z
     scope: z.enum(["all", "category", "coffee"]),
     categoryId: z.string().optional(),
     coffeeId: z.string().optional(),
+    code: z.string().optional(),
     startsAt: z.string().regex(DATE_REGEX, "Use YYYY-MM-DD"),
     endsAt: z.string().regex(DATE_REGEX, "Use YYYY-MM-DD"),
     isActive: z.boolean(),
@@ -104,6 +105,7 @@ export default function PromotionFormScreen() {
       scope: "all",
       categoryId: "",
       coffeeId: "",
+      code: "",
       startsAt: todayPlus(0),
       endsAt: todayPlus(7),
       isActive: true,
@@ -119,6 +121,7 @@ export default function PromotionFormScreen() {
         scope: existing.scope,
         categoryId: existing.category_id ?? "",
         coffeeId: existing.coffee_id ?? "",
+        code: existing.code ?? "",
         startsAt: existing.starts_at,
         endsAt: existing.ends_at,
         isActive: existing.is_active,
@@ -149,6 +152,7 @@ export default function PromotionFormScreen() {
         starts_at: values.startsAt,
         ends_at: values.endsAt,
         is_active: values.isActive,
+        code: values.code ? values.code.trim().toUpperCase() : null,
       };
       try {
         if (isEditing && existing) await updatePromotion(existing.id, payload);
@@ -164,7 +168,9 @@ export default function PromotionFormScreen() {
         setServerError(
           err?.code === "23P01"
             ? "This overlaps with another active promo on the same target. End or edit the existing one first."
-            : "Could not save this promotion. Please try again.",
+            : err?.code === "23505"
+              ? "That voucher code is already in use. Pick another."
+              : "Could not save this promotion. Please try again.",
         );
       }
     },
@@ -323,6 +329,41 @@ export default function PromotionFormScreen() {
             {errors.discountPercent.message}
           </Text>
         )}
+
+        <Controller
+          control={control}
+          name="code"
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              value={value}
+              onChangeText={(v) => onChange(v.toUpperCase())}
+              placeholder="Voucher code (optional, e.g. LATTE10)"
+              placeholderTextColor={colors.muted}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              style={{
+                borderWidth: 1,
+                borderColor: colors.line,
+                height: 48,
+                paddingHorizontal: 14,
+                fontSize: 14,
+                color: colors.ink,
+                borderRadius: radius.md,
+                marginTop: spacing.sm,
+                marginBottom: spacing.xs,
+              }}
+            />
+          )}
+        />
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: 11,
+            marginBottom: spacing.sm,
+          }}
+        >
+          Customers can enter this code at checkout.
+        </Text>
 
         <Text
           style={{

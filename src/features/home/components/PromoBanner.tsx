@@ -31,7 +31,7 @@ export function PromoBanner() {
           fontWeight: "800",
         }}
       >
-        {featured ? "Limited time" : "Riverside Roasters"}
+        {featured ? "Limited time" : "Yangon"} {/* later current location */}
       </Text>
       <Text
         style={{

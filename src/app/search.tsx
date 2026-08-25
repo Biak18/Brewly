@@ -8,9 +8,11 @@ import {
 } from "@/features/favorites/api/useFavorites";
 import { SearchBar } from "@/features/menu/components/SearchBar";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
+import { SearchIdlePanel } from "@/features/search/components/SearchIdlePanel";
 import { ShopCard } from "@/features/shops/components/ShopCard";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { CoffeeWithStoreName } from "@/services/coffees";
 import {
   isValidSearchTerm,
@@ -18,12 +20,14 @@ import {
   searchStores,
 } from "@/services/search";
 import type { Store } from "@/services/stores";
+import { useSearchStore } from "@/stores/searchStore";
 import { useTheme } from "@/theme";
+import { distanceKm } from "@/utils/geo";
 import { toCoffeeCardDataWithShop } from "@/utils/pricing";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Coffee as CoffeeIcon, SearchX } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { SearchX } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, ListRenderItem, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -46,7 +50,7 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default function SearchScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const router = useRouter();
   const [term, setTerm] = useState("");
   const debounced = useDebouncedValue(term, 300);
@@ -64,9 +68,29 @@ export default function SearchScreen() {
   });
 
   const promotions = useActivePromotions();
+  const { location } = useUserLocation();
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
   const addToCart = useAddToCart();
+
+  // Remember terms that actually matched something.
+  const addRecent = useSearchStore((s) => s.addRecent);
+  useEffect(() => {
+    if (!hasTerm) return;
+    if ((stores.data?.length ?? 0) > 0 || (coffees.data?.length ?? 0) > 0) {
+      if (!stores.isFetching && !coffees.isFetching) addRecent(debounced);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasTerm, stores.data, coffees.data, stores.isFetching, coffees.isFetching]);
+
+  const handlePickTerm = useCallback(
+    (t: string) => setTerm(t),
+    [],
+  );
+  const handlePickStoreId = useCallback(
+    (id: string) => router.push(`/shop/${id}`),
+    [router],
+  );
 
   const handleCoffeePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
@@ -121,9 +145,18 @@ export default function SearchScreen() {
 
   const renderStore: ListRenderItem<Store> = useCallback(
     ({ item }) => (
-      <ShopCard store={item} onPress={handleStorePress} layout="row" />
+      <ShopCard
+        store={item}
+        onPress={handleStorePress}
+        layout="row"
+        distanceKm={
+          location && item.lat != null && item.lng != null
+            ? distanceKm(location, { lat: item.lat, lng: item.lng })
+            : null
+        }
+      />
     ),
-    [handleStorePress],
+    [handleStorePress, location],
   );
 
   const isSearching = hasTerm && (!!stores.isFetching || !!coffees.isFetching);
@@ -153,15 +186,10 @@ export default function SearchScreen() {
       </View>
 
       {showIdleState ? (
-        <View style={{ padding: spacing.xl, paddingTop: spacing.xxxl }}>
-          <EmptyState
-            icon={
-              <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
-            }
-            title="Search Brewly"
-            description={'Find drinks or shops by name. Try "latte".'}
-          />
-        </View>
+        <SearchIdlePanel
+          onPickTerm={handlePickTerm}
+          onPickStore={handlePickStoreId}
+        />
       ) : showNoResults ? (
         <View style={{ padding: spacing.xl, paddingTop: spacing.xxxl }}>
           <EmptyState

@@ -45,7 +45,8 @@ export function FloatingCartButton() {
       );
   }, [count, scale]);
 
-  const bottomOffset = isOnTabScreen ? 80 + insets.bottom : insets.bottom + 120;
+  // const bottomOffset = isOnTabScreen ? 80 + insets.bottom : insets.bottom + 120;
+  const bottomOffset = 80;
   const translateY = useSharedValue(bottomOffset);
 
   useEffect(() => {
