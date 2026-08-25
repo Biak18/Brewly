@@ -14,12 +14,19 @@ import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Pencil, UserRound } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Image } from "expo-image";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -181,17 +188,21 @@ export default function AccountScreen() {
             }}
           >
             {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+              <Image
+                source={{ uri: avatarUrl }}
+                style={StyleSheet.absoluteFill}
+                contentFit="cover"
+              />
             ) : (
               <UserRound size={40} color={colors.espresso} strokeWidth={1.6} />
             )}
             <View
               style={{
                 position: "absolute",
-                end: 0,
+                end: 15,
                 bottom: 0,
-                width: 30,
-                height: 30,
+                width: 25,
+                height: 25,
                 borderRadius: 15,
                 backgroundColor: colors.espresso,
                 alignItems: "center",
@@ -249,7 +260,13 @@ export default function AccountScreen() {
             )}
           />
           {(nameForm.formState.errors.fullName || nameError) && (
-            <Text style={{ color: colors.danger, fontSize: typography.caption, marginTop: spacing.sm }}>
+            <Text
+              style={{
+                color: colors.danger,
+                fontSize: typography.caption,
+                marginTop: spacing.sm,
+              }}
+            >
               {nameForm.formState.errors.fullName?.message ?? nameError}
             </Text>
           )}
@@ -295,7 +312,9 @@ export default function AccountScreen() {
             )}
           />
           {passwordForm.formState.errors.password && (
-            <Text style={{ color: colors.danger, fontSize: typography.caption }}>
+            <Text
+              style={{ color: colors.danger, fontSize: typography.caption }}
+            >
               {passwordForm.formState.errors.password.message}
             </Text>
           )}
@@ -312,7 +331,13 @@ export default function AccountScreen() {
             )}
           />
           {(passwordForm.formState.errors.confirm || passwordError) && (
-            <Text style={{ color: colors.danger, fontSize: typography.caption, marginTop: spacing.sm }}>
+            <Text
+              style={{
+                color: colors.danger,
+                fontSize: typography.caption,
+                marginTop: spacing.sm,
+              }}
+            >
               {passwordForm.formState.errors.confirm?.message ?? passwordError}
             </Text>
           )}
@@ -350,9 +375,14 @@ export default function AccountScreen() {
               marginBottom: spacing.md,
             }}
           >
-            Deleting removes your orders, favorites, and loyalty stamps for good.
+            Deleting removes your orders, favorites, and loyalty stamps for
+            good.
           </Text>
-          <Button label="Delete account" onPress={onDeleteAccount} variant="danger" />
+          <Button
+            label="Delete account"
+            onPress={onDeleteAccount}
+            variant="danger"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
