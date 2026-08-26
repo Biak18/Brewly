@@ -1,5 +1,6 @@
 // src/app/sign-up.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
@@ -9,14 +10,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
@@ -80,6 +74,7 @@ export default function SignUpScreen() {
       <View
         style={{
           flex: 1,
+          paddingTop: spacing.sm,
           backgroundColor: colors.bg,
           alignItems: "center",
           justifyContent: "center",
@@ -126,19 +121,22 @@ export default function SignUpScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <FormScrollView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingHorizontal: spacing.xl,
+        justifyContent: "center",
+      }}
     >
       <Stagger
         stagger={70}
         duration={420}
         entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
-        style={{
-          flex: 1,
-          paddingHorizontal: spacing.xl,
-          justifyContent: "center",
-        }}
       >
         <Text
           style={{
@@ -322,6 +320,6 @@ export default function SignUpScreen() {
           </Text>
         </Pressable>
       </Stagger>
-    </KeyboardAvoidingView>
+    </FormScrollView>
   );
 }

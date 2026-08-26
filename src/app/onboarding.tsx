@@ -69,7 +69,12 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.bg, paddingHorizontal: spacing.xl }}
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+        paddingHorizontal: spacing.xl,
+      }}
     >
       <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
         <Pressable onPress={finish} hitSlop={8} accessibilityLabel="Skip intro">

@@ -1,6 +1,6 @@
 import { CoffeeCard, CoffeeCardData } from "@/components/coffee/CoffeeCard";
 import { MOCK_COFFEE_ITEMS } from "@/constants/coffeeData";
-import { useThemeStore } from "@/theme/themeStore";
+import { useTheme } from "@/theme";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
   Extrapolation,
@@ -76,7 +76,7 @@ function CarouselCard({
 
 export default function Index() {
   const { width } = useWindowDimensions();
-  const colors = useThemeStore((s) => s.colors);
+  const { colors, spacing } = useTheme();
 
   const CARD_HEIGHT = 300;
   const CARD_WIDTH = width * 0.6;
@@ -96,7 +96,12 @@ export default function Index() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: spacing.sm, backgroundColor: colors.bg },
+      ]}
+    >
       <Animated.FlatList
         data={MOCK_COFFEE_ITEMS}
         keyExtractor={(item) => item.id}

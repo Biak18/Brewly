@@ -116,6 +116,30 @@ jest.mock("react-native-worklets", () => ({
 }));
 
 /* ------------------------------------------------------------------ */
+/* react-native-keyboard-controller — no native module under Jest;     */
+/* KeyboardAwareScrollView becomes a plain ScrollView, provider passes */
+/* children through                                                    */
+/* ------------------------------------------------------------------ */
+jest.mock("react-native-keyboard-controller", () => {
+  const React = require("react");
+  const { ScrollView } = require("react-native");
+
+  const MockKeyboardAwareScrollView = React.forwardRef(
+    function MockKeyboardAwareScrollView(props, ref) {
+      const { bottomOffset, ...rest } = props;
+      void bottomOffset;
+      return React.createElement(ScrollView, { ...rest, ref });
+    },
+  );
+
+  return {
+    __esModule: true,
+    KeyboardProvider: ({ children }) => children ?? null,
+    KeyboardAwareScrollView: MockKeyboardAwareScrollView,
+  };
+});
+
+/* ------------------------------------------------------------------ */
 /* @shopify/flash-list — render as FlatList so children appear         */
 /* ------------------------------------------------------------------ */
 jest.mock("@shopify/flash-list", () => {

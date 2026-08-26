@@ -1,5 +1,6 @@
 // src/app/become-seller.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { supabase } from "@/services/supabase";
@@ -11,7 +12,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -99,7 +100,13 @@ export default function BecomeSellerScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -122,7 +129,7 @@ export default function BecomeSellerScreen() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
+      <FormScrollView contentContainerStyle={{ padding: spacing.xl }}>
         <Text
           style={{
             color: colors.muted,
@@ -356,7 +363,7 @@ export default function BecomeSellerScreen() {
           loading={isSubmitting}
           variant="primary"
         />
-      </ScrollView>
+      </FormScrollView>
     </SafeAreaView>
   );
 }

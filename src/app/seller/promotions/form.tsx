@@ -1,6 +1,7 @@
 // src/app/seller/promotions/form.tsx
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { useMyCategories } from "@/features/seller/hooks/useMyCategories";
 import { useMyPromotions } from "@/features/seller/hooks/useMyPromotions";
@@ -22,7 +23,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { Switch, Text, TextInput, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -198,7 +199,13 @@ export default function PromotionFormScreen() {
   if (!myStore) return null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -221,7 +228,7 @@ export default function PromotionFormScreen() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: spacing.xl }}>
+      <FormScrollView contentContainerStyle={{ padding: spacing.xl }}>
         <Controller
           control={control}
           name="title"
@@ -622,7 +629,7 @@ export default function PromotionFormScreen() {
             {serverError}
           </Text>
         )}
-      </ScrollView>
+      </FormScrollView>
 
       <View
         style={{

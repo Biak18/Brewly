@@ -1,6 +1,7 @@
 // src/app/seller/menu/coffee-form.tsx
 import { CoffeeImage } from "@/components/coffee/CoffeeImage";
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { CategoryPicker } from "@/features/seller/components/CategoryPicker";
 import { useImageUpload } from "@/features/seller/hooks/useImageUpload";
@@ -20,7 +21,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   Switch,
   Text,
   TextInput,
@@ -145,7 +145,13 @@ export default function CoffeeFormScreen() {
   if (!myStore) return null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -169,7 +175,7 @@ export default function CoffeeFormScreen() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
+      <FormScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
         <View style={{ marginBottom: spacing.lg }}>
           <Pressable onPress={handlePickImage} disabled={isUploading}>
             <View style={{ marginBottom: spacing.sm }}>
@@ -478,7 +484,7 @@ export default function CoffeeFormScreen() {
             )}
           />
         </View>
-      </ScrollView>
+      </FormScrollView>
 
       <View
         style={{

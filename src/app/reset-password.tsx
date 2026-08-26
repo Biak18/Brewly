@@ -1,5 +1,6 @@
 // src/app/reset-password.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
@@ -9,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { z } from "zod";
 
@@ -54,20 +55,23 @@ export default function ResetPasswordScreen() {
   }, []);
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.bg }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <FormScrollView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingHorizontal: spacing.xl,
+        justifyContent: "center",
+      }}
     >
       <Stagger
         stagger={70}
         duration={420}
         entering={() => ZoomInEasyDown.springify()}
         exiting={() => FadeOutDown.springify()}
-        style={{
-          flex: 1,
-          paddingHorizontal: spacing.xl,
-          justifyContent: "center",
-        }}
       >
         <Text
           style={{
@@ -155,6 +159,6 @@ export default function ResetPasswordScreen() {
           variant="primary"
         />
       </Stagger>
-    </KeyboardAvoidingView>
+    </FormScrollView>
   );
 }

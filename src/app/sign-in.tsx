@@ -1,5 +1,6 @@
 // src/app/sign-in.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
@@ -9,14 +10,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
@@ -50,15 +44,17 @@ export default function SignInScreen() {
   }, []);
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: colors.bg }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <FormScrollView
+      style={[
+        styles.flex,
+        { paddingTop: spacing.sm, backgroundColor: colors.bg },
+      ]}
+      contentContainerStyle={styles.container}
     >
       <Stagger
         stagger={70}
         duration={420}
         entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
-        style={styles.container}
       >
         <Text
           style={{
@@ -175,13 +171,13 @@ export default function SignInScreen() {
           </Text>
         </Pressable>
       </Stagger>
-    </KeyboardAvoidingView>
+    </FormScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  container: { flex: 1, justifyContent: "center", paddingHorizontal: 20 },
+  container: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20 },
   input: { borderWidth: 1, height: 48, paddingHorizontal: 14, fontSize: 14 },
   error: { fontSize: 11, marginBottom: 4 },
 });

@@ -2,7 +2,9 @@
 import { useTheme } from "@/theme";
 import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -75,41 +77,49 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFill,
-          { backgroundColor: "rgba(0,0,0,0.4)" },
-          backdropStyle,
-        ]}
+      {/* RN's KeyboardAvoidingView works inside Modals; keyboard-controller's
+          KeyboardAwareScrollView does not. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.avoid}
       >
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-          accessibilityLabel="Close"
-        />
-      </Animated.View>
-      <GestureDetector gesture={pan}>
         <Animated.View
           style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: radius.xxl,
-              borderTopRightRadius: radius.xxl,
-              paddingBottom: spacing.xxl,
-            },
-            sheetStyle,
+            StyleSheet.absoluteFill,
+            { backgroundColor: "rgba(0,0,0,0.4)" },
+            backdropStyle,
           ]}
         >
-          <View style={[styles.handle, { backgroundColor: colors.line }]} />
-          {children}
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={onClose}
+            accessibilityLabel="Close"
+          />
         </Animated.View>
-      </GestureDetector>
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.surface,
+                borderTopLeftRadius: radius.xxl,
+                borderTopRightRadius: radius.xxl,
+                paddingBottom: spacing.xxl,
+              },
+              sheetStyle,
+            ]}
+          >
+            <View style={[styles.handle, { backgroundColor: colors.line }]} />
+            {children}
+          </Animated.View>
+        </GestureDetector>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  avoid: { flex: 1 },
   sheet: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: 10 },
   handle: {
     width: 36,

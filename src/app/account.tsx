@@ -1,5 +1,6 @@
 // src/app/account.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useAvatarUpload } from "@/features/account/hooks/useAvatarUpload";
@@ -19,14 +20,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, Pencil, UserRound } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -140,7 +134,13 @@ export default function AccountScreen() {
     : null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -163,12 +163,11 @@ export default function AccountScreen() {
         </Text>
       </View>
 
-      <ScrollView
+      <FormScrollView
         contentContainerStyle={{
           padding: spacing.xl,
           paddingBottom: spacing.xxxl,
         }}
-        keyboardShouldPersistTaps="handled"
       >
         {/* Avatar */}
         <View style={{ alignItems: "center", marginBottom: spacing.xxl }}>
@@ -384,7 +383,7 @@ export default function AccountScreen() {
             variant="danger"
           />
         </View>
-      </ScrollView>
+      </FormScrollView>
     </SafeAreaView>
   );
 }

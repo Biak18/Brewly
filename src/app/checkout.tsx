@@ -1,5 +1,6 @@
 // src/app/checkout.tsx — full replacement
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { FulfillmentToggle } from "@/features/checkout/components/FulfillmentToggle";
 import { KpayPanel } from "@/features/checkout/components/KpayPanel";
@@ -37,7 +38,7 @@ import { useRouter } from "expo-router";
 import { Check, ChevronLeft, Gift } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -274,7 +275,13 @@ export default function CheckoutScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       {!isOnline && (
         <Text
           style={{
@@ -322,7 +329,7 @@ export default function CheckoutScreen() {
         </Text>
       </View>
 
-      <ScrollView
+      <FormScrollView
         contentContainerStyle={{ padding: spacing.xl }}
         showsVerticalScrollIndicator={false}
       >
@@ -470,7 +477,7 @@ export default function CheckoutScreen() {
             {serverError}
           </Text>
         )}
-      </ScrollView>
+      </FormScrollView>
 
       <View
         style={{

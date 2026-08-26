@@ -1,6 +1,7 @@
 // src/app/my-store/edit.tsx
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { TimeField } from "@/features/seller/components/TimeField";
 import { TimePickerSheet } from "@/features/seller/components/TimePickerSheet";
@@ -15,7 +16,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -138,7 +139,13 @@ export default function EditStoreScreen() {
   if (!store) return null;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -161,7 +168,7 @@ export default function EditStoreScreen() {
           Store settings
         </Text>
       </View>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
+      <FormScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
         <Text
           style={{
             color: colors.muted,
@@ -403,7 +410,7 @@ export default function EditStoreScreen() {
             variant="primary"
           />
         </View>
-      </ScrollView>
+      </FormScrollView>
 
       <TimePickerSheet
         visible={pickerField === "open"}

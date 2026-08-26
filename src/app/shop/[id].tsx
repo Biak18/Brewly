@@ -21,12 +21,12 @@ import { useActivePromotions } from "@/features/promotions/hooks/useActivePromot
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useCartAwareBottomInset } from "@/hooks/useCartAwareBottomInset";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { track } from "@/lib/analytics";
 import { MenuSort } from "@/services/coffees";
 import { fetchStoreById } from "@/services/stores";
-import { track } from "@/lib/analytics";
 import { useTheme } from "@/theme";
-import { getStoreOpenState } from "@/utils/storeHours";
 import { toCoffeeCardData } from "@/utils/pricing";
+import { getStoreOpenState } from "@/utils/storeHours";
 import { Stagger } from "@animatereactnative/stagger";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
@@ -124,7 +124,9 @@ export default function ShopMenuScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.bg, paddingTop: spacing.sm }}
+    >
       <View
         style={{
           flexDirection: "row",
@@ -132,10 +134,7 @@ export default function ShopMenuScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton
-          accessibilityLabel="Go back"
-          onPress={() => router.back()}
-        >
+        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text

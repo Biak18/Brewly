@@ -51,7 +51,13 @@ export default function ProfileScreen() {
   }, [showConfirm, signOut]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: spacing.sm,
+        backgroundColor: colors.bg,
+      }}
+    >
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.bg }}
         contentContainerStyle={{
