@@ -116,6 +116,15 @@ jest.mock("react-native-worklets", () => ({
 }));
 
 /* ------------------------------------------------------------------ */
+/* @sentry/react-native — no native bridge under Jest; capture is a spy */
+/* ------------------------------------------------------------------ */
+jest.mock("@sentry/react-native", () => ({
+  __esModule: true,
+  init: jest.fn(),
+  captureException: jest.fn(),
+}));
+
+/* ------------------------------------------------------------------ */
 /* react-native-keyboard-controller — no native module under Jest;     */
 /* KeyboardAwareScrollView becomes a plain ScrollView, provider passes */
 /* children through                                                    */

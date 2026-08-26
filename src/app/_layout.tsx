@@ -2,6 +2,7 @@
 import { CartPreviewSheet } from "@/components/cart/CartPreviewSheet";
 import { FloatingCartButton } from "@/components/cart/FloatingCartButton";
 import { ConfirmDialogHost } from "@/components/ui/ConfirmDialog";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { ToastHost } from "@/components/ui/Toast";
@@ -109,7 +110,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <KeyboardProvider>
           <QueryClientProvider client={queryClient}>
-            <RootNavigator />
+            <ErrorBoundary>
+              <RootNavigator />
+            </ErrorBoundary>
           </QueryClientProvider>
         </KeyboardProvider>
       </SafeAreaProvider>

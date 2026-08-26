@@ -12,7 +12,14 @@ if (dsn) {
   });
 }
 
-export function captureException(error: unknown) {
+export function captureException(
+  error: unknown,
+  context?: { componentStack?: string | null },
+) {
   if (!dsn) return;
-  Sentry.captureException(error);
+  Sentry.captureException(error, {
+    extra: context?.componentStack
+      ? { componentStack: context.componentStack }
+      : undefined,
+  });
 }
