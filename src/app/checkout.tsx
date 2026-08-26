@@ -361,7 +361,11 @@ export default function CheckoutScreen() {
             control={control}
             name="pickupTime"
             render={({ field: { value, onChange } }) => (
-              <PickupTimeRow value={value} onChange={onChange} />
+              <PickupTimeRow
+                value={value}
+                onChange={onChange}
+                hours={store?.hours}
+              />
             )}
           />
         </Section>

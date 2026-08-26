@@ -10,12 +10,17 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-type ChipProps = { label: string; active: boolean; onPress: () => void };
+type ChipProps = {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  disabled?: boolean;
+};
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function Chip({ label, active, onPress }: ChipProps) {
+export function Chip({ label, active, onPress, disabled = false }: ChipProps) {
   const { colors, radius, spacing } = useTheme();
   const progress = useSharedValue(active ? 1 : 0);
 
@@ -44,18 +49,21 @@ export function Chip({ label, active, onPress }: ChipProps) {
   }));
 
   const handlePress = useCallback(() => {
+    if (disabled) return;
     Haptics.selectionAsync();
     onPress();
-  }, [onPress]);
+  }, [disabled, onPress]);
 
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityState={{ selected: active }}
+      accessibilityState={{ selected: active, disabled }}
+      disabled={disabled}
       onPress={handlePress}
       style={[
         styles.base,
         { borderRadius: radius.pill, paddingHorizontal: spacing.md },
+        disabled && styles.disabled,
         containerStyle,
       ]}
     >
@@ -74,4 +82,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   label: { fontSize: 10, fontWeight: "800" },
+  disabled: { opacity: 0.45 },
 });

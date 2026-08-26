@@ -1,5 +1,6 @@
 // src/app/(tabs)/shops.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Chip } from "@/components/ui/Chip";
 import { Pulse } from "@/components/ui/Pulse";
 import {
   useFavoriteStoreIds,
@@ -15,7 +16,7 @@ import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Store as StoreIcon } from "lucide-react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,6 +57,17 @@ export default function ShopsScreen() {
     [router],
   );
   const { refreshing, onRefresh } = useRefresh(["stores"]);
+
+  // Distance filter — only meaningful once the user's location is known.
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
+  const hasLocation = locationStatus === "granted" && !!location;
+  const filtered = useMemo(() => {
+    if (radiusKm == null) return sorted;
+    return sorted.filter((s) => {
+      if (!location || s.lat == null || s.lng == null) return false;
+      return distanceKm(location, { lat: s.lat, lng: s.lng }) <= radiusKm;
+    });
+  }, [sorted, radiusKm, location]);
 
   if (isLoading) {
     return (
@@ -127,17 +139,45 @@ export default function ShopsScreen() {
             ? "Turn on location to sort shops by distance."
             : "Finding your location…"}
       </Text>
-      <AnimatedFlashList
-        data={sorted}
-        keyExtractor={(s: Store) => s.id}
-        contentContainerStyle={{ padding: spacing.lg }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.espresso}
-          />
-        }
+      {hasLocation && (
+        <View
+          style={{
+            flexDirection: "row",
+            gap: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            marginBottom: spacing.md,
+          }}
+        >
+          {[null, 1, 3, 5].map((r) => (
+            <Chip
+              key={String(r)}
+              label={r == null ? "All" : `≤ ${r} km`}
+              active={radiusKm === r}
+              onPress={() => setRadiusKm(r)}
+            />
+          ))}
+        </View>
+      )}
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />}
+          title={`No shops within ${radiusKm} km`}
+          description="Widen the distance filter to see more shops."
+          actionLabel="Show all"
+          onAction={() => setRadiusKm(null)}
+        />
+      ) : (
+        <AnimatedFlashList
+          data={filtered}
+          keyExtractor={(s: Store) => s.id}
+          contentContainerStyle={{ padding: spacing.lg }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.espresso}
+            />
+          }
         renderItem={({ item }: { item: Store }) => (
           <Animated.View
             style={{ flex: 1, margin: spacing.xs }}
@@ -158,7 +198,8 @@ export default function ShopsScreen() {
             />
           </Animated.View>
         )}
-      />
+        />
+      )}
     </SafeAreaView>
   );
 }
