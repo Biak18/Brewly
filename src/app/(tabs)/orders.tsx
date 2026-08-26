@@ -12,12 +12,13 @@ import { OrderStatus, OrderSummary } from "@/services/orders";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
+import { useRefresh } from "@/hooks/useRefresh";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ReceiptText } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
@@ -56,6 +57,7 @@ export default function OrdersScreen() {
   const active = viewMode === "shop" ? shopOrders : purchases;
   const { isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     active;
+  const { refreshing, onRefresh } = useRefresh(["orders"]);
   const orders = useMemo(
     () => active.data?.pages.flatMap((p) => p.orders) ?? [],
     [active.data],
@@ -195,6 +197,13 @@ export default function OrdersScreen() {
           contentContainerStyle={{ padding: spacing.lg }}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.espresso}
+            />
+          }
           ListFooterComponent={
             isFetchingNextPage ? <Pulse style={{ height: 76 }} /> : null
           }

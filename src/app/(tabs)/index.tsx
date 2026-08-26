@@ -7,20 +7,19 @@ import { HomeSkeleton } from "@/features/home/components/HomeSkeleton";
 import { PromoBanner } from "@/features/home/components/PromoBanner";
 import { RecentOrdersRow } from "@/features/home/components/RecentOrdersRow";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
+import { useRefresh } from "@/hooks/useRefresh";
 import { fetchPopularCoffees } from "@/services/coffees";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
-import { useCallback, useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
 import { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { colors, spacing } = useTheme();
-  const queryClient = useQueryClient();
-  const [refreshing, setRefreshing] = useState(false);
+  const { refreshing, onRefresh } = useRefresh(["coffees"], ["stores"]);
 
   const popular = useQuery({
     queryKey: ["coffees", "popular"],
@@ -28,15 +27,6 @@ export default function HomeScreen() {
   });
   const promotions = useActivePromotions();
   const isLoading = popular.isLoading || promotions.isLoading;
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["coffees"] }),
-      queryClient.invalidateQueries({ queryKey: ["stores"] }),
-    ]);
-    setRefreshing(false);
-  }, [queryClient]);
 
   if (isLoading) return <HomeSkeleton />;
 
@@ -49,9 +39,7 @@ export default function HomeScreen() {
         title="Couldn't load the menu"
         description="Check your connection and try again."
         actionLabel="Retry"
-        onAction={() =>
-          queryClient.invalidateQueries({ queryKey: ["coffees"] })
-        }
+        onAction={() => popular.refetch()}
       />
     );
   }

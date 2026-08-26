@@ -10,6 +10,8 @@ type EmptyStateProps = {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
 };
 
 export function EmptyState({
@@ -18,6 +20,8 @@ export function EmptyState({
   description,
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
 }: EmptyStateProps) {
   const { colors, radius, spacing, typography } = useTheme();
   return (
@@ -51,9 +55,25 @@ export function EmptyState({
       >
         {description}
       </Text>
-      {actionLabel && onAction && (
-        <Button label={actionLabel} onPress={onAction} variant="primary" />
-      )}
+      {(actionLabel && onAction) ||
+      (secondaryActionLabel && onSecondaryAction) ? (
+        <View style={{ flexDirection: "row", gap: spacing.sm }}>
+          {actionLabel && onAction && (
+            <View style={{ flex: 1 }}>
+              <Button label={actionLabel} onPress={onAction} variant="primary" />
+            </View>
+          )}
+          {secondaryActionLabel && onSecondaryAction && (
+            <View style={{ flex: 1 }}>
+              <Button
+                label={secondaryActionLabel}
+                onPress={onSecondaryAction}
+                variant="soft"
+              />
+            </View>
+          )}
+        </View>
+      ) : null}
     </View>
   );
 }

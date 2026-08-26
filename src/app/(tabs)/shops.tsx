@@ -8,6 +8,7 @@ import {
 import { ShopCard } from "@/features/shops/components/ShopCard";
 import { fetchStores, Store } from "@/services/stores";
 import { useTheme } from "@/theme";
+import { useRefresh } from "@/hooks/useRefresh";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { distanceKm } from "@/utils/geo";
 import { AnimatedFlashList } from "@shopify/flash-list";
@@ -15,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Store as StoreIcon } from "lucide-react-native";
 import { useCallback, useMemo } from "react";
-import { Text, View } from "react-native";
+import { RefreshControl, Text, View } from "react-native";
 import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -54,6 +55,7 @@ export default function ShopsScreen() {
     (id: string) => router.push(`/shop/${id}`),
     [router],
   );
+  const { refreshing, onRefresh } = useRefresh(["stores"]);
 
   if (isLoading) {
     return (
@@ -129,6 +131,13 @@ export default function ShopsScreen() {
         data={sorted}
         keyExtractor={(s: Store) => s.id}
         contentContainerStyle={{ padding: spacing.lg }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.espresso}
+          />
+        }
         renderItem={({ item }: { item: Store }) => (
           <Animated.View
             style={{ flex: 1, margin: spacing.xs }}

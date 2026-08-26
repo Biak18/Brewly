@@ -190,9 +190,11 @@ export default function CoffeeDetailScreen() {
           <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
         }
         title="Couldn't load this coffee"
-        description="It may have been removed from the menu."
-        actionLabel="Go back"
-        onAction={() => router.back()}
+        description="Check your connection and try again."
+        actionLabel="Retry"
+        onAction={() => coffee.refetch()}
+        secondaryActionLabel="Go back"
+        onSecondaryAction={() => router.back()}
       />
     );
   }

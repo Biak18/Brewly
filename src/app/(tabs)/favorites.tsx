@@ -13,6 +13,7 @@ import { ShopCard } from "@/features/shops/components/ShopCard";
 import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAddToCart } from "@/hooks/useAddToCart";
+import { useRefresh } from "@/hooks/useRefresh";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
@@ -22,7 +23,7 @@ import { AnimatedFlashList, FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { Heart, Store as StoreIcon } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, RefreshControl, Text, View } from "react-native";
 import Animated, {
   FadeOut,
   LinearTransition,
@@ -116,6 +117,10 @@ export default function FavoritesScreen() {
   const toggleFavorite = useToggleFavorite();
   const { data: promotions = [] } = useActivePromotions();
   const addToCart = useAddToCart();
+  const { refreshing, onRefresh } = useRefresh([
+    "favorites",
+    "store-favorites",
+  ]);
 
   const handlePress = useCallback(
     (id: string) => router.push(`/coffee/${id}`),
@@ -212,6 +217,13 @@ export default function FavoritesScreen() {
               paddingHorizontal: spacing.lg,
               paddingBottom: spacing.xxxl,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.espresso}
+              />
+            }
             renderItem={({ item }) => (
               <Animated.View entering={ZoomInEasyDown.springify()}>
                 <ShopCard
@@ -250,6 +262,13 @@ export default function FavoritesScreen() {
             paddingHorizontal: spacing.lg,
             paddingBottom: spacing.xxxl,
           }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.espresso}
+            />
+          }
           renderItem={({ item }) => {
             const data = toCoffeeCardDataWithShop(item, promotions ?? []);
             return (
