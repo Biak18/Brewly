@@ -1,6 +1,6 @@
 // src/app/shop/[id].tsx
 import { CoffeeCard } from "@/components/coffee/CoffeeCard";
-import { BottomSheet } from "@/components/ui/BottomSheet";
+import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
@@ -15,7 +15,6 @@ import {
 import { MenuCategoryRow } from "@/features/menu/components/MenuCategoryRow";
 import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { SearchBar } from "@/features/menu/components/SearchBar";
-import { SortSheet } from "@/features/menu/components/SortSheet";
 import { useMenuCoffees } from "@/features/menu/hooks/useMenuCoffees";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
 import { useAddToCart } from "@/hooks/useAddToCart";
@@ -49,6 +48,13 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+
+const SORT_OPTIONS: { value: MenuSort; label: string }[] = [
+  { value: "popular", label: "Popular" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "name", label: "Name" },
+];
 
 export default function ShopMenuScreen() {
   const { id: storeId } = useLocalSearchParams<{ id: string }>();
@@ -291,18 +297,14 @@ export default function ShopMenuScreen() {
         />
       )}
 
-      <BottomSheet
+      <DropdownMenu
         visible={sortSheetVisible}
         onClose={() => setSortSheetVisible(false)}
-      >
-        <SortSheet
-          value={sort}
-          onChange={(s) => {
-            setSort(s);
-            setSortSheetVisible(false);
-          }}
-        />
-      </BottomSheet>
+        options={SORT_OPTIONS}
+        value={sort}
+        onChange={setSort}
+        anchorTop={insets.top + 60}
+      />
     </SafeAreaView>
   );
 }

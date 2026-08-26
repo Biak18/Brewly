@@ -140,6 +140,49 @@ jest.mock("react-native-keyboard-controller", () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* @expo/ui/community/bottom-sheet — native sheet becomes a plain View */
+/* that renders its children; ref methods are inert stubs              */
+/* ------------------------------------------------------------------ */
+jest.mock("@expo/ui/community/bottom-sheet", () => {
+  const React = require("react");
+  const RN = require("react-native");
+
+  const sheetMethods = {
+    snapToIndex: jest.fn(),
+    snapToPosition: jest.fn(),
+    expand: jest.fn(),
+    collapse: jest.fn(),
+    close: jest.fn(),
+    forceClose: jest.fn(),
+    present: jest.fn(),
+    dismiss: jest.fn(),
+  };
+
+  const MockBottomSheet = React.forwardRef(function MockBottomSheet(
+    { children },
+    ref,
+  ) {
+    React.useImperativeHandle(ref, () => sheetMethods);
+    return React.createElement(RN.View, null, children ?? null);
+  });
+
+  return {
+    __esModule: true,
+    default: MockBottomSheet,
+    BottomSheet: MockBottomSheet,
+    BottomSheetModal: MockBottomSheet,
+    BottomSheetView: ({ children }) =>
+      React.createElement(RN.View, null, children ?? null),
+    BottomSheetScrollView: RN.ScrollView,
+    BottomSheetFlatList: RN.FlatList,
+    BottomSheetSectionList: RN.SectionList,
+    BottomSheetTextInput: RN.TextInput,
+    BottomSheetModalProvider: ({ children }) => children ?? null,
+    useBottomSheet: () => sheetMethods,
+  };
+});
+
+/* ------------------------------------------------------------------ */
 /* @shopify/flash-list — render as FlatList so children appear         */
 /* ------------------------------------------------------------------ */
 jest.mock("@shopify/flash-list", () => {

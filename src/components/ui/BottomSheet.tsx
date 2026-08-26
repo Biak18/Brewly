@@ -1,131 +1,41 @@
 // src/components/ui/BottomSheet.tsx
+// Thin wrapper around @expo/ui/community/bottom-sheet (native platform sheets)
+// keeping the app-wide { visible, onClose, children } API. Native sheets handle
+// keyboard avoidance inside modals automatically — KeyboardAwareScrollView and
+// RN's KeyboardAvoidingView do not work reliably there.
 import { useTheme } from "@/theme";
-import React, { useEffect, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
+import BottomSheetNative, {
+  BottomSheetView,
+} from "@expo/ui/community/bottom-sheet";
+import { useEffect, useRef, type ReactNode } from "react";
 
 type BottomSheetProps = {
   visible: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
-  const { colors, radius, spacing } = useTheme();
-  const { height: screenHeight } = useWindowDimensions();
-  const [mounted, setMounted] = useState(visible);
-  const translateY = useSharedValue(screenHeight);
-  const backdropOpacity = useSharedValue(0);
+  const { colors, spacing } = useTheme();
+  const sheetRef = useRef<BottomSheetNative>(null);
 
+  // Imperative sync with the native sheet; it owns presentation/animation.
   useEffect(() => {
-    if (visible) {
-      setMounted(true);
-      translateY.value = withTiming(0, { duration: 300 });
-      backdropOpacity.value = withTiming(1, { duration: 200 });
-    } else if (mounted) {
-      translateY.value = withTiming(
-        screenHeight,
-        { duration: 220 },
-        (finished) => {
-          if (finished) scheduleOnRN(setMounted, false);
-        },
-      );
-      backdropOpacity.value = withTiming(0, { duration: 200 });
-    }
+    if (visible) sheetRef.current?.present();
+    else sheetRef.current?.close();
   }, [visible]);
 
-  const pan = Gesture.Pan()
-    .onUpdate((e) => {
-      if (e.translationY > 0) translateY.value = e.translationY;
-    })
-    .onEnd((e) => {
-      if (e.translationY > 100 || e.velocityY > 800) {
-        scheduleOnRN(onClose);
-      } else {
-        translateY.value = withTiming(0, { duration: 300 });
-      }
-    });
-
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
-  const backdropStyle = useAnimatedStyle(() => ({
-    opacity: backdropOpacity.value,
-  }));
-
-  if (!mounted) return null;
-
   return (
-    <Modal
-      transparent
-      visible={mounted}
-      animationType="none"
-      onRequestClose={onClose}
-      statusBarTranslucent
+    <BottomSheetNative
+      ref={sheetRef}
+      index={-1}
+      enablePanDownToClose
+      onClose={onClose}
+      backgroundStyle={{ backgroundColor: colors.surface }}
     >
-      {/* RN's KeyboardAvoidingView works inside Modals; keyboard-controller's
-          KeyboardAwareScrollView does not. */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.avoid}
-      >
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: "rgba(0,0,0,0.4)" },
-            backdropStyle,
-          ]}
-        >
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={onClose}
-            accessibilityLabel="Close"
-          />
-        </Animated.View>
-        <GestureDetector gesture={pan}>
-          <Animated.View
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.surface,
-                borderTopLeftRadius: radius.xxl,
-                borderTopRightRadius: radius.xxl,
-                paddingBottom: spacing.xxl,
-              },
-              sheetStyle,
-            ]}
-          >
-            <View style={[styles.handle, { backgroundColor: colors.line }]} />
-            {children}
-          </Animated.View>
-        </GestureDetector>
-      </KeyboardAvoidingView>
-    </Modal>
+      <BottomSheetView style={{ paddingBottom: spacing.xxl }}>
+        {children}
+      </BottomSheetView>
+    </BottomSheetNative>
   );
 }
-
-const styles = StyleSheet.create({
-  avoid: { flex: 1 },
-  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: 10 },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 12,
-  },
-});
