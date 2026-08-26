@@ -27,7 +27,7 @@ export function AddToCartButton({ onPress }: { onPress: () => void }) {
     );
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onPress();
-  }, [onPress]);
+  }, [onPress, scale]);
 
   return (
     <AnimatedPressable

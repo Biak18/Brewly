@@ -4,6 +4,8 @@ import { useCartStore } from "../../stores/cartStore";
 import { renderScreen } from "../../test/testUtils";
 
 jest.mock("react-native-gesture-handler/ReanimatedSwipeable", () => {
+  // require() inside a jest.mock factory is intentional (imports are illegal there)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require("react");
   return {
     __esModule: true,

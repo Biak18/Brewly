@@ -17,6 +17,14 @@ export function ConfirmDialogHost() {
   const options = useConfirmDialogStore((s) => s.options);
   const hide = useConfirmDialogStore((s) => s.hide);
   const [mounted, setMounted] = useState(false);
+  const [wasOpen, setWasOpen] = useState(false);
+  const isOpen = !!options;
+  // Render-phase adjustment (see react.dev "Adjusting state when props change"):
+  // mounts content as soon as the dialog opens, no setState-in-effect needed.
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) setMounted(true);
+  }
 
   const backdropOpacity = useSharedValue(0);
   const cardScale = useSharedValue(0.92);
@@ -24,7 +32,6 @@ export function ConfirmDialogHost() {
 
   useEffect(() => {
     if (options) {
-      setMounted(true);
       backdropOpacity.value = withTiming(1, { duration: 180 });
       cardScale.value = withTiming(1, {
         duration: 220,

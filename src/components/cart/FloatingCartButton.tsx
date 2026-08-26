@@ -13,16 +13,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const TAB_ROUTES = [
-  "/",
-  "/shops",
-  "/shop/[id]",
-  "/orders",
-  "/favorites",
-  "/profile",
-];
 
 const HIDDEN_ROUTE_PREFIXES = ["/cart", "/checkout", "/coffee"];
 
@@ -30,12 +20,9 @@ export function FloatingCartButton() {
   const { colors, shadows } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const insets = useSafeAreaInsets();
   const count = useCartStore(selectCartCount);
   const scale = useSharedValue(1);
   const isHidden = HIDDEN_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
-  const isOnTabScreen =
-    TAB_ROUTES.includes(pathname) || pathname.startsWith("/shop/");
 
   useEffect(() => {
     if (count > 0)
@@ -45,7 +32,6 @@ export function FloatingCartButton() {
       );
   }, [count, scale]);
 
-  // const bottomOffset = isOnTabScreen ? 80 + insets.bottom : insets.bottom + 120;
   const bottomOffset = 80;
   const translateY = useSharedValue(bottomOffset);
 
@@ -53,7 +39,7 @@ export function FloatingCartButton() {
     translateY.value = withTiming(bottomOffset, {
       duration: 300,
     });
-  }, [bottomOffset]);
+  }, [bottomOffset, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateY: -translateY.value }],
@@ -65,7 +51,7 @@ export function FloatingCartButton() {
     <Animated.View
       pointerEvents="box-none"
       style={[
-        { position: "absolute", end: 20, /*bottom: bottomOffset*/ bottom: 0 },
+        { position: "absolute", end: 20, bottom: 0 },
         animatedStyle,
       ]}
     >

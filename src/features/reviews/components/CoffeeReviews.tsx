@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Text, View } from "react-native";
 
 export function CoffeeReviews({ coffeeId }: { coffeeId: string }) {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const { data: reviews, isLoading } = useQuery({
     queryKey: ["reviews", "coffee", coffeeId],
     queryFn: () => fetchCoffeeReviews(coffeeId),

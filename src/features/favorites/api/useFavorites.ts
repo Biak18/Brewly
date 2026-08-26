@@ -59,7 +59,8 @@ export function useToggleFavorite() {
       const previous = queryClient.getQueryData<Set<string>>(idsKey);
       queryClient.setQueryData<Set<string>>(idsKey, (old) => {
         const next = new Set(old);
-        liked ? next.add(coffeeId) : next.delete(coffeeId);
+        if (liked) next.add(coffeeId);
+        else next.delete(coffeeId);
         return next;
       });
       return { previous };

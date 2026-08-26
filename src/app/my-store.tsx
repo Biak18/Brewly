@@ -15,15 +15,11 @@ import {
   Store as StoreIcon,
 } from "lucide-react-native";
 import { Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyStoreScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.session?.user.id);
   const { data: store, isLoading } = useQuery({
     queryKey: ["my-store", userId],

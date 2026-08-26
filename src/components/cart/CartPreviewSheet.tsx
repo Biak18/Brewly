@@ -80,7 +80,7 @@ export function CartPreviewSheet() {
                 fontWeight: "600",
               }}
             >
-              You're saving
+              You&apos;re saving
             </Text>
             <Text
               style={{

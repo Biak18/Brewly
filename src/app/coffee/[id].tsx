@@ -81,6 +81,9 @@ export default function CoffeeDetailScreen() {
   }, [options.data]);
 
   useEffect(() => {
+    // Bridging query results into form defaults once they load — an external
+    // system sync, not a cascading render hazard.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (grouped.size.length && !size) setSize(grouped.size[0].id);
     if (grouped.temperature.length && !temperature)
       setTemperature(grouped.temperature[0].id);
@@ -165,8 +168,8 @@ export default function CoffeeDetailScreen() {
     extras,
     quantity,
     unitPrice,
-    router,
     addToCart,
+    pricing.compareAtUnitPrice,
   ]);
 
   if (coffee.isLoading || options.isLoading)

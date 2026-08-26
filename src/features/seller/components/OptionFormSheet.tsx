@@ -14,7 +14,7 @@ import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useTheme } from "@/theme";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 
 const TYPES: { value: OptionType; label: string }[] = [
@@ -50,13 +50,6 @@ export function OptionFormSheet({
     option?.categoryIds ?? [],
   );
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    setType(option?.type ?? "size");
-    setLabel(option?.label ?? "");
-    setPriceDelta(option ? String(option.price_delta) : "0");
-    setSelectedCategoryIds(option?.categoryIds ?? []);
-  }, [option]);
 
   const toggleCategory = useCallback((id: string) => {
     setSelectedCategoryIds((prev) =>

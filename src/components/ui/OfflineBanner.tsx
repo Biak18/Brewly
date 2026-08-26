@@ -21,7 +21,7 @@ export function OfflineBanner() {
     translateY.value = withTiming(isOnline ? (insets.top + 60) * -1 : 0, {
       duration: 250,
     });
-  }, [isOnline, translateY]);
+  }, [isOnline, translateY, insets.top]);
 
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -59,7 +59,7 @@ export function OfflineBanner() {
             marginLeft: 6,
           }}
         >
-          You're offline
+          You&apos;re offline
         </Text>
       </View>
     </Animated.View>

@@ -13,10 +13,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const schema = z.object({
@@ -32,7 +29,6 @@ type FormValues = z.infer<typeof schema>;
 export default function BecomeSellerScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {

@@ -21,14 +21,10 @@ import {
 import { useCallback } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { colors, spacing, typography, radius } = useTheme();
-  const insets = useSafeAreaInsets();
   const profile = useAuthStore((s) => s.profile);
   const session = useAuthStore((s) => s.session);
   const signOut = useAuthStore((s) => s.signOut);

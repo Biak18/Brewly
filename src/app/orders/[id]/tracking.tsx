@@ -326,7 +326,7 @@ export default function OrderTrackingScreen() {
     );
 
     return () => subscription.remove();
-  }, []);
+  }, [router]);
 
   const handleAdvance = useCallback(async () => {
     if (!order || !nextStatus) return;

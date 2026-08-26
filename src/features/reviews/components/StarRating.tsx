@@ -11,7 +11,6 @@ type StarRatingProps = {
 
 // Standout gold — theme tokens are too pale for stars on cream surfaces.
 const GOLD = "#FFC107";
-const GOLD_DIM = "#E8DFCE";
 
 export function StarRating({ value, onChange, size = 28 }: StarRatingProps) {
   const { colors } = useTheme();

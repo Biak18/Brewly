@@ -22,15 +22,11 @@ import Animated, {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CartScreen() {
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const items = useCartStore((s) => s.items);
   const savings = useCartStore(selectCartSavings);
 
@@ -162,7 +158,7 @@ export default function CartScreen() {
                     fontWeight: "600",
                   }}
                 >
-                  You're saving
+                  You&apos;re saving
                 </Text>
                 <Text
                   style={{

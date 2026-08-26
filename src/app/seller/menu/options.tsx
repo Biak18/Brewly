@@ -19,10 +19,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, Plus, Sliders } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { SectionList, Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const TYPE_LABELS: Record<OptionType, string> = {
   size: "Size",
@@ -34,7 +31,6 @@ const TYPE_LABELS: Record<OptionType, string> = {
 export default function ManageOptionsScreen() {
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.session?.user.id);
 
   const { data: myStore } = useQuery({
@@ -161,7 +157,9 @@ export default function ManageOptionsScreen() {
       )}
 
       <BottomSheet visible={sheetOpen} onClose={closeSheet}>
+        {/* Remount per target so form state reseeds without an effect. */}
         <OptionFormSheet
+          key={editingOption?.id ?? "new"}
           storeId={myStore.id}
           option={editingOption}
           onDone={closeSheet}

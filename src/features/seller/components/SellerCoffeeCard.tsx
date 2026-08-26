@@ -46,7 +46,7 @@ function SellerCoffeeCardComponent({
       damping: 18,
       stiffness: 160,
     });
-  }, [coffee.is_active]);
+  }, [coffee.is_active, progress]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

@@ -18,7 +18,7 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Pencil, UserRound } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +28,10 @@ const nameSchema = z.object({
   fullName: z.string().trim().min(1, "Name can't be empty").max(60),
 });
 type NameForm = z.infer<typeof nameSchema>;
+
+// Evaluated once per session so avatar cache-busting stays stable across
+// re-renders without impure render-time Date.now() calls.
+const AVATAR_EPOCH = Date.now();
 
 const passwordSchema = z
   .object({
@@ -54,6 +58,7 @@ export default function AccountScreen() {
   const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [avatarCacheKey, setAvatarCacheKey] = useState(0);
 
   const nameForm = useForm<NameForm>({
     resolver: zodResolver(nameSchema),
@@ -108,6 +113,7 @@ export default function AccountScreen() {
     if (url) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showToast("Profile photo updated");
+      setAvatarCacheKey(Date.now());
     }
   }, [pickAndUpload, showToast]);
 
@@ -129,9 +135,13 @@ export default function AccountScreen() {
     });
   }, [showConfirm, showToast]);
 
-  const avatarUrl = profile?.avatar_url
-    ? `${profile.avatar_url}${profile.avatar_url.includes("?") ? "&" : "?"}t=${Date.now()}`
-    : null;
+  // Cache-bust after each upload so a refreshed avatar is never served
+  // from the image cache under the same URL.
+  const avatarUrl = useMemo(() => {
+    if (!profile?.avatar_url) return null;
+    const sep = profile.avatar_url.includes("?") ? "&" : "?";
+    return `${profile.avatar_url}${sep}t=${AVATAR_EPOCH + avatarCacheKey}`;
+  }, [profile?.avatar_url, avatarCacheKey]);
 
   return (
     <SafeAreaView

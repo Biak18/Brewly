@@ -34,12 +34,18 @@ export function DropdownMenu<T extends string>({
 }: DropdownMenuProps<T>) {
   const { colors, radius, spacing, typography, shadows } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [wasVisible, setWasVisible] = useState(false);
+  // Render-phase adjustment (see react.dev "Adjusting state when props change"):
+  // mounts content as soon as the menu opens, no setState-in-effect needed.
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible) setMounted(true);
+  }
   const scale = useSharedValue(0.92);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      setMounted(true);
       scale.value = withTiming(1, {
         duration: 160,
         easing: Easing.out(Easing.cubic),

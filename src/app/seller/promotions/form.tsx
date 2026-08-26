@@ -24,10 +24,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Switch, Text, TextInput, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -73,7 +70,6 @@ export default function PromotionFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { colors, spacing, radius, typography } = useTheme();
   const userId = useAuthStore((s) => s.session?.user.id);
   const queryClient = useQueryClient();

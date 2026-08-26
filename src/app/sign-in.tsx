@@ -164,7 +164,7 @@ export default function SignInScreen() {
               fontWeight: "600",
             }}
           >
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Text style={{ color: colors.espresso, fontWeight: "800" }}>
               Sign up
             </Text>

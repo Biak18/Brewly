@@ -79,7 +79,7 @@ export function KpayPanel({
           </Pressable>
         ) : (
           <Text style={{ color: colors.danger, fontSize: typography.caption }}>
-            This shop hasn't set a payment number yet.
+            This shop hasn&apos;t set a payment number yet.
           </Text>
         )}
 

@@ -20,7 +20,7 @@ import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShopsScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const {
     data: stores = [],

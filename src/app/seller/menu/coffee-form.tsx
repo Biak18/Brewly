@@ -26,10 +26,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const schema = z.object({
@@ -49,7 +46,6 @@ export default function CoffeeFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { colors, spacing, radius, typography } = useTheme();
   const userId = useAuthStore((s) => s.session?.user.id);
   const queryClient = useQueryClient();

@@ -82,8 +82,8 @@ export default function ForgotPasswordScreen() {
               marginBottom: spacing.xl,
             }}
           >
-            If an account exists for that address, we've sent a link to reset
-            your password.
+            If an account exists for that address, we&apos;ve sent a link to
+            reset your password.
           </Text>
           <Button
             label="Back to sign in"
@@ -142,7 +142,7 @@ export default function ForgotPasswordScreen() {
               marginBottom: spacing.xl,
             }}
           >
-            Enter your email and we'll send you a reset link.
+            Enter your email and we&apos;ll send you a reset link.
           </Text>
         </View>
         <View>

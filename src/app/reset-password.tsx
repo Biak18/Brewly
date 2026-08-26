@@ -26,7 +26,7 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 export default function ResetPasswordScreen() {
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     control,

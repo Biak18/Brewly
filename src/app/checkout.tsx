@@ -37,12 +37,9 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Check, ChevronLeft, Gift } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const checkoutSchema = z
@@ -90,7 +87,6 @@ function Section({
 export default function CheckoutScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const items = useCartStore((s) => s.items);  const clearCart = useCartStore((s) => s.clear);
   const isOnline = useNetworkStore((s) => s.isOnline);
   const showToast = useToastStore((s) => s.show);
@@ -250,7 +246,7 @@ export default function CheckoutScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         clearCart();
         router.replace(`/orders/${orderId}/tracking`);
-      } catch (err) {
+      } catch {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
           "Something went wrong placing your order. Please try again.",
@@ -291,7 +287,7 @@ export default function CheckoutScreen() {
             marginTop: spacing.sm,
           }}
         >
-          You're offline — connect to place your order.
+          You&apos;re offline — connect to place your order.
         </Text>
       )}
       {isShopClosed && (

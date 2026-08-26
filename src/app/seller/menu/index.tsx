@@ -12,7 +12,7 @@ import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
 import { AnimatedFlashList } from "@shopify/flash-list";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   ChevronLeft,
@@ -30,10 +30,7 @@ import Animated, {
   useSharedValue,
   ZoomInEasyDown,
 } from "react-native-reanimated";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ITEM_HEIGHT = 108;
 
@@ -81,9 +78,7 @@ function AnimatedSellerCoffeeCard({
 export default function ManageMenuScreen() {
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.session?.user.id);
-  const queryClient = useQueryClient();
 
   const { data: myStore } = useQuery({
     queryKey: ["my-store", userId],
@@ -109,7 +104,7 @@ export default function ManageMenuScreen() {
   const handleScroll = useCallback((event: any) => {
     // This runs on the JS thread – perfectly fine for this use case
     scrollY.value = event.nativeEvent.contentOffset.y;
-  }, []);
+  }, [scrollY]);
 
   return (
     <SafeAreaView

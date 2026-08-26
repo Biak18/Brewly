@@ -17,15 +17,11 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, Plus, Tag } from "lucide-react-native";
 import { useCallback } from "react";
 import { Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManagePromotionsScreen() {
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.session?.user.id);
 
   const { data: myStore } = useQuery({
