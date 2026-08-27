@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
+import { useAddresses } from "@/features/account/hooks/useAddresses";
+import { DeliveryAddressPicker } from "@/features/checkout/components/DeliveryAddressPicker";
 import { FulfillmentToggle } from "@/features/checkout/components/FulfillmentToggle";
 import { KpayPanel } from "@/features/checkout/components/KpayPanel";
 import { OrderSummary } from "@/features/checkout/components/OrderSummary";
@@ -12,20 +14,13 @@ import {
   AppliedPromo,
   PromoCodeInput,
 } from "@/features/checkout/components/PromoCodeInput";
-import { DeliveryAddressPicker } from "@/features/checkout/components/DeliveryAddressPicker";
 import { TipJar } from "@/features/checkout/components/TipJar";
-import {
-  useAddresses,
-} from "@/features/account/hooks/useAddresses";
+import { track } from "@/lib/analytics";
 import { formatAddressSnapshot } from "@/services/addresses";
-import { attachPayment, placeOrder, DELIVERY_FEE } from "@/services/orders";
-import {
-  fetchCardForStore,
-  finalizeRedemption,
-} from "@/services/loyalty";
+import { fetchCardForStore, finalizeRedemption } from "@/services/loyalty";
+import { attachPayment, DELIVERY_FEE, placeOrder } from "@/services/orders";
 import { lookupPromoCode } from "@/services/promotions";
 import { fetchStoreById } from "@/services/stores";
-import { track } from "@/lib/analytics";
 import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useToastStore } from "@/stores/toastStore";
@@ -87,7 +82,8 @@ function Section({
 export default function CheckoutScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
-  const items = useCartStore((s) => s.items);  const clearCart = useCartStore((s) => s.clear);
+  const items = useCartStore((s) => s.items);
+  const clearCart = useCartStore((s) => s.clear);
   const isOnline = useNetworkStore((s) => s.isOnline);
   const showToast = useToastStore((s) => s.show);
 
@@ -115,8 +111,7 @@ export default function CheckoutScreen() {
     queryFn: () => fetchCardForStore(storeId!),
     enabled: !!storeId,
   });
-  const hasFreeCoffee =
-    (loyaltyCard?.stamps ?? 0) >= 10 && items.length > 0;
+  const hasFreeCoffee = (loyaltyCard?.stamps ?? 0) >= 10 && items.length > 0;
   const [redeemFree, setRedeemFree] = useState(false);
   const freeDrinkDiscount =
     redeemFree && hasFreeCoffee
@@ -146,8 +141,7 @@ export default function CheckoutScreen() {
   const selectedAddress =
     addresses.find((a) => a.id === selectedAddressId) ?? null;
   const deliveryFee = fulfillment === "delivery" ? DELIVERY_FEE : 0;
-  const needsAddress =
-    fulfillment === "delivery" && !selectedAddress;
+  const needsAddress = fulfillment === "delivery" && !selectedAddress;
 
   const handleApplyPromo = useCallback(async () => {
     if (!storeId) return;
@@ -453,10 +447,8 @@ export default function CheckoutScreen() {
                   }}
                 >
                   10 stamps · −$
-                  {Math.min(
-                    ...items.map((i) => i.unitPrice),
-                  ).toFixed(2)}{" "}
-                  off your cheapest drink
+                  {Math.min(...items.map((i) => i.unitPrice)).toFixed(2)} off
+                  your cheapest drink
                 </Text>
               </View>
               {redeemFree && (

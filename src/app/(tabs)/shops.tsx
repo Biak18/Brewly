@@ -1,16 +1,16 @@
 // src/app/(tabs)/shops.tsx
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Chip } from "@/components/ui/Chip";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Pulse } from "@/components/ui/Pulse";
 import {
   useFavoriteStoreIds,
   useToggleStoreFavorite,
 } from "@/features/favorites/api/useStoreFavorites";
 import { ShopCard } from "@/features/shops/components/ShopCard";
-import { fetchStores, Store } from "@/services/stores";
-import { useTheme } from "@/theme";
 import { useRefresh } from "@/hooks/useRefresh";
 import { useUserLocation } from "@/hooks/useUserLocation";
+import { fetchStores, Store } from "@/services/stores";
+import { useTheme } from "@/theme";
 import { distanceKm } from "@/utils/geo";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
@@ -71,18 +71,20 @@ export default function ShopsScreen() {
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.bg,
-          padding: spacing.lg,
-          gap: spacing.md,
-        }}
-      >
-        {[0, 1, 2].map((i) => (
-          <Pulse key={i} style={{ height: 88 }} />
-        ))}
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.bg,
+            padding: spacing.lg,
+            gap: spacing.md,
+          }}
+        >
+          {[0, 1, 2].map((i) => (
+            <Pulse key={i} style={{ height: 88 }} />
+          ))}
+        </View>
+      </SafeAreaView>
     );
   }
   if (isError) {
@@ -160,7 +162,9 @@ export default function ShopsScreen() {
       )}
       {filtered.length === 0 ? (
         <EmptyState
-          icon={<StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />}
+          icon={
+            <StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />
+          }
           title={`No shops within ${radiusKm} km`}
           description="Widen the distance filter to see more shops."
           actionLabel="Show all"
@@ -178,26 +182,26 @@ export default function ShopsScreen() {
               tintColor={colors.espresso}
             />
           }
-        renderItem={({ item }: { item: Store }) => (
-          <Animated.View
-            style={{ flex: 1, margin: spacing.xs }}
-            entering={ZoomInEasyDown.springify()}
-          >
-            <ShopCard
-              store={item}
-              onPress={handlePress}
-              layout="list"
-              distanceKm={withDistance(item)}
-              favorite={favoriteStoreIds?.has(item.id) ?? false}
-              onToggleFavorite={() =>
-                toggleStoreFavorite.mutate({
-                  storeId: item.id,
-                  liked: !(favoriteStoreIds?.has(item.id) ?? false),
-                })
-              }
-            />
-          </Animated.View>
-        )}
+          renderItem={({ item }: { item: Store }) => (
+            <Animated.View
+              style={{ flex: 1, margin: spacing.xs }}
+              entering={ZoomInEasyDown.springify()}
+            >
+              <ShopCard
+                store={item}
+                onPress={handlePress}
+                layout="list"
+                distanceKm={withDistance(item)}
+                favorite={favoriteStoreIds?.has(item.id) ?? false}
+                onToggleFavorite={() =>
+                  toggleStoreFavorite.mutate({
+                    storeId: item.id,
+                    liked: !(favoriteStoreIds?.has(item.id) ?? false),
+                  })
+                }
+              />
+            </Animated.View>
+          )}
         />
       )}
     </SafeAreaView>

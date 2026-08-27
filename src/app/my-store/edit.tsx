@@ -10,6 +10,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { getStoreOpenState } from "@/utils/storeHours";
+import {
+  PinCoords,
+  getCurrentCoordinates,
+  resolveMapLink,
+} from "@/utils/mapLink";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -18,7 +23,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -27,6 +32,7 @@ const schema = z
   .object({
     name: z.string().min(1, "Enter your shop name"),
     address: z.string().min(1, "Enter your shop address"),
+    mapLink: z.string(),
     openTime: z
       .string()
       .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
@@ -79,6 +85,7 @@ export default function EditStoreScreen() {
     defaultValues: {
       name: "",
       address: "",
+      mapLink: "",
       openTime: "",
       closeTime: "",
       kpayPhone: "",
@@ -86,11 +93,19 @@ export default function EditStoreScreen() {
     },
   });
 
+  // Shop pin: lets the app compute real distances for customers. Derived
+  // from the saved store until the seller overrides it in this session by
+  // pasting a map link or capturing their current location.
+  const [pinOverride, setPinOverride] = useState<PinCoords | null>(null);
+  const [pinSource, setPinSource] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
   useEffect(() => {
     if (store) {
       reset({
         name: store.name ?? "",
         address: store.address ?? "",
+        mapLink: "",
         openTime: store.hours?.open ?? "",
         closeTime: store.hours?.close ?? "",
         kpayPhone: store.kpay_phone ?? "",
@@ -100,7 +115,13 @@ export default function EditStoreScreen() {
   }, [store, reset]);
 
   const save = useMutation({
-    mutationFn: (values: FormValues) => {
+    mutationFn: ({
+      values,
+      pin,
+    }: {
+      values: FormValues;
+      pin: PinCoords | null;
+    }) => {
       const hours =
         values.openTime && values.closeTime
           ? { open: values.openTime, close: values.closeTime }
@@ -111,6 +132,8 @@ export default function EditStoreScreen() {
         hours,
         kpay_phone: values.kpayPhone.trim() || null,
         payment_note: values.paymentNote.trim() || null,
+        lat: pin?.lat ?? null,
+        lng: pin?.lng ?? null,
       });
     },
     onSuccess: async () => {
@@ -131,10 +154,72 @@ export default function EditStoreScreen() {
   const [pickerField, setPickerField] = useState<"open" | "close" | null>(null);
   const openTime = useWatch({ control, name: "openTime" });
   const closeTime = useWatch({ control, name: "closeTime" });
+  const mapLinkValue = useWatch({ control, name: "mapLink" });
+  const pin = useMemo(
+    () =>
+      pinOverride ??
+      (store?.lat != null && store?.lng != null
+        ? { lat: store.lat, lng: store.lng }
+        : null),
+    [pinOverride, store],
+  );
   const draftHours =
     openTime && closeTime ? { open: openTime, close: closeTime } : null;
   const openState = getStoreOpenState(draftHours);
   const isOvernight = !!draftHours && openTime >= closeTime;
+
+  const readMapLink = useCallback(async () => {
+    const link = mapLinkValue?.trim() ?? "";
+    if (!link) {
+      setLinkError("Paste a Google Maps link first.");
+      return;
+    }
+    setLinkError(null);
+    const resolved = await resolveMapLink(link);
+    if (!resolved) {
+      setLinkError(
+        "Couldn't read coordinates from that link. Use Share → Copy link in Google Maps, or pin your current location at the shop.",
+      );
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+    setPinOverride(resolved);
+    setPinSource("from your map link");
+    Haptics.selectionAsync();
+  }, [mapLinkValue]);
+
+  const useCurrentLocation = useCallback(async () => {
+    const coords = await getCurrentCoordinates();
+    if (!coords) {
+      showToast("Could not get your location");
+      return;
+    }
+    setPinOverride(coords);
+    setPinSource("your current location — stand at the shop before tapping");
+    setLinkError(null);
+    Haptics.selectionAsync();
+  }, [showToast]);
+
+  const submit = useCallback(
+    async (values: FormValues) => {
+      let nextPin = pin;
+      if (!nextPin && values.mapLink.trim()) {
+        const resolved = await resolveMapLink(values.mapLink);
+        if (!resolved) {
+          setLinkError(
+            "Couldn't read coordinates from that link. Use Share → Copy link in Google Maps, or tap Find after pasting.",
+          );
+          return;
+        }
+        nextPin = resolved;
+        setPinOverride(nextPin);
+        setPinSource("from your map link");
+      }
+      setLinkError(null);
+      await save.mutateAsync({ values, pin: nextPin });
+    },
+    [pin, save],
+  );
 
   if (!store) return null;
 
@@ -220,6 +305,79 @@ export default function EditStoreScreen() {
             )}
           </View>
         ))}
+
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: typography.caption,
+            fontWeight: "800",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+            marginTop: spacing.md,
+            marginBottom: spacing.sm,
+          }}
+        >
+          Shop location
+        </Text>
+        <Controller
+          control={control}
+          name="mapLink"
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              onEndEditing={readMapLink}
+              autoCapitalize="none"
+              autoCorrect={false}
+              multiline
+              placeholder="Paste a Google Maps link (Share → Copy link)"
+              placeholderTextColor={colors.muted}
+              style={{
+                borderWidth: 1,
+                borderColor: linkError ? colors.danger : colors.line,
+                minHeight: 48,
+                paddingVertical: 12,
+                paddingHorizontal: 14,
+                fontSize: 14,
+                color: colors.ink,
+                borderRadius: radius.md,
+                textAlignVertical: "top",
+              }}
+            />
+          )}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: spacing.sm,
+            marginTop: spacing.sm,
+          }}
+        >
+          <Chip
+            label="Find coordinates"
+            active={false}
+            onPress={readMapLink}
+          />
+          <Chip
+            label="Use my current location"
+            active={false}
+            onPress={useCurrentLocation}
+          />
+        </View>
+        {linkError ? (
+          <Text style={{ color: colors.danger, fontSize: 11, marginTop: 6 }}>
+            {linkError}
+          </Text>
+        ) : (
+          <Text
+            style={{ color: colors.muted, fontSize: 11, marginTop: 6 }}
+          >
+            {pin
+              ? `Pin saved${pinSource ? ` (${pinSource})` : ""}: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`
+              : "No pin yet — customers won't see how far your shop is until it's set."}
+          </Text>
+        )}
 
         <Text
           style={{
@@ -405,7 +563,7 @@ export default function EditStoreScreen() {
         <View style={{ marginVertical: spacing.xxl }}>
           <Button
             label="Save changes"
-            onPress={handleSubmit((v) => save.mutateAsync(v))}
+            onPress={handleSubmit(submit)}
             loading={isSubmitting || save.isPending}
             variant="primary"
           />

@@ -9,6 +9,8 @@ export type AddressInput = {
   full_name: string;
   phone: string;
   address: string;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 /** "Home · Aung A · 09xxx · 123 Baho Rd" — snapshot stored on the order. */

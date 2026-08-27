@@ -46,6 +46,8 @@ export type StoreUpdateInput = {
   hours: { open: string; close: string } | null;
   kpay_phone: string | null;
   payment_note: string | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export async function updateMyStore(

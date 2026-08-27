@@ -10,6 +10,7 @@ type SettingsRowProps = {
   value?: string;
   onPress?: () => void;
   disabled?: boolean;
+  right?: React.ReactNode;
 };
 
 export function SettingsRow({
@@ -18,6 +19,7 @@ export function SettingsRow({
   value,
   onPress,
   disabled,
+  right,
 }: SettingsRowProps) {
   const { colors, spacing, typography } = useTheme();
   const content = (
@@ -41,19 +43,25 @@ export function SettingsRow({
       >
         {label}
       </Text>
-      {value && (
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.caption,
-            marginRight: onPress && !disabled ? spacing.xs : 0,
-          }}
-        >
-          {value}
-        </Text>
-      )}
-      {onPress && !disabled && (
-        <ChevronRight size={16} color={colors.muted} strokeWidth={1.8} />
+      {right ? (
+        right
+      ) : (
+        <>
+          {value && (
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.caption,
+                marginRight: onPress && !disabled ? spacing.xs : 0,
+              }}
+            >
+              {value}
+            </Text>
+          )}
+          {onPress && !disabled && (
+            <ChevronRight size={16} color={colors.muted} strokeWidth={1.8} />
+          )}
+        </>
       )}
     </View>
   );

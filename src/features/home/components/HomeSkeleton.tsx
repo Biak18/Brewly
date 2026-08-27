@@ -2,11 +2,12 @@
 import { Pulse } from "@/components/ui/Pulse";
 import { useTheme } from "@/theme";
 import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export function HomeSkeleton() {
   const { spacing } = useTheme();
   return (
-    <View style={{ paddingTop: spacing.lg }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Pulse
         style={{
           height: 40,
@@ -33,6 +34,6 @@ export function HomeSkeleton() {
           <Pulse key={i} style={{ height: 90, width: 140, borderRadius: 18 }} />
         ))}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

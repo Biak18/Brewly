@@ -23,7 +23,7 @@ import {
   StoreIcon,
 } from "lucide-react-native";
 import { useCallback } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Switch, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -226,8 +226,15 @@ export default function ProfileScreen() {
             <SettingsRow
               icon={<Bell size={18} color={colors.muted} strokeWidth={1.8} />}
               label="Push notifications"
-              value={pushEnabled ? "On" : "Off"}
               onPress={togglePush}
+              right={
+                <Switch
+                  value={pushEnabled}
+                  onValueChange={togglePush}
+                  trackColor={{ false: colors.line, true: colors.green }}
+                  thumbColor={colors.surface}
+                />
+              }
             />
             <View style={{ height: 1, backgroundColor: colors.line }} />
             <Text
