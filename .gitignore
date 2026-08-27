@@ -48,3 +48,6 @@ example
 
 # supabase CLI local state (link info, cached versions)
 supabase/.temp/
+
+# services
+google-services.json
