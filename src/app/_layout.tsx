@@ -10,6 +10,7 @@ import { useOrdersRealtimeSync } from "@/features/orders/hooks/useOrdersRealtime
 import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromotionsRealtimeSync";
 import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
 import { useNetworkSync } from "@/hooks/useNetworkSync";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuthStore } from "@/stores/authStore";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/theme/themeStore";
@@ -34,6 +35,7 @@ function RootNavigator() {
   usePromotionsRealtimeSync();
   useAuthDeepLink();
   useNetworkSync();
+  usePushNotifications();
   const colors = useThemeStore((s) => s.colors);
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);

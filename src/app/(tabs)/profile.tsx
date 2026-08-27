@@ -2,14 +2,18 @@
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
+import { ensureNotificationPermission } from "@/lib/notifications";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
+import { useNotificationStore } from "@/stores/notificationStore";
+import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import {
+  Bell,
   Coffee as CoffeeIcon,
   Gift,
   LogOut,
@@ -31,6 +35,20 @@ export default function ProfileScreen() {
   const mode = useThemeStore((s) => s.mode);
   const setMode = useThemeStore((s) => s.setMode);
   const showConfirm = useConfirmDialogStore((s) => s.show);
+  const pushEnabled = useNotificationStore((s) => s.pushEnabled);
+  const setPushEnabled = useNotificationStore((s) => s.setPushEnabled);
+  const showToast = useToastStore((s) => s.show);
+
+  // Only flip on when the OS permission is actually granted — otherwise the
+  // toggle would claim pushes are on while the system blocks them.
+  const togglePush = useCallback(async () => {
+    const next = !pushEnabled;
+    if (next && !(await ensureNotificationPermission())) {
+      showToast("Enable notifications for Brewly in system settings.");
+      return;
+    }
+    setPushEnabled(next);
+  }, [pushEnabled, setPushEnabled, showToast]);
 
   const firstInitial = (profile?.full_name ??
     session?.user.email ??
@@ -169,9 +187,7 @@ export default function ProfileScreen() {
             />
             <View style={{ height: 1, backgroundColor: colors.line }} />
             <SettingsRow
-              icon={
-                <MapPin size={18} color={colors.muted} strokeWidth={1.8} />
-              }
+              icon={<MapPin size={18} color={colors.muted} strokeWidth={1.8} />}
               label="Delivery addresses"
               onPress={() => router.push("/addresses")}
             />
@@ -207,6 +223,13 @@ export default function ProfileScreen() {
               marginBottom: spacing.xl,
             }}
           >
+            <SettingsRow
+              icon={<Bell size={18} color={colors.muted} strokeWidth={1.8} />}
+              label="Push notifications"
+              value={pushEnabled ? "On" : "Off"}
+              onPress={togglePush}
+            />
+            <View style={{ height: 1, backgroundColor: colors.line }} />
             <Text
               style={{
                 color: colors.ink,

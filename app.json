@@ -18,7 +18,12 @@
       },
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.chanorg.grabcoffee"
+      "package": "com.chanorg.grabcoffee",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -31,7 +36,8 @@
         {
           "backgroundColor": "#f6efe6",
           "image": "./assets/images/splash-icon.png",
-          "resizeMode": "contain"
+          // "resizeMode": "contain"
+          "imageWidth": 200
         }
       ],
       [
@@ -50,6 +56,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "981d62c9-3507-4520-ac84-ca51428ba2a0"
+      }
+    },
+    "owner": "chanorg"
   }
 }

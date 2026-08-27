@@ -45,3 +45,6 @@ example
 
 # auth
 .opencode/supabase-auth.json
+
+# supabase CLI local state (link info, cached versions)
+supabase/.temp/

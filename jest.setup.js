@@ -116,6 +116,30 @@ jest.mock("react-native-worklets", () => ({
 }));
 
 /* ------------------------------------------------------------------ */
+/* expo-notifications — no native module under Jest; pessimistic perms  */
+/* ------------------------------------------------------------------ */
+jest.mock("expo-notifications", () => ({
+  __esModule: true,
+  AndroidImportance: { DEFAULT: 3 },
+  setNotificationHandler: jest.fn(),
+  getPermissionsAsync: jest.fn(async () => ({
+    granted: false,
+    canAskAgain: true,
+    status: "undetermined",
+  })),
+  requestPermissionsAsync: jest.fn(async () => ({
+    granted: false,
+    canAskAgain: true,
+    status: "denied",
+  })),
+  getExpoPushTokenAsync: jest.fn(async () => ({ data: null })),
+  setNotificationChannelAsync: jest.fn(async () => {}),
+  addNotificationResponseReceivedListener: jest.fn(() => ({
+    remove: jest.fn(),
+  })),
+}));
+
+/* ------------------------------------------------------------------ */
 /* @sentry/react-native — no native bridge under Jest; capture is a spy */
 /* ------------------------------------------------------------------ */
 jest.mock("@sentry/react-native", () => ({
