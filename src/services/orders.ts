@@ -54,7 +54,7 @@ export async function placeOrder(params: {
       extras: i.extras ?? [],
       quantity: i.quantity,
       unit_price: i.unitPrice,
-      compare_at_price: i.compareAtUnitPrice ?? null,
+      compare_at_price: null,
     })),
     p_tip: tip,
     p_promo_code: params.promoCode ?? null,
@@ -65,6 +65,7 @@ export async function placeOrder(params: {
     p_idempotency_key: params.idempotencyKey ?? null,
   };
   const { data, error } = await supabase.rpc("create_order", rpcParams);
+  console.log(error);
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }
@@ -149,10 +150,10 @@ export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
 ): Promise<void> {
-  const { error } = await supabase
-    .from("orders")
-    .update({ status })
-    .eq("id", orderId);
+  const { error } = await supabase.rpc("update_order_status", {
+    p_order_id: orderId,
+    p_status: status,
+  });
   if (error) throw error;
 }
 

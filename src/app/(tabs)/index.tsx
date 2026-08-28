@@ -13,7 +13,7 @@ import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
 import { useQuery } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
-import { RefreshControl, ScrollView } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -73,6 +73,7 @@ export default function HomeScreen() {
           <HomeShopsRow />
           <CoffeeRow title="Popular" coffees={popular.data ?? []} />
           <RecentOrdersRow />
+          <View style={{ marginBottom: spacing.xxl }} />
         </Stagger>
       </ScrollView>
     </SafeAreaView>

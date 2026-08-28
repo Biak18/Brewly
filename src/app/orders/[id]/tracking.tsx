@@ -20,6 +20,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -483,7 +484,7 @@ export default function OrderTrackingScreen() {
               Subtotal
             </Text>
             <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
-              ${order.subtotal.toFixed(2)}
+              {formatCurrency(order.subtotal)}
             </Text>
           </View>
           <View
@@ -499,7 +500,7 @@ export default function OrderTrackingScreen() {
               Tax
             </Text>
             <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
-              ${order.tax.toFixed(2)}
+              {formatCurrency(order.tax)}
             </Text>
           </View>
           {totalSavings > 0 && (
@@ -522,7 +523,7 @@ export default function OrderTrackingScreen() {
                   fontWeight: "800",
                 }}
               >
-                ${totalSavings.toFixed(2)}
+                {formatCurrency(totalSavings)}
               </Text>
             </View>
           )}
@@ -552,7 +553,7 @@ export default function OrderTrackingScreen() {
                   fontWeight: "800",
                 }}
               >
-                -${order.discount.toFixed(2)}
+                -{formatCurrency(order.discount)}
               </Text>
             </View>
           )}
@@ -572,7 +573,7 @@ export default function OrderTrackingScreen() {
               <Text
                 style={{ color: colors.ink, fontSize: typography.bodySmall }}
               >
-                ${order.tip.toFixed(2)}
+                {formatCurrency(order.tip)}
               </Text>
             </View>
           )}
@@ -592,7 +593,7 @@ export default function OrderTrackingScreen() {
               <Text
                 style={{ color: colors.ink, fontSize: typography.bodySmall }}
               >
-                ${order.delivery_fee.toFixed(2)}
+                {formatCurrency(order.delivery_fee)}
               </Text>
             </View>
           )}
@@ -640,7 +641,7 @@ export default function OrderTrackingScreen() {
                 fontWeight: "800",
               }}
             >
-              ${order.total.toFixed(2)}
+              {formatCurrency(order.total)}
             </Text>
           </View>
 

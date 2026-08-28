@@ -13,6 +13,10 @@ export type CoffeeOption = {
   price_delta: number;
 };
 
+function escapePostgrestValue(value: string) {
+  return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+}
+
 // export type CoffeeWithStoreName = Coffee & { stores: { name: string } | null };
 export type CoffeeWithStoreName = Awaited<ReturnType<typeof fetchCoffeeById>>;
 
@@ -89,8 +93,8 @@ export async function fetchMenuCoffees(params: {
     .eq("store_id", params.storeId);
   if (params.categoryId) query = query.eq("category_id", params.categoryId);
   if (params.search?.trim()) {
-    const term = params.search.trim();
-    query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%`);
+    const term = escapePostgrestValue(params.search.trim());
+    query = query.or(`name.ilike."%${term}%",description.ilike."%${term}%"`);
   }
   switch (params.sort) {
     case "price_asc":

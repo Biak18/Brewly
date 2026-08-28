@@ -1,6 +1,7 @@
 // src/features/seller/components/OptionRow.tsx
 import { SellerOption } from "@/services/sellerOptions";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -60,7 +61,9 @@ export function OptionRow({ option, categoryCount, onPress }: OptionRowProps) {
           fontSize: typography.bodySmall,
         }}
       >
-        {option.price_delta > 0 ? `+$${option.price_delta.toFixed(2)}` : "Free"}
+        {option.price_delta > 0
+          ? `+${formatCurrency(option.price_delta)}`
+          : "Free"}
       </Text>
     </Pressable>
   );

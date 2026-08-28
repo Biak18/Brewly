@@ -28,17 +28,3 @@ export async function fetchCardForStore(
   const cards = await fetchMyLoyaltyCards();
   return cards.find((c) => c.store_id === storeId) ?? null;
 }
-
-// Burns the 10 stamps for this store once the discounted order exists.
-// Server re-checks ownership AND that the card still holds a full set —
-// so a second concurrent redemption is rejected here, not silently lost.
-export async function finalizeRedemption(
-  storeId: string,
-  orderId: string,
-): Promise<void> {
-  const { error } = await supabase.rpc("finalize_redemption", {
-    p_store_id: storeId,
-    p_order_id: orderId,
-  });
-  if (error) throw error;
-}

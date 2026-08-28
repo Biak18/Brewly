@@ -25,6 +25,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useNetworkStore } from "@/stores/networkStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { getStoreOpenState } from "@/utils/storeHours";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -236,10 +237,12 @@ export default function CheckoutScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         clearCart();
         router.replace(`/orders/${orderId}/tracking`);
-      } catch {
+      } catch (error) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
-          "Something went wrong placing your order. Please try again.",
+          error instanceof Error && error.message.includes("Menu price changed")
+            ? "Your menu changed. Please return to your cart and refresh it before trying again."
+            : "Something went wrong placing your order. Please try again.",
         );
       }
     },
@@ -442,9 +445,9 @@ export default function CheckoutScreen() {
                     fontSize: typography.micro,
                   }}
                 >
-                  10 stamps · −$
-                  {Math.min(...items.map((i) => i.unitPrice)).toFixed(2)} off
-                  your cheapest drink
+                  10 stamps ·{" "}
+                  {formatCurrency(Math.min(...items.map((i) => i.unitPrice)))}{" "}
+                  off your cheapest drink
                 </Text>
               </View>
               {redeemFree && (

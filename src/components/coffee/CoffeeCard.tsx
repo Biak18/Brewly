@@ -1,5 +1,6 @@
 // src/components/coffee/CoffeeCard.tsx
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { memo, useCallback } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -62,7 +63,7 @@ function CoffeeCardComponent({
   return (
     <AnimatedPressable
       accessibilityRole="button"
-      accessibilityLabel={`${coffee.name}, $${coffee.price.toFixed(2)}`}
+      accessibilityLabel={`${coffee.name}, ${formatCurrency(coffee.price)}`}
       onPress={handlePress}
       onPressIn={() => {
         scale.value = withSpring(0.98);

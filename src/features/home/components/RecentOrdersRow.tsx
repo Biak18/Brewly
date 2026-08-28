@@ -22,7 +22,7 @@ export function RecentOrdersRow() {
   if (orders.length === 0) return null;
 
   return (
-    <View style={{ marginTop: spacing.xxl, marginBottom: spacing.xxl }}>
+    <View style={{ marginTop: spacing.xxl }}>
       <Text
         style={{
           color: colors.ink,

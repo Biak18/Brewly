@@ -11,6 +11,7 @@ import {
 } from "@/stores/cartStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { useRouter } from "expo-router";
 import { FlatList, Text, View } from "react-native";
 
@@ -89,7 +90,7 @@ export function CartPreviewSheet() {
                 fontWeight: "800",
               }}
             >
-              ${savings.toFixed(2)}
+              {formatCurrency(savings)}
             </Text>
           </View>
         )}

@@ -413,6 +413,22 @@ export type Database = {
         Args: { p_address_id: string };
         Returns: undefined;
       };
+      update_order_status: {
+        Args: { p_order_id: string; p_status: string };
+        Returns: undefined;
+      };
+      attach_payment: {
+        Args: { p_order_id: string; p_method: string; p_ref: string };
+        Returns: undefined;
+      };
+      set_payment_verified: {
+        Args: { p_order_id: string; p_verified: boolean };
+        Returns: undefined;
+      };
+      cancel_order: {
+        Args: { p_order_id: string };
+        Returns: undefined;
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
