@@ -42,16 +42,22 @@ export function DetailFooterBar({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: spacing.md,
         padding: spacing.xl,
         borderTopWidth: 1,
         borderTopColor: colors.line,
         backgroundColor: colors.surface,
       }}
     >
-      <Animated.View style={style}>
-        <CoffeePrice value={total} compareAtValue={compareAtTotal} size={22} />
+      <Animated.View style={[style, { flex: 1, minWidth: 0 }]}>
+        <CoffeePrice
+          value={total}
+          compareAtValue={compareAtTotal}
+          size={22}
+          stacked
+        />
       </Animated.View>
-      <View style={{ width: 180 }}>
+      <View style={{ flexGrow: 1, maxWidth: 180 }}>
         <Button label="Add to cart" onPress={onAddToCart} variant="primary" />
       </View>
     </View>
