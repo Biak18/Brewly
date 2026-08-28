@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { CartLineItemCard } from "@/features/cart/components/CartLineItemCard";
 import { fetchActiveCoffeesByIds } from "@/services/coffees";
+import { fetchExpectedCartPrices } from "@/services/orders";
 import {
   CartLineItem,
   selectCartSavings,
@@ -14,7 +15,7 @@ import {
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ChevronLeft, ShoppingBag } from "lucide-react-native";
 import { useCallback, useEffect, useRef } from "react";
 import { FlatList, Text, View } from "react-native";
@@ -82,6 +83,52 @@ export default function CartScreen() {
       cancelled = true;
     };
   }, [items, removeItem, updateItem, showToast]);
+
+  // Re-price persisted cart lines against the server on every visit. Lines
+  // cache unit_price at add-time; promotions and menu edits happen after, so
+  // cached prices can silently drift from what checkout will validate against.
+  const repriceCart = useCallback(async () => {
+    const current = useCartStore.getState().items;
+    if (current.length === 0) return;
+    try {
+      const expected = await fetchExpectedCartPrices(current);
+      let changed = 0;
+      let removed = 0;
+      for (const line of current) {
+        const price = expected.get(line.id);
+        if (price === undefined) continue;
+        if (price === null) {
+          removeItem(line.id);
+          removed += 1;
+          continue;
+        }
+        if (
+          Math.abs(price.unitPrice - line.unitPrice) > 0.001 ||
+          price.compareAtUnitPrice !== line.compareAtUnitPrice
+        ) {
+          updateItem(line.id, {
+            unitPrice: price.unitPrice,
+            compareAtUnitPrice: price.compareAtUnitPrice,
+          });
+          changed += 1;
+        }
+      }
+      if (removed > 0) {
+        showToast("Some unavailable items were removed from your cart");
+      } else if (changed > 0) {
+        showToast("Cart prices were updated");
+      }
+    } catch {
+      // Pricing service unavailable — keep cached prices; checkout
+      // re-validates server-side anyway.
+    }
+  }, [removeItem, updateItem, showToast]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void repriceCart();
+    }, [repriceCart]),
+  );
 
   const handleRemove = useCallback(
     (lineId: string) => {

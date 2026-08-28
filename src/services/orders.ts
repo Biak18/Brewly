@@ -18,6 +18,69 @@ export type OrderSummary = {
   thumbnail_url: string | null;
 };
 
+export type ExpectedLinePrice = {
+  unitPrice: number;
+  compareAtUnitPrice?: number;
+};
+
+/**
+ * Server-authoritative re-pricing for persisted cart lines. Cart lines cache
+ * unit_price at add-time, but promotions and menu edits happen server-side
+ * afterwards — the cart screen refreshes through this before checkout so the
+ * cached prices can't drift from what create_order will validate against.
+ *
+ * Resolves to one entry per line id: the refreshed price, or null when the
+ * line can no longer be priced (coffee removed/deactivated, invalid option).
+ */
+export async function fetchExpectedCartPrices(
+  items: CartLineItem[],
+): Promise<Map<string, ExpectedLinePrice | null>> {
+  const byStore = new Map<string, CartLineItem[]>();
+  items.forEach((item) => {
+    const lines = byStore.get(item.storeId) ?? [];
+    lines.push(item);
+    byStore.set(item.storeId, lines);
+  });
+
+  const result = new Map<string, ExpectedLinePrice | null>();
+  for (const [storeId, lines] of byStore) {
+    const { data, error } = await supabase.rpc("expected_cart_prices", {
+      p_store_id: storeId,
+      p_items: lines.map((i) => ({
+        coffee_id: i.coffeeId,
+        size: i.size ?? null,
+        temperature: i.temperature ?? null,
+        milk: i.milk ?? null,
+        extras: i.extras ?? [],
+        quantity: i.quantity,
+        unit_price: i.unitPrice,
+      })),
+    });
+    if (error) throw error;
+    (data ?? []).forEach(
+      (row: { item_index: number; unit_price: number | null; full_price: number | null }) => {
+        const line = lines[row.item_index];
+        if (!line) return;
+        if (row.unit_price == null) {
+          result.set(line.id, null);
+          return;
+        }
+        const unitPrice = Math.round(Number(row.unit_price) * 100) / 100;
+        const full =
+          row.full_price != null
+            ? Math.round(Number(row.full_price) * 100) / 100
+            : null;
+        result.set(line.id, {
+          unitPrice,
+          compareAtUnitPrice:
+            full != null && full > unitPrice ? full : undefined,
+        });
+      },
+    );
+  }
+  return result;
+}
+
 export async function placeOrder(params: {
   storeId: string;
   fulfillment: "pickup" | "delivery";
@@ -69,7 +132,7 @@ export async function placeOrder(params: {
   };
   const { data, error } = await supabase.rpc("create_order", rpcParams);
   console.log(error);
-  console.log(error);
+
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }

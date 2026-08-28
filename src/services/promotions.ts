@@ -37,9 +37,14 @@ export async function fetchActivePromotions(
   storeId?: string,
 ): Promise<Promotion[]> {
   const today = new Date().toISOString().slice(0, 10);
+  // Only codeless promotions are automatic discounts. Voucher-code promotions
+  // must NOT auto-apply to displayed prices — the customer redeems them
+  // explicitly at checkout via lookupPromoCode, otherwise the discount would
+  // be counted twice.
   let query = supabase
     .from("promotions")
     .select("*")
+    .is("code", null)
     .eq("is_active", true)
     .lte("starts_at", today)
     .gte("ends_at", today)

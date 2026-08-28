@@ -353,6 +353,14 @@ jest.mock("expo-router", () => {
     useGlobalSearchParams: () => params,
     usePathname: () => "/test",
     useSegments: () => [],
+    // Real hook re-runs the callback on focus; tests render once, so a plain
+    // invoke mirrors mount-focus behavior.
+    useFocusEffect: (callback) => {
+      const React = require("react");
+      React.useEffect(() => {
+        callback();
+      }, [callback]);
+    },
     Link: ({ children }) => children,
     Redirect: null,
     Stack: {
