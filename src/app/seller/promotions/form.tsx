@@ -22,7 +22,7 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -89,7 +89,6 @@ export default function PromotionFormScreen() {
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
     reset,
     formState: { errors, isSubmitting },
@@ -126,7 +125,7 @@ export default function PromotionFormScreen() {
     }
   }, [existing, reset]);
 
-  const scope = watch("scope");
+  const scope = useWatch({ control, name: "scope" });
   const applyDuration = useCallback(
     (days: number) => {
       setValue("startsAt", todayPlus(0));

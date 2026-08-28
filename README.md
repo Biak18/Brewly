@@ -45,6 +45,15 @@ The migrations contain authoritative order pricing, idempotent checkout,
 address-default handling, RLS policies, payment authorization, and seller
 ownership checks.
 
+The current migrations are hardening migrations for the existing Supabase
+project. A fresh project also needs the original application schema and RPC
+baseline before applying these files. Keep that baseline in version control
+before attempting a clean-environment restore.
+
+The migration history was reconciled against the linked project on 2026-08-28.
+Do not mark migrations as applied or reverted unless the remote schema has been
+verified first.
+
 Run database tests locally when Docker is available:
 
 ```powershell

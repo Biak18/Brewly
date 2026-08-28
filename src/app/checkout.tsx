@@ -33,7 +33,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Check, ChevronLeft, Gift } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -89,9 +89,7 @@ export default function CheckoutScreen() {
   const showToast = useToastStore((s) => s.show);
 
   const [serverError, setServerError] = useState<string | null>(null);
-  const checkoutKeyRef = useRef(
-    `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-  );
+  const checkoutKeyRef = useRef<string | null>(null);
 
   const storeId = items[0]?.storeId;
 
@@ -136,14 +134,9 @@ export default function CheckoutScreen() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
-  // Auto-pick the user's default address once loaded.
-  useEffect(() => {
-    if (!selectedAddressId && defaultAddress) {
-      setSelectedAddressId(defaultAddress.id);
-    }
-  }, [defaultAddress, selectedAddressId]);
+  const effectiveAddressId = selectedAddressId ?? defaultAddress?.id ?? null;
   const selectedAddress =
-    addresses.find((a) => a.id === selectedAddressId) ?? null;
+    addresses.find((a) => a.id === effectiveAddressId) ?? null;
   const deliveryFee = fulfillment === "delivery" ? DELIVERY_FEE : 0;
   const needsAddress = fulfillment === "delivery" && !selectedAddress;
 
@@ -161,6 +154,9 @@ export default function CheckoutScreen() {
         code: promo.code,
         title: promo.title,
         discountPercent: Number(promo.discount_percent),
+        scope: promo.scope,
+        categoryId: promo.category_id,
+        coffeeId: promo.coffee_id,
       });
       setPromoInput("");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -171,17 +167,40 @@ export default function CheckoutScreen() {
     }
   }, [storeId, promoInput]);
 
-  // Promo codes take a percentage off the item subtotal, on top of any
-  // loyalty free-drink discount.
-  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+  // Promo codes apply only to the items eligible for the selected promotion.
+  const eligiblePromoItems = appliedPromo
+    ? items
+        .filter(
+          (item) =>
+            appliedPromo.scope === "all" ||
+            (appliedPromo.scope === "coffee" &&
+              item.coffeeId === appliedPromo.coffeeId) ||
+            (appliedPromo.scope === "category" &&
+              item.categoryId === appliedPromo.categoryId),
+        )
+        .map((item) => item.name)
+    : undefined;
+  const eligiblePromoSubtotal = appliedPromo
+    ? items
+        .filter(
+          (item) =>
+            appliedPromo.scope === "all" ||
+            (appliedPromo.scope === "coffee" &&
+              item.coffeeId === appliedPromo.coffeeId) ||
+            (appliedPromo.scope === "category" &&
+              item.categoryId === appliedPromo.categoryId),
+        )
+        .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+    : 0;
   const promoDiscount = appliedPromo
-    ? Math.round(subtotal * (appliedPromo.discountPercent / 100) * 100) / 100
+    ? Math.round(
+        eligiblePromoSubtotal * (appliedPromo.discountPercent / 100) * 100,
+      ) / 100
     : 0;
 
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
@@ -191,11 +210,15 @@ export default function CheckoutScreen() {
       paymentRef: "",
     },
   });
+  const paymentMethod = useWatch({ control, name: "paymentMethod" });
 
   const onSubmit = useCallback(
     async (values: CheckoutForm) => {
       if (!storeId || isShopClosed || needsAddress) return;
       setServerError(null);
+      if (!checkoutKeyRef.current) {
+        checkoutKeyRef.current = `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
       try {
         const orderId = await placeOrder({
           storeId,
@@ -262,6 +285,9 @@ export default function CheckoutScreen() {
       needsAddress,
     ],
   );
+  const submitOrder = useCallback(() => {
+    void handleSubmit(onSubmit)();
+  }, [handleSubmit, onSubmit]);
 
   return (
     <SafeAreaView
@@ -375,7 +401,7 @@ export default function CheckoutScreen() {
               <PaymentMethodRow value={value} onChange={onChange} />
             )}
           />
-          {watch("paymentMethod") !== "cash" && (
+          {paymentMethod !== "cash" && (
             <View style={{ marginTop: spacing.md }}>
               <Controller
                 control={control}
@@ -383,7 +409,7 @@ export default function CheckoutScreen() {
                 render={({ field: { value, onChange } }) => (
                   <KpayPanel
                     store={store}
-                    method={watch("paymentMethod") as "kpay" | "mmqr"}
+                    method={paymentMethod as "kpay" | "mmqr"}
                     value={value}
                     onChangeText={onChange}
                     error={errors.paymentRef?.message}
@@ -401,6 +427,7 @@ export default function CheckoutScreen() {
             applied={appliedPromo}
             error={promoError}
             busy={promoBusy}
+            eligibleItems={eligiblePromoItems}
             onApply={handleApplyPromo}
             onRemove={() => {
               setAppliedPromo(null);
@@ -480,7 +507,7 @@ export default function CheckoutScreen() {
       >
         <Button
           label={isSubmitting ? "Placing order…" : "Place order"}
-          onPress={handleSubmit(onSubmit)}
+          onPress={submitOrder}
           loading={isSubmitting}
           disabled={
             items.length === 0 || !storeId || isShopClosed || needsAddress

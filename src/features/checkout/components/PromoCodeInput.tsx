@@ -8,6 +8,9 @@ export type AppliedPromo = {
   code: string;
   title: string;
   discountPercent: number;
+  scope: "all" | "category" | "coffee";
+  categoryId: string | null;
+  coffeeId: string | null;
 };
 
 export function PromoCodeInput({
@@ -18,6 +21,7 @@ export function PromoCodeInput({
   busy,
   onApply,
   onRemove,
+  eligibleItems,
 }: {
   value: string;
   onChangeText: (v: string) => void;
@@ -26,6 +30,7 @@ export function PromoCodeInput({
   busy?: boolean;
   onApply: () => void;
   onRemove: () => void;
+  eligibleItems?: string[];
 }) {
   const { colors, radius, spacing, typography } = useTheme();
 
@@ -59,6 +64,15 @@ export function PromoCodeInput({
           <Text style={{ color: colors.muted, fontSize: typography.micro }}>
             {applied.title} · {applied.discountPercent}% off
           </Text>
+          {eligibleItems && (
+            <Text style={{ color: colors.muted, fontSize: typography.micro }}>
+              {applied.scope === "all"
+                ? "Applies to all items"
+                : eligibleItems.length > 0
+                  ? `Applies to: ${eligibleItems.join(", ")}`
+                  : "No eligible items in this cart"}
+            </Text>
+          )}
         </View>
         <Pressable
           onPress={onRemove}

@@ -69,6 +69,7 @@ export async function placeOrder(params: {
   };
   const { data, error } = await supabase.rpc("create_order", rpcParams);
   console.log(error);
+  console.log(error);
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }

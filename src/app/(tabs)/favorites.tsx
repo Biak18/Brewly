@@ -10,9 +10,9 @@ import {
   useFavoriteStores,
   useToggleStoreFavorite,
 } from "@/features/favorites/api/useStoreFavorites";
-import { ShopCard } from "@/features/shops/components/ShopCard";
 import { MenuSkeleton } from "@/features/menu/components/MenuSkeleton";
 import { useActivePromotions } from "@/features/promotions/hooks/useActivePromotions";
+import { ShopCard } from "@/features/shops/components/ShopCard";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { useRefresh } from "@/hooks/useRefresh";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -150,6 +150,7 @@ export default function FavoritesScreen() {
       addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
+        categoryId: coffee.category_id,
         name: coffee.name,
         imageUrl: coffee.image_url ?? "",
         unitPrice,

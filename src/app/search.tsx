@@ -82,12 +82,15 @@ export default function SearchScreen() {
       if (!stores.isFetching && !coffees.isFetching) addRecent(debounced);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasTerm, stores.data, coffees.data, stores.isFetching, coffees.isFetching]);
+  }, [
+    hasTerm,
+    stores.data,
+    coffees.data,
+    stores.isFetching,
+    coffees.isFetching,
+  ]);
 
-  const handlePickTerm = useCallback(
-    (t: string) => setTerm(t),
-    [],
-  );
+  const handlePickTerm = useCallback((t: string) => setTerm(t), []);
   const handlePickStoreId = useCallback(
     (id: string) => router.push(`/shop/${id}`),
     [router],
@@ -111,6 +114,7 @@ export default function SearchScreen() {
       addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
+        categoryId: coffee.category_id,
         name: coffee.name,
         imageUrl: coffee.image_url ?? "",
         unitPrice: card.price,

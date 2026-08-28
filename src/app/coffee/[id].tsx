@@ -146,6 +146,7 @@ export default function CoffeeDetailScreen() {
     addToCart({
       coffeeId: coffee.data.id,
       storeId: coffee.data.store_id,
+      categoryId: coffee.data.category_id,
       name: coffee.data.name,
       imageUrl: coffee.data.image_url ?? "",
       unitPrice,

@@ -118,6 +118,7 @@ export default function ShopMenuScreen() {
       addToCart({
         coffeeId: coffee.id,
         storeId: coffee.store_id,
+        categoryId: coffee.category_id,
         name: coffee.name,
         imageUrl: coffee.image_url ?? "",
         unitPrice: card.price,

@@ -118,6 +118,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   useEffect(() => {
     if (ready) goTo(activeIndex);
+    // The indicator callback intentionally reads the latest measurements.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, ready]);
 
   const onMeasure = (index: number, x: number, width: number) => {

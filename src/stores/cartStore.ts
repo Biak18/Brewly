@@ -7,6 +7,7 @@ export type CartLineItem = {
   id: string;
   coffeeId: string;
   storeId: string;
+  categoryId?: string | null;
   name: string;
   imageUrl: string;
   unitPrice: number;
