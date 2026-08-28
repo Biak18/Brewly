@@ -17,7 +17,7 @@ import {
 import { TipJar } from "@/features/checkout/components/TipJar";
 import { track } from "@/lib/analytics";
 import { formatAddressSnapshot } from "@/services/addresses";
-import { fetchCardForStore, finalizeRedemption } from "@/services/loyalty";
+import { fetchCardForStore } from "@/services/loyalty";
 import { attachPayment, DELIVERY_FEE, placeOrder } from "@/services/orders";
 import { lookupPromoCode } from "@/services/promotions";
 import { fetchStoreById } from "@/services/stores";
@@ -200,6 +200,7 @@ export default function CheckoutScreen() {
           loyaltyDiscount: freeDrinkDiscount + promoDiscount,
           tip,
           promoCode: appliedPromo?.code ?? null,
+          redeemLoyalty: freeDrinkDiscount > 0,
           deliveryAddress: selectedAddress
             ? formatAddressSnapshot(selectedAddress)
             : null,
@@ -214,16 +215,6 @@ export default function CheckoutScreen() {
           tip_amount: tip,
           fulfillment,
         });
-        if (freeDrinkDiscount > 0) {
-          // Order is placed with the discounted total; this just burns the
-          // stamps. A rare concurrent-redeem failure must not lose the order —
-          // seller sees the discounted total and can adjust manually.
-          try {
-            await finalizeRedemption(storeId, orderId);
-          } catch {
-            showToast("Order placed, but free coffee could not be marked used");
-          }
-        }
         if (values.paymentMethod !== "cash") {
           // Order is already placed; a failed proof attach must not lose it —
           // the seller simply sees it as unpaid and can coordinate manually.

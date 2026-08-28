@@ -1,7 +1,7 @@
 // src/hooks/usePushNotifications.ts
-import { useNotificationStore } from "@/stores/notificationStore";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
+import { useNotificationStore } from "@/stores/notificationStore";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
@@ -33,6 +33,9 @@ export function usePushNotifications() {
         tokenRef.current = null;
         if (stale) {
           await supabase.from("push_tokens").delete().eq("token", stale);
+        }
+        if (userId && (!enabled || !Device.isDevice)) {
+          await supabase.from("push_tokens").delete().eq("user_id", userId);
         }
         return;
       }
@@ -85,14 +88,28 @@ export function usePushNotifications() {
   // Tapping a notification navigates to the order it's about — router is
   // expo-router's imperative singleton, safe to call outside a hook/component tree.
   useEffect(() => {
+    let cancelled = false;
+
+    function openOrderFromResponse(
+      response: Notifications.NotificationResponse | null,
+    ) {
+      if (cancelled || !response) return;
+      const data = response.notification.request.content.data;
+      const orderId = (data?.orderId ?? data?.order_id) as string | undefined;
+      if (orderId) router.push(`/orders/${orderId}/tracking`);
+    }
+
     const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const orderId = response.notification.request.content.data?.orderId as
-          | string
-          | undefined;
-        if (orderId) router.push(`/orders/${orderId}/tracking`);
-      },
+      openOrderFromResponse,
     );
-    return () => subscription.remove();
+
+    Notifications.getLastNotificationResponseAsync()
+      .then(openOrderFromResponse)
+      .catch((error) => console.warn("Notification response failed", error));
+
+    return () => {
+      cancelled = true;
+      subscription.remove();
+    };
   }, []);
 }

@@ -1,5 +1,7 @@
 // src/stores/cartStore.ts
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type CartLineItem = {
   id: string;
@@ -26,30 +28,42 @@ type CartState = {
   clear: () => void;
 };
 
-export const useCartStore = create<CartState>((set) => ({
-  items: [],
-  addItem: (item) =>
-    set((state) => ({
-      items: [
-        ...state.items,
-        {
-          ...item,
-          id: `${item.coffeeId}-${Date.now()}`,
-          quantity: item.quantity ?? 1,
-        },
-      ],
-    })),
-  removeItem: (lineId) =>
-    set((state) => ({ items: state.items.filter((i) => i.id !== lineId) })),
-  setQuantity: (lineId, quantity) =>
-    set((state) => ({
-      items:
-        quantity <= 0
-          ? state.items.filter((i) => i.id !== lineId)
-          : state.items.map((i) => (i.id === lineId ? { ...i, quantity } : i)),
-    })),
-  clear: () => set({ items: [] }),
-}));
+export const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
+      items: [],
+      addItem: (item) =>
+        set((state) => ({
+          items: [
+            ...state.items,
+            {
+              ...item,
+              id: `${item.coffeeId}-${Date.now()}`,
+              quantity: item.quantity ?? 1,
+            },
+          ],
+        })),
+      removeItem: (lineId) =>
+        set((state) => ({ items: state.items.filter((i) => i.id !== lineId) })),
+      setQuantity: (lineId, quantity) =>
+        set((state) => ({
+          items:
+            quantity <= 0
+              ? state.items.filter((i) => i.id !== lineId)
+              : state.items.map((i) =>
+                  i.id === lineId ? { ...i, quantity } : i,
+                ),
+        })),
+      clear: () => set({ items: [] }),
+    }),
+    {
+      name: "brewly-cart",
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ items: state.items }),
+      version: 1,
+    },
+  ),
+);
 
 export const selectCartCount = (s: CartState) =>
   s.items.reduce((sum, i) => sum + i.quantity, 0);

@@ -6,8 +6,8 @@ import { Pulse } from "@/components/ui/Pulse";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { ShareReceiptButton } from "@/features/orders/components/ShareReceiptButton";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
-import { OrderReviewSection } from "@/features/reviews/components/OrderReviewSection";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
+import { OrderReviewSection } from "@/features/reviews/components/OrderReviewSection";
 import {
   OrderStatus,
   PaymentStatus,
@@ -23,7 +23,12 @@ import { useTheme } from "@/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CheckCircle2, ChevronLeft, PackageX, XCircle } from "lucide-react-native";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  PackageX,
+  XCircle,
+} from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
@@ -230,7 +235,8 @@ export default function OrderTrackingScreen() {
   const canRevert = canManage && !!previousStatus;
   // Customers may cancel only their own order, and only before the shop
   // starts preparing it. The RPC enforces this server-side too.
-  const canCancel = !!order && order.user_id === userId && order.status === "received";
+  const canCancel =
+    !!order && order.user_id === userId && order.status === "received";
 
   const handleRevert = useCallback(() => {
     if (!order || !previousStatus) return;
@@ -336,7 +342,10 @@ export default function OrderTrackingScreen() {
       await updateOrderStatus(order.id, nextStatus);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      queryClient.setQueryData(["order", id], { ...order, status: nextStatus });
+      queryClient.setQueryData(["orders", "detail", id], {
+        ...order,
+        status: nextStatus,
+      });
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -425,15 +434,19 @@ export default function OrderTrackingScreen() {
               <StatusTimeline status={order.status} />
               <View style={{ marginTop: spacing.md }} />
               {order.status === "completed" && <CompletedBanner />}
-              {order.status === "completed" &&
-                order.user_id === userId && (
-                  <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}>
-                    <OrderReviewSection
-                      orderId={order.id}
-                      items={order.order_items}
-                    />
-                  </View>
-                )}
+              {order.status === "completed" && order.user_id === userId && (
+                <View
+                  style={{
+                    paddingHorizontal: spacing.xl,
+                    marginTop: spacing.lg,
+                  }}
+                >
+                  <OrderReviewSection
+                    orderId={order.id}
+                    items={order.order_items}
+                  />
+                </View>
+              )}
             </>
           )}
         </View>
@@ -556,7 +569,9 @@ export default function OrderTrackingScreen() {
               >
                 Tip
               </Text>
-              <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
+              <Text
+                style={{ color: colors.ink, fontSize: typography.bodySmall }}
+              >
                 ${order.tip.toFixed(2)}
               </Text>
             </View>
@@ -574,7 +589,9 @@ export default function OrderTrackingScreen() {
               >
                 Delivery fee
               </Text>
-              <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
+              <Text
+                style={{ color: colors.ink, fontSize: typography.bodySmall }}
+              >
                 ${order.delivery_fee.toFixed(2)}
               </Text>
             </View>
@@ -589,7 +606,10 @@ export default function OrderTrackingScreen() {
                 }}
               >
                 <Text
-                  style={{ color: colors.muted, fontSize: typography.bodySmall }}
+                  style={{
+                    color: colors.muted,
+                    fontSize: typography.bodySmall,
+                  }}
                 >
                   Delivery to
                 </Text>
@@ -645,30 +665,36 @@ export default function OrderTrackingScreen() {
                 textTransform: "capitalize",
               }}
             >
-              Payment · {order.payment_method === "cash" ? "Cash on pickup" : order.payment_method.toUpperCase()}
+              Payment ·{" "}
+              {order.payment_method === "cash"
+                ? "Cash on pickup"
+                : order.payment_method.toUpperCase()}
             </Text>
             <PaymentStatusChip status={order.payment_status} />
           </View>
           {order.payment_method !== "cash" && !!order.payment_ref && (
             <Text
               selectable
-              style={{ color: colors.muted, fontSize: typography.micro, marginTop: spacing.xs }}
+              style={{
+                color: colors.muted,
+                fontSize: typography.micro,
+                marginTop: spacing.xs,
+              }}
             >
               TRX ID: {order.payment_ref}
             </Text>
           )}
-          {!canManage &&
-            order.payment_status === "awaiting_verification" && (
-              <Text
-                style={{
-                  color: colors.muted,
-                  fontSize: typography.micro,
-                  marginTop: spacing.xs,
-                }}
-              >
-                Waiting for the shop to confirm your payment.
-              </Text>
-            )}
+          {!canManage && order.payment_status === "awaiting_verification" && (
+            <Text
+              style={{
+                color: colors.muted,
+                fontSize: typography.micro,
+                marginTop: spacing.xs,
+              }}
+            >
+              Waiting for the shop to confirm your payment.
+            </Text>
+          )}
         </View>
       </ScrollView>
 
@@ -733,10 +759,7 @@ export default function OrderTrackingScreen() {
           }}
         >
           {isCustomerOrder && (
-            <ShareReceiptButton
-              order={order}
-              storeName={receiptStore?.name}
-            />
+            <ShareReceiptButton order={order} storeName={receiptStore?.name} />
           )}
           <Button
             label="Done"
@@ -755,16 +778,9 @@ export default function OrderTrackingScreen() {
           }}
         >
           {isCustomerOrder && (
-            <ShareReceiptButton
-              order={order}
-              storeName={receiptStore?.name}
-            />
+            <ShareReceiptButton order={order} storeName={receiptStore?.name} />
           )}
-          <Button
-            label="Done"
-            onPress={() => router.back()}
-            variant="soft"
-          />
+          <Button label="Done" onPress={() => router.back()} variant="soft" />
         </View>
       ) : canManage && nextStatus ? (
         <View

@@ -1,6 +1,7 @@
 // src/services/orders.ts
 import { CartLineItem } from "@/stores/cartStore";
 import { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
+import { finalizeRedemption } from "./loyalty";
 import { supabase } from "./supabase";
 export { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
 export type OrderStatus =
@@ -25,21 +26,21 @@ export async function placeOrder(params: {
   loyaltyDiscount?: number;
   tip?: number;
   promoCode?: string | null;
+  redeemLoyalty?: boolean;
   /** Required snapshot string when fulfillment is "delivery". */
   deliveryAddress?: string | null;
 }): Promise<string> {
   const { subtotal, tax, total } = computeOrderTotals(params.items);
   const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
   const tip = Math.max(params.tip ?? 0, 0);
-  const deliveryFee =
-    params.fulfillment === "delivery" ? DELIVERY_FEE : 0;
+  const deliveryFee = params.fulfillment === "delivery" ? DELIVERY_FEE : 0;
   if (params.fulfillment === "delivery" && !params.deliveryAddress) {
     throw new Error("Delivery address required");
   }
   const grandTotal =
     Math.round((total - discount + tip + deliveryFee) * 100) / 100;
 
-  const { data, error } = await supabase.rpc("create_order", {
+  const rpcParams = {
     p_store_id: params.storeId,
     p_fulfillment: params.fulfillment,
     p_subtotal: subtotal,
@@ -60,8 +61,20 @@ export async function placeOrder(params: {
     p_discount: discount,
     p_delivery_fee: deliveryFee,
     p_delivery_address: params.deliveryAddress ?? null,
-  });
+    p_redeem_loyalty: params.redeemLoyalty ?? false,
+  };
+  let { data, error } = await supabase.rpc("create_order", rpcParams);
 
+  // Older deployments do not have the transactional loyalty argument yet.
+  // Retry only when PostgREST confirms the function signature is missing.
+  if (error?.code === "PGRST202") {
+    const legacyParams = { ...rpcParams };
+    delete (legacyParams as { p_redeem_loyalty?: boolean }).p_redeem_loyalty;
+    ({ data, error } = await supabase.rpc("create_order", legacyParams));
+    if (!error && params.redeemLoyalty) {
+      await finalizeRedemption(params.storeId, data as string);
+    }
+  }
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }

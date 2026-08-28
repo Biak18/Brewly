@@ -25,7 +25,14 @@ export const useAuthStore = create<AuthState>(() => ({
   isLoading: true,
   isPasswordRecovery: false,
   signOut: async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    useAuthStore.setState({
+      session: null,
+      profile: null,
+      isPasswordRecovery: false,
+      isLoading: false,
+    });
   },
 }));
 
@@ -50,7 +57,11 @@ export async function refreshProfile() {
   useAuthStore.setState({ profile });
 }
 
+let sessionRequestId = 0;
+
 async function handleSession(session: Session | null) {
+  const requestId = ++sessionRequestId;
+
   useAuthStore.setState({
     session,
     profile: null,
@@ -67,15 +78,14 @@ async function handleSession(session: Session | null) {
     return;
   }
 
-  setTimeout(async () => {
-    const profile = await fetchProfile(session.user.id);
+  const profile = await fetchProfile(session.user.id);
+  if (requestId !== sessionRequestId) return;
 
-    useAuthStore.setState({
-      session,
-      profile,
-      isLoading: false,
-    });
-  }, 0);
+  useAuthStore.setState({
+    session,
+    profile,
+    isLoading: false,
+  });
 }
 
 // Initial session

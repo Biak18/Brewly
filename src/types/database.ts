@@ -163,6 +163,12 @@ export type Database = {
           subtotal: number;
           tax: number;
           total: number;
+          discount: number;
+          tip: number;
+          promo_code: string | null;
+          payment_method: string | null;
+          payment_status: string;
+          payment_ref: string | null;
           delivery_fee: number;
           delivery_address: string | null;
           user_id: string;
@@ -193,6 +199,12 @@ export type Database = {
           subtotal?: number;
           tax?: number;
           total?: number;
+          discount?: number;
+          tip?: number;
+          promo_code?: string | null;
+          payment_method?: string | null;
+          payment_status?: string;
+          payment_ref?: string | null;
           delivery_fee?: number;
           delivery_address?: string | null;
           user_id?: string;
@@ -370,6 +382,12 @@ export type Database = {
           p_subtotal: number;
           p_tax: number;
           p_total: number;
+          p_tip?: number;
+          p_promo_code?: string | null;
+          p_discount?: number;
+          p_delivery_fee?: number;
+          p_delivery_address?: string | null;
+          p_redeem_loyalty?: boolean;
         };
         Returns: string;
       };
