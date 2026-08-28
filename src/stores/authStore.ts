@@ -2,6 +2,7 @@
 import { supabase } from "@/services/supabase";
 import { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
+import { useCartStore } from "./cartStore";
 
 type Role = "seller" | "customer";
 type Profile = {
@@ -33,6 +34,7 @@ export const useAuthStore = create<AuthState>(() => ({
       isPasswordRecovery: false,
       isLoading: false,
     });
+    useCartStore.getState().setCartUser(null);
   },
 }));
 
@@ -61,6 +63,7 @@ let sessionRequestId = 0;
 
 async function handleSession(session: Session | null) {
   const requestId = ++sessionRequestId;
+  useCartStore.getState().setCartUser(session?.user.id ?? null);
 
   useAuthStore.setState({
     session,

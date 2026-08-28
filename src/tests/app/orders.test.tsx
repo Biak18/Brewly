@@ -40,7 +40,7 @@ describe("<OrdersScreen />", () => {
     expect(getByText("My Purchases")).toBeTruthy();
     // Sellers default to the shop view
     expect(
-      await findByText("Orders placed at your shop will show up here.")
+      await findByText("Orders placed at your shop will show up here."),
     ).toBeTruthy();
   });
 });

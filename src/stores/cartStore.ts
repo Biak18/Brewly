@@ -20,6 +20,9 @@ export type CartLineItem = {
 
 type CartState = {
   items: CartLineItem[];
+  activeUserId: string | null;
+  carts: Record<string, CartLineItem[]>;
+  setCartUser: (userId: string | null) => void;
   addItem: (
     item: Omit<CartLineItem, "id" | "quantity"> & { quantity?: number },
   ) => void;
@@ -33,41 +36,94 @@ export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       items: [],
-      addItem: (item) =>
+      activeUserId: null,
+      carts: {},
+      setCartUser: (userId) =>
         set((state) => ({
-          items: [
+          activeUserId: userId,
+          carts:
+            state.activeUserId && state.activeUserId !== userId
+              ? { ...state.carts, [state.activeUserId]: state.items }
+              : state.carts,
+          items: userId ? (state.carts[userId] ?? []) : [],
+        })),
+      addItem: (item) =>
+        set((state) => {
+          const items = [
             ...state.items,
             {
               ...item,
               id: `${item.coffeeId}-${Date.now()}`,
               quantity: item.quantity ?? 1,
             },
-          ],
-        })),
+          ];
+          return {
+            items,
+            carts: state.activeUserId
+              ? { ...state.carts, [state.activeUserId]: items }
+              : state.carts,
+          };
+        }),
       removeItem: (lineId) =>
-        set((state) => ({ items: state.items.filter((i) => i.id !== lineId) })),
+        set((state) => {
+          const items = state.items.filter((i) => i.id !== lineId);
+          return {
+            items,
+            carts: state.activeUserId
+              ? { ...state.carts, [state.activeUserId]: items }
+              : state.carts,
+          };
+        }),
       setQuantity: (lineId, quantity) =>
-        set((state) => ({
-          items:
+        set((state) => {
+          const items =
             quantity <= 0
               ? state.items.filter((i) => i.id !== lineId)
               : state.items.map((i) =>
                   i.id === lineId ? { ...i, quantity } : i,
-                ),
-        })),
+                );
+          return {
+            items,
+            carts: state.activeUserId
+              ? { ...state.carts, [state.activeUserId]: items }
+              : state.carts,
+          };
+        }),
       updateItem: (lineId, patch) =>
-        set((state) => ({
-          items: state.items.map((item) =>
+        set((state) => {
+          const items = state.items.map((item) =>
             item.id === lineId ? { ...item, ...patch } : item,
-          ),
+          );
+          return {
+            items,
+            carts: state.activeUserId
+              ? { ...state.carts, [state.activeUserId]: items }
+              : state.carts,
+          };
+        }),
+      clear: () =>
+        set((state) => ({
+          items: [],
+          carts: state.activeUserId
+            ? { ...state.carts, [state.activeUserId]: [] }
+            : state.carts,
         })),
-      clear: () => set({ items: [] }),
     }),
     {
       name: "brewly-cart",
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ items: state.items }),
-      version: 1,
+      partialize: (state) => ({ carts: state.carts }),
+      version: 2,
+      migrate: (persistedState) => ({
+        items: [],
+        activeUserId: null,
+        carts:
+          (
+            persistedState as
+              | { carts?: Record<string, CartLineItem[]> }
+              | undefined
+          )?.carts ?? {},
+      }),
     },
   ),
 );

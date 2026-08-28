@@ -28,7 +28,7 @@ export type RenderScreenResult = RenderAPI & { queryClient: QueryClient };
 export function renderScreen(ui: React.ReactElement): RenderScreenResult {
   const queryClient = createTestQueryClient();
   const utils = render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
   );
   return { ...utils, queryClient };
 }
