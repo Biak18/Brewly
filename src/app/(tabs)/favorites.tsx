@@ -1,6 +1,7 @@
 // src/app/(tabs)/favorites.tsx
 import { CoffeeCard } from "@/components/coffee/CoffeeCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useOpenCoffee } from "@/features/coffee/hooks/useOpenCoffee";
 import {
   useFavoriteCoffees,
   useToggleFavorite,
@@ -122,10 +123,8 @@ export default function FavoritesScreen() {
     "store-favorites",
   ]);
 
-  const handlePress = useCallback(
-    (id: string) => router.push(`/coffee/${id}`),
-    [router],
-  );
+  const openCoffee = useOpenCoffee();
+
   const handleShopPress = useCallback(
     (id: string) => router.push(`/shop/${id}`),
     [router],
@@ -282,7 +281,7 @@ export default function FavoritesScreen() {
                   coffee={data}
                   layout="grid"
                   liked
-                  onPress={handlePress}
+                  onPress={openCoffee}
                   onToggleFavorite={handleToggleFavorite}
                   onAddToCart={handleAddToCart}
                 />

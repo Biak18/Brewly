@@ -2,6 +2,7 @@
 import { CoffeeCard } from "@/components/coffee/CoffeeCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
+import { useOpenCoffee } from "@/features/coffee/hooks/useOpenCoffee";
 import {
   useFavoriteIds,
   useToggleFavorite,
@@ -92,10 +93,7 @@ export default function SearchScreen() {
     [router],
   );
 
-  const handleCoffeePress = useCallback(
-    (id: string) => router.push(`/coffee/${id}`),
-    [router],
-  );
+  const openCoffee = useOpenCoffee();
   const handleStorePress = useCallback(
     (id: string) => router.push(`/shop/${id}`),
     [router],
@@ -128,7 +126,7 @@ export default function SearchScreen() {
         <CoffeeCard
           coffee={toCoffeeCardDataWithShop(item, promotions.data ?? [])}
           liked={favoriteIds?.has(item.id) ?? false}
-          onPress={handleCoffeePress}
+          onPress={openCoffee}
           onToggleFavorite={handleToggleFavorite}
           onAddToCart={handleAddToCart}
         />
@@ -137,7 +135,7 @@ export default function SearchScreen() {
     [
       promotions.data,
       favoriteIds,
-      handleCoffeePress,
+      openCoffee,
       handleToggleFavorite,
       handleAddToCart,
     ],

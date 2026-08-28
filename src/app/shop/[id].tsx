@@ -4,6 +4,7 @@ import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
+import { useOpenCoffee } from "@/features/coffee/hooks/useOpenCoffee";
 import {
   useFavoriteIds,
   useToggleFavorite,
@@ -103,10 +104,7 @@ export default function ShopMenuScreen() {
     toggleStoreFavorite.mutate({ storeId, liked: !storeFavorited });
   }, [storeId, storeFavorited, toggleStoreFavorite]);
 
-  const handlePress = useCallback(
-    (id: string) => router.push(`/coffee/${id}`),
-    [router],
-  );
+  const openCoffee = useOpenCoffee();
   const handleToggleFavorite = useCallback(
     (id: string) =>
       toggleFavorite.mutate({ coffeeId: id, liked: !favoriteIds?.has(id) }),
@@ -288,7 +286,7 @@ export default function ShopMenuScreen() {
                 coffee={toCoffeeCardData(item, promotions.data ?? [])}
                 layout="grid"
                 liked={favoriteIds?.has(item.id) ?? false}
-                onPress={handlePress}
+                onPress={openCoffee}
                 onToggleFavorite={handleToggleFavorite}
                 onAddToCart={handleAddToCart}
               />

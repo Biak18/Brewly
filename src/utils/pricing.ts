@@ -91,6 +91,8 @@ export function toCoffeeCardData(
     price: unitPrice,
     compareAtPrice: compareAtUnitPrice,
     imageUrl: coffee.image_url ?? "",
+    categoryId: coffee.category_id,
+    storeId: coffee.store_id,
   };
 }
 

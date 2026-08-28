@@ -1,5 +1,6 @@
 // src/features/home/components/CoffeeRow.tsx
 import { CoffeeCard } from "@/components/coffee/CoffeeCard";
+import { useOpenCoffee } from "@/features/coffee/hooks/useOpenCoffee";
 import {
   useFavoriteIds,
   useToggleFavorite,
@@ -9,7 +10,6 @@ import { useAddToCart } from "@/hooks/useAddToCart";
 import { CoffeeWithStoreName } from "@/services/coffees";
 import { useTheme } from "@/theme";
 import { toCoffeeCardDataWithShop } from "@/utils/pricing";
-import { useRouter } from "expo-router";
 import { useCallback } from "react";
 import { FlatList, ListRenderItem, Text, View } from "react-native";
 
@@ -17,18 +17,14 @@ type CoffeeRowProps = { title: string; coffees: CoffeeWithStoreName[] };
 
 export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
   const { colors, spacing, typography } = useTheme();
-  const router = useRouter();
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
+  const openCoffee = useOpenCoffee();
 
   const addToCart = useAddToCart();
 
   const { data: promotions = [] } = useActivePromotions();
 
-  const handlePress = useCallback(
-    (id: string) => router.push(`/coffee/${id}`),
-    [router],
-  );
   const handleToggleFavorite = useCallback(
     (id: string) =>
       toggleFavorite.mutate({ coffeeId: id, liked: !favoriteIds?.has(id) }),
@@ -60,7 +56,7 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
         <CoffeeCard
           coffee={data}
           liked={favoriteIds?.has(item.id) ?? false}
-          onPress={handlePress}
+          onPress={openCoffee}
           onToggleFavorite={handleToggleFavorite}
           onAddToCart={handleAddToCart}
         />
@@ -68,7 +64,7 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
     },
     [
       favoriteIds,
-      handlePress,
+      openCoffee,
       handleToggleFavorite,
       handleAddToCart,
       promotions,

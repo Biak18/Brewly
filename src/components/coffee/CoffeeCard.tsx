@@ -20,12 +20,14 @@ export type CoffeeCardData = {
   imageUrl: string;
   compareAtPrice?: number;
   shopName?: string;
+  categoryId?: string | null;
+  storeId?: string;
 };
 
 type CoffeeCardProps = {
   coffee: CoffeeCardData;
   liked: boolean;
-  onPress: (id: string) => void;
+  onPress: (coffee: CoffeeCardData) => void;
   onToggleFavorite: (id: string) => void;
   onAddToCart: (id: string) => void;
   layout?: "row" | "grid";
@@ -47,10 +49,7 @@ function CoffeeCardComponent({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePress = useCallback(
-    () => onPress(coffee.id),
-    [onPress, coffee.id],
-  );
+  const handlePress = useCallback(() => onPress(coffee), [onPress, coffee]);
   const handleToggle = useCallback(
     () => onToggleFavorite(coffee.id),
     [onToggleFavorite, coffee.id],
