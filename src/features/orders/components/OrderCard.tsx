@@ -2,6 +2,7 @@
 import { CoffeeImage } from "@/components/coffee/CoffeeImage";
 import { OrderStatus } from "@/services/orders";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { memo, useCallback } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -50,7 +51,7 @@ function OrderCardComponent({
 
   const shared = {
     accessibilityRole: "button" as const,
-    accessibilityLabel: `Order, ${itemsLabel}, $${order.total.toFixed(2)}, ${order.status}`,
+    accessibilityLabel: `Order, ${itemsLabel}, ${formatCurrency(order.total)}, ${order.status}`,
     onPress: handlePress,
     onPressIn: () => {
       scale.value = withSpring(0.97);
@@ -105,7 +106,7 @@ function OrderCardComponent({
                 fontSize: typography.caption,
               }}
             >
-              ${order.total.toFixed(2)}
+              {formatCurrency(order.total)}
             </Text>
             <StatusBadge status={order.status} />
           </View>
@@ -142,7 +143,7 @@ function OrderCardComponent({
             fontSize: typography.bodySmall,
           }}
         >
-          {itemsLabel} · ${order.total.toFixed(2)}
+          {itemsLabel} · {formatCurrency(order.total)}
         </Text>
         <Text
           style={{

@@ -12,6 +12,7 @@ import {
 } from "@/stores/cartStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ShoppingBag } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
@@ -167,7 +168,7 @@ export default function CartScreen() {
                     fontWeight: "800",
                   }}
                 >
-                  ${savings.toFixed(2)}
+                  {formatCurrency(savings)}
                 </Text>
               </View>
             )}

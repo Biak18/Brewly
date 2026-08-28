@@ -1,5 +1,6 @@
 // src/features/orders/components/receipt.ts
 import { OrderWithItems } from "@/services/orders";
+import { formatCurrency } from "@/utils/currency";
 
 const STATUS_LABELS: Record<string, string> = {
   received: "Received",
@@ -12,7 +13,7 @@ const STATUS_LABELS: Record<string, string> = {
 function lineItemText(item: OrderWithItems["order_items"][number]): string {
   const qty = `${item.quantity}x`;
   const name = item.coffees?.name ?? "Drink";
-  const amount = `$${(item.unit_price * item.quantity).toFixed(2)}`;
+  const amount = formatCurrency(item.unit_price * item.quantity);
   const options = [
     item.size,
     item.temperature,
@@ -47,16 +48,17 @@ export function buildReceiptText(
 
   lines.push("", "— Items —", ...order.order_items.map(lineItemText), "");
 
-  lines.push(`Subtotal        $${order.subtotal.toFixed(2)}`);
-  lines.push(`Tax             $${order.tax.toFixed(2)}`);
+  lines.push(`Subtotal        ${formatCurrency(order.subtotal)}`);
+  lines.push(`Tax             ${formatCurrency(order.tax)}`);
   if ((order.discount ?? 0) > 0)
     lines.push(
-      `Discount${order.promo_code ? ` (${order.promo_code})` : ""}   -$${order.discount.toFixed(2)}`,
+      `Discount${order.promo_code ? ` (${order.promo_code})` : ""}   -${formatCurrency(order.discount)}`,
     );
-  if ((order.tip ?? 0) > 0) lines.push(`Tip             $${order.tip.toFixed(2)}`);
+  if ((order.tip ?? 0) > 0)
+    lines.push(`Tip             ${formatCurrency(order.tip)}`);
   if ((order.delivery_fee ?? 0) > 0)
-    lines.push(`Delivery fee    $${order.delivery_fee.toFixed(2)}`);
-  lines.push(`TOTAL           $${Number(order.total).toFixed(2)}`);
+    lines.push(`Delivery fee    ${formatCurrency(order.delivery_fee)}`);
+  lines.push(`TOTAL           ${formatCurrency(Number(order.total))}`);
 
   lines.push("");
   const method =

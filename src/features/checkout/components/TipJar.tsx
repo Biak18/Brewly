@@ -1,5 +1,6 @@
 // src/features/checkout/components/TipJar.tsx
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { HandCoins } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
@@ -16,7 +17,9 @@ export function TipJar({
 
   return (
     <View style={{ gap: spacing.sm }}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}
+      >
         <HandCoins size={16} color={colors.muted} strokeWidth={1.8} />
         <Text
           style={{
@@ -37,7 +40,9 @@ export function TipJar({
               key={tip}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
-              accessibilityLabel={tip === 0 ? "No tip" : `Tip $${tip.toFixed(2)}`}
+              accessibilityLabel={
+                tip === 0 ? "No tip" : `Tip ${formatCurrency(tip)}`
+              }
               onPress={() => onChange(tip)}
               style={{
                 flex: 1,
@@ -57,7 +62,7 @@ export function TipJar({
                   fontWeight: "800",
                 }}
               >
-                {tip === 0 ? "None" : `$${tip.toFixed(2)}`}
+                {tip === 0 ? "None" : formatCurrency(tip)}
               </Text>
             </Pressable>
           );

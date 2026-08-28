@@ -2,6 +2,7 @@
 import { computeOrderTotals } from "@/services/orders";
 import { CartLineItem, computeCartSavings } from "@/stores/cartStore";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { Text, View } from "react-native";
 
 function Row({
@@ -75,25 +76,25 @@ export function OrderSummary({
     >
       <Row
         label={`${items.length} item${items.length === 1 ? "" : "s"}`}
-        value={`$${subtotal.toFixed(2)}`}
+        value={formatCurrency(subtotal)}
       />
-      <Row label="Tax" value={`$${tax.toFixed(2)}`} />
+      <Row label="Tax" value={formatCurrency(tax)} />
       {savings > 0 && (
         <Row
           label="Savings"
-          value={`-$${savings.toFixed(2)}`}
+          value={`-${formatCurrency(savings)}`}
           color={colors.green}
         />
       )}
       {discount > 0 && (
         <Row
           label="Discounts"
-          value={`-$${Math.min(discount, total).toFixed(2)}`}
+          value={`-${formatCurrency(Math.min(discount, total))}`}
           color={colors.green}
         />
       )}
-      {fee > 0 && <Row label="Delivery fee" value={`$${fee.toFixed(2)}`} />}
-      {tip > 0 && <Row label="Tip" value={`$${tip.toFixed(2)}`} />}
+      {fee > 0 && <Row label="Delivery fee" value={formatCurrency(fee)} />}
+      {tip > 0 && <Row label="Tip" value={formatCurrency(tip)} />}
       <View
         style={{
           height: 1,
@@ -101,7 +102,7 @@ export function OrderSummary({
           marginVertical: spacing.sm,
         }}
       />
-      <Row label="Total" value={`$${grandTotal.toFixed(2)}`} bold />
+      <Row label="Total" value={formatCurrency(grandTotal)} bold />
     </View>
   );
 }

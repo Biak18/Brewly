@@ -1,5 +1,6 @@
 // src/components/coffee/CoffeePrice.tsx — full replacement
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { StyleSheet, Text, View } from "react-native";
 
 type CoffeePriceProps = {
@@ -22,7 +23,7 @@ export function CoffeePrice({
         style={[styles.price, { color: colors.ink, fontSize: size }]}
         selectable
       >
-        ${value.toFixed(2)}
+        {formatCurrency(value)}
       </Text>
     );
   }
@@ -33,7 +34,7 @@ export function CoffeePrice({
         style={[styles.price, { color: colors.danger, fontSize: size }]}
         selectable
       >
-        ${value.toFixed(2)}
+        {formatCurrency(value)}
       </Text>
       <Text
         style={{
@@ -43,7 +44,7 @@ export function CoffeePrice({
         }}
         selectable
       >
-        ${compareAtValue!.toFixed(2)}
+        {formatCurrency(compareAtValue!)}
       </Text>
     </View>
   );

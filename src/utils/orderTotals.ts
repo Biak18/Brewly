@@ -3,9 +3,7 @@ import { CartLineItem } from "@/stores/cartStore";
 
 const TAX_RATE = 0.08;
 
-// Flat city-wide delivery fee (USD). A store-configurable or distance-based
-// fee can replace this later — the DB column already exists per-order.
-export const DELIVERY_FEE = 1.5;
+export const DELIVERY_FEE = 0;
 
 export function computeOrderTotals(items: CartLineItem[]) {
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);

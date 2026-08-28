@@ -2,6 +2,7 @@
 import { Chip } from "@/components/ui/Chip";
 import { CoffeeOption } from "@/services/coffees";
 import { useTheme } from "@/theme";
+import { formatCurrency } from "@/utils/currency";
 import { Text, View } from "react-native";
 
 type OptionGroupProps = {
@@ -43,7 +44,7 @@ export function OptionGroup({
             key={opt.id}
             label={
               opt.price_delta > 0
-                ? `${opt.label} (+$${opt.price_delta.toFixed(2)})`
+                ? `${opt.label} (+${formatCurrency(opt.price_delta)})`
                 : opt.label
             }
             active={isActive(opt.id)}

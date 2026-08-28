@@ -48,11 +48,11 @@ describe("<CartScreen />", () => {
       <CartScreen />,
     );
     expect(await findByText("Latte")).toBeTruthy();
-    // Line total and cart total coincide at $9.00
-    expect((await findAllByText("$9.00")).length).toBeGreaterThan(0);
+    // Line total and cart total coincide at Ks 9.
+    expect((await findAllByText("Ks 9")).length).toBeGreaterThan(0);
     expect(getByText("Total")).toBeTruthy();
     expect(getByText("You're saving")).toBeTruthy();
-    expect(getByText("$1.00")).toBeTruthy();
+    expect(getByText("Ks 1")).toBeTruthy();
     expect(getByText("Proceed to checkout")).toBeTruthy();
   });
 });

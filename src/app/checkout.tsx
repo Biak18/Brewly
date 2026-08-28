@@ -341,7 +341,7 @@ export default function CheckoutScreen() {
                 marginTop: spacing.sm,
               }}
             >
-              Flat ${DELIVERY_FEE.toFixed(2)} delivery fee applies.
+              Free delivery applies.
             </Text>
           </Section>
         )}
