@@ -32,15 +32,6 @@ export async function fetchAddresses(userId: string): Promise<Address[]> {
   return data;
 }
 
-// Keeps at most one default per user: clears the flag everywhere else first.
-async function makeOnlyDefault(userId: string, addressId: string) {
-  await supabase
-    .from("addresses")
-    .update({ is_default: false })
-    .eq("user_id", userId)
-    .neq("id", addressId);
-}
-
 export async function createAddress(
   userId: string,
   input: AddressInput,
@@ -48,11 +39,11 @@ export async function createAddress(
 ): Promise<Address> {
   const { data, error } = await supabase
     .from("addresses")
-    .insert({ ...input, user_id: userId, is_default: isDefault })
+    .insert({ ...input, user_id: userId, is_default: false })
     .select()
     .single();
   if (error) throw error;
-  if (isDefault) await makeOnlyDefault(userId, data.id);
+  if (isDefault) await setDefaultAddress(userId, data.id);
   return data;
 }
 
@@ -76,14 +67,11 @@ export async function deleteAddress(addressId: string): Promise<void> {
 }
 
 export async function setDefaultAddress(
-  userId: string,
+  _userId: string,
   addressId: string,
 ): Promise<void> {
-  const { error } = await supabase
-    .from("addresses")
-    .update({ is_default: true })
-    .eq("user_id", userId)
-    .eq("id", addressId);
+  const { error } = await supabase.rpc("set_default_address", {
+    p_address_id: addressId,
+  });
   if (error) throw error;
-  await makeOnlyDefault(userId, addressId);
 }

@@ -169,6 +169,7 @@ export type Database = {
           payment_method: string | null;
           payment_status: string;
           payment_ref: string | null;
+          idempotency_key: string | null;
           delivery_fee: number;
           delivery_address: string | null;
           user_id: string;
@@ -205,6 +206,7 @@ export type Database = {
           payment_method?: string | null;
           payment_status?: string;
           payment_ref?: string | null;
+          idempotency_key?: string | null;
           delivery_fee?: number;
           delivery_address?: string | null;
           user_id?: string;
@@ -388,6 +390,7 @@ export type Database = {
           p_delivery_fee?: number;
           p_delivery_address?: string | null;
           p_redeem_loyalty?: boolean;
+          p_idempotency_key?: string | null;
         };
         Returns: string;
       };
@@ -404,6 +407,10 @@ export type Database = {
       is_store_owner: { Args: { p_store_id: string }; Returns: boolean };
       set_option_category_scoping: {
         Args: { p_category_ids: string[]; p_option_id: string };
+        Returns: undefined;
+      };
+      set_default_address: {
+        Args: { p_address_id: string };
         Returns: undefined;
       };
     };

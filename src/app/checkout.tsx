@@ -31,7 +31,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Check, ChevronLeft, Gift } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -88,6 +88,9 @@ export default function CheckoutScreen() {
   const showToast = useToastStore((s) => s.show);
 
   const [serverError, setServerError] = useState<string | null>(null);
+  const checkoutKeyRef = useRef(
+    `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
 
   const storeId = items[0]?.storeId;
 
@@ -201,9 +204,11 @@ export default function CheckoutScreen() {
           tip,
           promoCode: appliedPromo?.code ?? null,
           redeemLoyalty: freeDrinkDiscount > 0,
-          deliveryAddress: selectedAddress
-            ? formatAddressSnapshot(selectedAddress)
-            : null,
+          idempotencyKey: checkoutKeyRef.current,
+          deliveryAddress:
+            fulfillment === "delivery" && selectedAddress
+              ? formatAddressSnapshot(selectedAddress)
+              : null,
         });
         track("order_placed", {
           order_id: orderId,

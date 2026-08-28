@@ -1,7 +1,6 @@
 // src/services/orders.ts
 import { CartLineItem } from "@/stores/cartStore";
 import { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
-import { finalizeRedemption } from "./loyalty";
 import { supabase } from "./supabase";
 export { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
 export type OrderStatus =
@@ -27,6 +26,7 @@ export async function placeOrder(params: {
   tip?: number;
   promoCode?: string | null;
   redeemLoyalty?: boolean;
+  idempotencyKey?: string;
   /** Required snapshot string when fulfillment is "delivery". */
   deliveryAddress?: string | null;
 }): Promise<string> {
@@ -62,19 +62,9 @@ export async function placeOrder(params: {
     p_delivery_fee: deliveryFee,
     p_delivery_address: params.deliveryAddress ?? null,
     p_redeem_loyalty: params.redeemLoyalty ?? false,
+    p_idempotency_key: params.idempotencyKey ?? null,
   };
-  let { data, error } = await supabase.rpc("create_order", rpcParams);
-
-  // Older deployments do not have the transactional loyalty argument yet.
-  // Retry only when PostgREST confirms the function signature is missing.
-  if (error?.code === "PGRST202") {
-    const legacyParams = { ...rpcParams };
-    delete (legacyParams as { p_redeem_loyalty?: boolean }).p_redeem_loyalty;
-    ({ data, error } = await supabase.rpc("create_order", legacyParams));
-    if (!error && params.redeemLoyalty) {
-      await finalizeRedemption(params.storeId, data as string);
-    }
-  }
+  const { data, error } = await supabase.rpc("create_order", rpcParams);
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }
