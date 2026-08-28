@@ -11,6 +11,7 @@ import { OrderReviewSection } from "@/features/reviews/components/OrderReviewSec
 import {
   OrderStatus,
   PaymentStatus,
+  attachPayment,
   cancelOrder,
   setPaymentVerified,
   updateOrderStatus,
@@ -31,7 +32,14 @@ import {
   XCircle,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  BackHandler,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -186,7 +194,7 @@ export default function OrderTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, radius, typography } = useTheme();
   const queryClient = useQueryClient();
   const profile = useAuthStore((s) => s.profile);
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -206,6 +214,7 @@ export default function OrderTrackingScreen() {
   });
 
   const [isAdvancing, setIsAdvancing] = useState(false);
+  const [paymentRef, setPaymentRef] = useState("");
 
   const showToast = useToastStore((s) => s.show);
   const prevStatusRef = useRef<OrderStatus | undefined>(undefined);
@@ -320,6 +329,27 @@ export default function OrderTrackingScreen() {
     },
     [order, queryClient, id, showToast],
   );
+
+  const handleRetryPayment = useCallback(async () => {
+    if (!order || !paymentRef.trim()) return;
+    setIsAdvancing(true);
+    try {
+      await attachPayment(
+        order.id,
+        order.payment_method as "kpay" | "mmqr",
+        paymentRef.trim(),
+      );
+      setPaymentRef("");
+      await queryClient.invalidateQueries({
+        queryKey: ["orders", "detail", id],
+      });
+      showToast("Payment proof submitted");
+    } catch {
+      showToast("Could not submit payment proof");
+    } finally {
+      setIsAdvancing(false);
+    }
+  }, [order, paymentRef, queryClient, id, showToast]);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -748,6 +778,51 @@ export default function OrderTrackingScreen() {
               Reject — wrong TRX ID
             </Text>
           </Pressable>
+        </View>
+      ) : isCustomerOrder &&
+        order.status === "received" &&
+        order.payment_status === "unpaid" &&
+        (order.payment_method === "kpay" || order.payment_method === "mmqr") ? (
+        <View
+          style={{
+            padding: spacing.xl,
+            borderTopWidth: 1,
+            borderTopColor: colors.line,
+            backgroundColor: colors.surface,
+            gap: spacing.sm,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.ink,
+              fontSize: typography.bodySmall,
+              fontWeight: "800",
+            }}
+          >
+            Submit payment proof
+          </Text>
+          <TextInput
+            value={paymentRef}
+            onChangeText={setPaymentRef}
+            placeholder="Enter transaction ID"
+            placeholderTextColor={colors.muted}
+            autoCapitalize="characters"
+            style={{
+              borderWidth: 1,
+              borderColor: colors.line,
+              borderRadius: radius.md,
+              color: colors.ink,
+              paddingHorizontal: spacing.md,
+              height: 46,
+            }}
+          />
+          <Button
+            label="Submit payment proof"
+            onPress={handleRetryPayment}
+            loading={isAdvancing}
+            disabled={!paymentRef.trim()}
+            variant="primary"
+          />
         </View>
       ) : order.status === "completed" ? (
         <View

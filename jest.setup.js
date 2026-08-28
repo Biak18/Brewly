@@ -43,14 +43,17 @@ jest.mock("react-native-reanimated", () => {
         }
         return undefined;
       },
-    }
+    },
   );
 
   const Easing = new Proxy(
     {},
     {
-      get: (_t, prop) => (...args) => args[0] ?? makeBuilder(),
-    }
+      get:
+        (_t, prop) =>
+        (...args) =>
+          args[0] ?? makeBuilder(),
+    },
   );
 
   const mock = {
@@ -133,6 +136,7 @@ jest.mock("expo-notifications", () => ({
     status: "denied",
   })),
   getExpoPushTokenAsync: jest.fn(async () => ({ data: null })),
+  getLastNotificationResponseAsync: jest.fn(async () => null),
   setNotificationChannelAsync: jest.fn(async () => {}),
   addNotificationResponseReceivedListener: jest.fn(() => ({
     remove: jest.fn(),
@@ -274,8 +278,11 @@ jest.mock("react-native-gesture-handler", () => {
   const GestureProxy = new Proxy(
     {},
     {
-      get: (_t, method) => (..._args) => gestureStub(),
-    }
+      get:
+        (_t, method) =>
+        (..._args) =>
+          gestureStub(),
+    },
   );
 
   const GestureDetector = ({ children }) =>
@@ -410,7 +417,7 @@ jest.mock("@/services/supabase", () => {
 /* @react-native-async-storage/async-storage — official jest mock      */
 /* ------------------------------------------------------------------ */
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
 /* ------------------------------------------------------------------ */
@@ -447,7 +454,7 @@ jest.mock("lucide-react-native", () => {
         if (typeof prop === "string") return Icon;
         return undefined;
       },
-    }
+    },
   );
 });
 
@@ -488,5 +495,12 @@ jest.mock("expo-location", () => ({
     DENIED: "denied",
     UNDETERMINED: "undetermined",
   },
-  Accuracy: { Lowest: 1, Low: 2, Balanced: 3, High: 4, Highest: 5, BestForNavigation: 6 },
+  Accuracy: {
+    Lowest: 1,
+    Low: 2,
+    Balanced: 3,
+    High: 4,
+    Highest: 5,
+    BestForNavigation: 6,
+  },
 }));

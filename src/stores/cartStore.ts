@@ -25,6 +25,7 @@ type CartState = {
   ) => void;
   removeItem: (lineId: string) => void;
   setQuantity: (lineId: string, quantity: number) => void;
+  updateItem: (lineId: string, patch: Partial<CartLineItem>) => void;
   clear: () => void;
 };
 
@@ -53,6 +54,12 @@ export const useCartStore = create<CartState>()(
               : state.items.map((i) =>
                   i.id === lineId ? { ...i, quantity } : i,
                 ),
+        })),
+      updateItem: (lineId, patch) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === lineId ? { ...item, ...patch } : item,
+          ),
         })),
       clear: () => set({ items: [] }),
     }),

@@ -60,7 +60,10 @@ export async function placeOrder(params: {
     p_promo_code: params.promoCode ?? null,
     p_discount: discount,
     p_delivery_fee: deliveryFee,
-    p_delivery_address: params.deliveryAddress ?? null,
+    p_delivery_address:
+      params.fulfillment === "delivery"
+        ? (params.deliveryAddress ?? null)
+        : null,
     p_redeem_loyalty: params.redeemLoyalty ?? false,
     p_idempotency_key: params.idempotencyKey ?? null,
   };

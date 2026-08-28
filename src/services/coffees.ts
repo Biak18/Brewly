@@ -125,6 +125,19 @@ export async function fetchCoffeeById(id: string) {
   return data;
 }
 
+export async function fetchActiveCoffeesByIds(
+  ids: string[],
+): Promise<Pick<Coffee, "id" | "name" | "image_url" | "is_active">[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from("coffees")
+    .select("id, name, image_url, is_active")
+    .in("id", ids)
+    .eq("is_active", true);
+  if (error) throw error;
+  return data;
+}
+
 export async function fetchCoffeeOptionsForCategory(
   categoryId: string,
 ): Promise<CoffeeOption[]> {

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { CartLineItemCard } from "@/features/cart/components/CartLineItemCard";
+import { fetchActiveCoffeesByIds } from "@/services/coffees";
 import {
   CartLineItem,
   selectCartSavings,
@@ -15,7 +16,7 @@ import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ShoppingBag } from "lucide-react-native";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { FlatList, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -33,10 +34,54 @@ export default function CartScreen() {
 
   const removeItem = useCartStore((s) => s.removeItem);
   const setQuantity = useCartStore((s) => s.setQuantity);
+  const updateItem = useCartStore((s) => s.updateItem);
   const total = useCartStore(selectCartTotal);
 
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useToastStore((s) => s.show);
+  const lastCheckedIds = useRef("");
+
+  useEffect(() => {
+    const ids = [...new Set(items.map((item) => item.coffeeId))].sort();
+    const signature = ids.join(",");
+    if (!signature || signature === lastCheckedIds.current) return;
+    lastCheckedIds.current = signature;
+
+    let cancelled = false;
+    fetchActiveCoffeesByIds(ids)
+      .then((activeCoffees) => {
+        if (cancelled) return;
+        if (activeCoffees.length === 0) return;
+        const activeById = new Map(
+          activeCoffees.map((coffee) => [coffee.id, coffee]),
+        );
+        const unavailable = items.filter(
+          (item) => !activeById.has(item.coffeeId),
+        );
+        unavailable.forEach((item) => removeItem(item.id));
+        items.forEach((item) => {
+          const coffee = activeById.get(item.coffeeId);
+          if (!coffee) return;
+          if (
+            item.name !== coffee.name ||
+            item.imageUrl !== (coffee.image_url ?? "")
+          ) {
+            updateItem(item.id, {
+              name: coffee.name,
+              imageUrl: coffee.image_url ?? "",
+            });
+          }
+        });
+        if (unavailable.length > 0) {
+          showToast("Some unavailable items were removed from your cart");
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, removeItem, updateItem, showToast]);
 
   const handleRemove = useCallback(
     (lineId: string) => {
