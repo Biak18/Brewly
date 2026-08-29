@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
+import {
+  EarningsCard,
+  EarningsCardError,
+  EarningsCardSkeleton,
+} from "@/features/seller/components/EarningsCard";
+import { useSellerEarnings } from "@/features/seller/hooks/useSellerEarnings";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
@@ -26,6 +32,11 @@ export default function MyStoreScreen() {
     queryFn: () => fetchMyStore(userId!),
     enabled: !!userId,
   });
+  const {
+    data: earnings,
+    isSuccess: earningsLoaded,
+    isError: earningsFailed,
+  } = useSellerEarnings(store?.id);
 
   return (
     <SafeAreaView
@@ -128,6 +139,16 @@ export default function MyStoreScreen() {
                 </Text>
               </View>
             )}
+          </View>
+
+          <View style={{ marginTop: spacing.lg }}>
+            {!earningsLoaded && !earningsFailed ? (
+              <EarningsCardSkeleton />
+            ) : earningsLoaded && earnings ? (
+              <EarningsCard earnings={earnings} />
+            ) : earningsFailed ? (
+              <EarningsCardError />
+            ) : null}
           </View>
 
           <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>

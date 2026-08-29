@@ -36,7 +36,9 @@ export async function searchStores(term: string): Promise<Store[]> {
   const escaped = escapePostgrestValue(clean);
   const { data, error } = await supabase
     .from("stores")
-    .select("id, name, address, hours, kpay_phone, payment_note, lat, lng")
+    .select(
+      "id, name, address, hours, kpay_phone, payment_note, contact_phone, lat, lng",
+    )
     .or(`name.ilike."%${escaped}%",address.ilike."%${escaped}%"`)
     .order("name", { ascending: true })
     .limit(10);

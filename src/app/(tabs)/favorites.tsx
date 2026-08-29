@@ -26,7 +26,6 @@ import { Heart, Store as StoreIcon } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Pressable, RefreshControl, Text, View } from "react-native";
 import Animated, {
-  FadeOut,
   LinearTransition,
   ZoomInEasyDown,
 } from "react-native-reanimated";
@@ -275,8 +274,7 @@ export default function FavoritesScreen() {
               <Animated.View
                 style={{ flex: 1, margin: spacing.xs }}
                 entering={ZoomInEasyDown.springify()}
-                exiting={FadeOut.duration(100)}
-                layout={LinearTransition.springify()}
+                layout={LinearTransition.springify().duration(0)}
               >
                 <CoffeeCard
                   coffee={data}

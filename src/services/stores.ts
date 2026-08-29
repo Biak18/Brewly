@@ -6,11 +6,13 @@ export type Store = Pick<Tables<"stores">, "id" | "name" | "address"> & {
   hours: { open: string; close: string } | null;
   kpay_phone: string | null;
   payment_note: string | null;
+  contact_phone: string | null;
   lat: number | null;
   lng: number | null;
 };
 
-const STORE_FIELDS = "id, name, address, hours, kpay_phone, payment_note, lat, lng";
+const STORE_FIELDS =
+  "id, name, address, hours, kpay_phone, payment_note, contact_phone, lat, lng";
 
 export async function fetchStores(): Promise<Store[]> {
   const { data, error } = await supabase
@@ -46,6 +48,7 @@ export type StoreUpdateInput = {
   hours: { open: string; close: string } | null;
   kpay_phone: string | null;
   payment_note: string | null;
+  contact_phone: string | null;
   lat?: number | null;
   lng?: number | null;
 };

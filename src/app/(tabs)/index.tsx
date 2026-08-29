@@ -69,6 +69,7 @@ export default function HomeScreen() {
           entering={() => ZoomInEasyDown.springify()}
         >
           <HomeHeader />
+          <View style={{ marginTop: spacing.sm }} /> {/* spacer */}
           <PromoBanner />
           <HomeShopsRow />
           <CoffeeRow title="Popular" coffees={popular.data ?? []} />

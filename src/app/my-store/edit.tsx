@@ -41,6 +41,7 @@ const schema = z
       .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
     kpayPhone: z.string(),
     paymentNote: z.string(),
+    contactPhone: z.string(),
   })
   .superRefine((v, ctx) => {
     const oneSet = !!v.openTime !== !!v.closeTime;
@@ -90,6 +91,7 @@ export default function EditStoreScreen() {
       closeTime: "",
       kpayPhone: "",
       paymentNote: "",
+      contactPhone: "",
     },
   });
 
@@ -110,6 +112,7 @@ export default function EditStoreScreen() {
         closeTime: store.hours?.close ?? "",
         kpayPhone: store.kpay_phone ?? "",
         paymentNote: store.payment_note ?? "",
+        contactPhone: store.contact_phone ?? "",
       });
     }
   }, [store, reset]);
@@ -132,6 +135,7 @@ export default function EditStoreScreen() {
         hours,
         kpay_phone: values.kpayPhone.trim() || null,
         payment_note: values.paymentNote.trim() || null,
+        contact_phone: values.contactPhone.trim() || null,
         lat: pin?.lat ?? null,
         lng: pin?.lng ?? null,
       });
@@ -555,6 +559,42 @@ export default function EditStoreScreen() {
                 color: colors.ink,
                 borderRadius: radius.md,
                 textAlignVertical: "top",
+              }}
+            />
+          )}
+        />
+
+        <Text
+          style={{
+            color: colors.muted,
+            fontSize: typography.caption,
+            fontWeight: "800",
+            textTransform: "uppercase",
+            letterSpacing: 1,
+            marginTop: spacing.xl,
+            marginBottom: spacing.sm,
+          }}
+        >
+          Contact number
+        </Text>
+        <Controller
+          control={control}
+          name="contactPhone"
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              placeholder="Phone customers can call (e.g. 09XXXXXXXXX)"
+              placeholderTextColor={colors.muted}
+              keyboardType="phone-pad"
+              style={{
+                borderWidth: 1,
+                borderColor: colors.line,
+                height: 48,
+                paddingHorizontal: 14,
+                fontSize: 14,
+                color: colors.ink,
+                borderRadius: radius.md,
               }}
             />
           )}

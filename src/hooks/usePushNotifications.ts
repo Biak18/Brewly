@@ -6,7 +6,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 
 Notifications.setNotificationHandler({
@@ -20,8 +20,15 @@ Notifications.setNotificationHandler({
 
 export function usePushNotifications() {
   const userId = useAuthStore((s) => s.session?.user.id);
+  const isAuthLoading = useAuthStore((s) => s.isLoading);
   const enabled = useNotificationStore((s) => s.pushEnabled);
   const tokenRef = useRef<string | null>(null);
+  const pendingOrderIdRef = useRef<string | null>(null);
+  const isAuthLoadingRef = useRef(isAuthLoading);
+
+  useEffect(() => {
+    isAuthLoadingRef.current = isAuthLoading;
+  }, [isAuthLoading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,18 +94,23 @@ export function usePushNotifications() {
 
   // Tapping a notification navigates to the order it's about — router is
   // expo-router's imperative singleton, safe to call outside a hook/component tree.
-  useEffect(() => {
-    let cancelled = false;
-
-    function openOrderFromResponse(
-      response: Notifications.NotificationResponse | null,
-    ) {
-      if (cancelled || !response) return;
-      const data = response.notification.request.content.data;
+  const openOrderFromResponse = useCallback(
+    (response: Notifications.NotificationResponse | null) => {
+      const data = response?.notification.request.content.data;
       const orderId = (data?.orderId ?? data?.order_id) as string | undefined;
-      if (orderId) router.push(`/orders/${orderId}/tracking`);
-    }
+      if (!orderId) return;
+      // Cold start: the Stack isn't mounted and the session isn't restored
+      // yet — park the tap and flush it once auth settles.
+      if (isAuthLoadingRef.current) {
+        pendingOrderIdRef.current = orderId;
+        return;
+      }
+      router.push(`/orders/${orderId}/tracking`);
+    },
+    [],
+  );
 
+  useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       openOrderFromResponse,
     );
@@ -108,8 +120,24 @@ export function usePushNotifications() {
       .catch((error) => console.warn("Notification response failed", error));
 
     return () => {
-      cancelled = true;
       subscription.remove();
     };
-  }, []);
+  }, [openOrderFromResponse]);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    const orderId = pendingOrderIdRef.current;
+    if (!orderId) return;
+    pendingOrderIdRef.current = null;
+    // Signed out (or into another account) — the tracking screen is
+    // session-guarded, so a stale tap has nowhere to land.
+    if (!userId) return;
+    router.push(`/orders/${orderId}/tracking`);
+  }, [isAuthLoading, userId]);
+
+  // App is open and every queued push is on screen — badge can be cleared.
+  useEffect(() => {
+    if (!userId || !enabled) return;
+    Notifications.setBadgeCountAsync(0).catch(() => {});
+  }, [userId, enabled]);
 }

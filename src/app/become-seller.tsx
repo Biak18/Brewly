@@ -145,6 +145,7 @@ export default function BecomeSellerScreen() {
               hours,
               kpay_phone: values.kpayPhone.trim() || null,
               payment_note: values.paymentNote.trim() || null,
+              contact_phone: null,
               lat: nextPin?.lat ?? null,
               lng: nextPin?.lng ?? null,
             });

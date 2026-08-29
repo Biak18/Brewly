@@ -27,7 +27,6 @@ import { fetchStoreById } from "@/services/stores";
 import { useTheme } from "@/theme";
 import { toCoffeeCardData } from "@/utils/pricing";
 import { getStoreOpenState } from "@/utils/storeHours";
-import { Stagger } from "@animatereactnative/stagger";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -40,11 +39,7 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
-import Animated, {
-  Easing,
-  FadeInUp,
-  ZoomInEasyDown,
-} from "react-native-reanimated";
+import Animated, { ZoomInEasyDown } from "react-native-reanimated";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -169,71 +164,65 @@ export default function ShopMenuScreen() {
         </IconButton>
       </View>
 
-      <Stagger
-        stagger={70}
-        duration={420}
-        entering={() => FadeInUp.duration(420).easing(Easing.out(Easing.cubic))}
-      >
-        {(() => {
-          const openState = getStoreOpenState(store?.hours);
-          if (!openState.isKnown || openState.isOpen) return null;
-          return (
-            <View
+      {(() => {
+        const openState = getStoreOpenState(store?.hours);
+        if (!openState.isKnown || openState.isOpen) return null;
+        return (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.sm,
+              marginHorizontal: spacing.xl,
+              marginBottom: spacing.md,
+              padding: spacing.md,
+              borderRadius: radius.md,
+              backgroundColor: colors.surface2,
+            }}
+          >
+            <Clock size={16} color={colors.muted} strokeWidth={1.8} />
+            <Text
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: spacing.sm,
-                marginHorizontal: spacing.xl,
-                marginBottom: spacing.md,
-                padding: spacing.md,
-                borderRadius: radius.md,
-                backgroundColor: colors.surface2,
+                color: colors.muted,
+                fontSize: typography.caption,
+                fontWeight: "600",
+                flex: 1,
               }}
             >
-              <Clock size={16} color={colors.muted} strokeWidth={1.8} />
-              <Text
-                style={{
-                  color: colors.muted,
-                  fontSize: typography.caption,
-                  fontWeight: "600",
-                  flex: 1,
-                }}
-              >
-                Closed now — opens at {openState.opensAt}. You can still browse.
-              </Text>
-            </View>
-          );
-        })()}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: spacing.sm,
-            paddingHorizontal: spacing.xl,
-          }}
+              Closed now — opens at {openState.opensAt}. You can still browse.
+            </Text>
+          </View>
+        );
+      })()}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sm,
+          paddingHorizontal: spacing.xl,
+        }}
+      >
+        <SearchBar value={searchText} onChangeText={setSearchText} />
+        <IconButton
+          accessibilityLabel="Sort"
+          variant={sort !== "popular" ? "filled" : "default"}
+          onPress={() => setSortSheetVisible(true)}
         >
-          <SearchBar value={searchText} onChangeText={setSearchText} />
-          <IconButton
-            accessibilityLabel="Sort"
-            variant={sort !== "popular" ? "filled" : "default"}
-            onPress={() => setSortSheetVisible(true)}
-          >
-            <SlidersHorizontal
-              size={18}
-              color={colors.espresso}
-              strokeWidth={1.8}
-            />
-          </IconButton>
-        </View>
-        <View style={{ height: spacing.md }} />
-        <View>
-          <MenuCategoryRow
-            storeId={storeId}
-            selectedId={categoryId}
-            onSelect={setCategoryId}
+          <SlidersHorizontal
+            size={18}
+            color={colors.espresso}
+            strokeWidth={1.8}
           />
-        </View>
-      </Stagger>
+        </IconButton>
+      </View>
+      <View style={{ height: spacing.md }} />
+      <View>
+        <MenuCategoryRow
+          storeId={storeId}
+          selectedId={categoryId}
+          onSelect={setCategoryId}
+        />
+      </View>
       <View style={{ height: spacing.md }} />
 
       {combinedLoading ? (

@@ -10,7 +10,8 @@ export type AnalyticsEvent =
   | "shop_viewed"
   | "add_to_cart"
   | "checkout_started"
-  | "order_placed";
+  | "order_placed"
+  | "chat_message_sent";
 
 export type AnalyticsProps = Record<
   string,

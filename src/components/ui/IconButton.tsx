@@ -14,6 +14,7 @@ type IconButtonProps = {
   children: React.ReactNode;
   accessibilityLabel: string;
   variant?: "default" | "filled";
+  animation?: boolean;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,6 +24,7 @@ export function IconButton({
   children,
   accessibilityLabel,
   variant = "default",
+  animation = false,
 }: IconButtonProps) {
   const colors = useThemeStore((s) => s.colors);
   const scale = useSharedValue(1);
@@ -54,7 +56,7 @@ export function IconButton({
           backgroundColor:
             variant === "filled" ? colors.surface2 : colors.surface,
         },
-        animatedStyle,
+        animation ?? animatedStyle,
       ]}
     >
       {children}
