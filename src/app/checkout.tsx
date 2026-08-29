@@ -45,7 +45,9 @@ const checkoutSchema = z
     paymentRef: z.string().trim(),
   })
   .superRefine((v, ctx) => {
-    if (v.paymentMethod !== "cash" && v.paymentRef.length === 0) {
+    // Manual proof methods need a transaction ID.
+    const needsManualRef = v.paymentMethod !== "cash";
+    if (needsManualRef && v.paymentRef.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["paymentRef"],
@@ -244,9 +246,9 @@ export default function CheckoutScreen() {
           tip_amount: tip,
           fulfillment,
         });
-        if (values.paymentMethod !== "cash") {
-          // Order is already placed; a failed proof attach must not lose it —
-          // the seller simply sees it as unpaid and can coordinate manually.
+        if (values.paymentMethod === "mmqr" || values.paymentMethod === "kpay") {
+          // Manual proof path. Order is already placed; a failed proof attach
+          // must not lose it — the seller sees it unpaid and coordinates.
           try {
             await attachPayment(
               orderId,
@@ -402,22 +404,22 @@ export default function CheckoutScreen() {
             )}
           />
           {paymentMethod !== "cash" && (
-            <View style={{ marginTop: spacing.md }}>
-              <Controller
-                control={control}
-                name="paymentRef"
-                render={({ field: { value, onChange } }) => (
-                  <KpayPanel
-                    store={store}
-                    method={paymentMethod as "kpay" | "mmqr"}
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.paymentRef?.message}
-                  />
-                )}
-              />
-            </View>
-          )}
+              <View style={{ marginTop: spacing.md }}>
+                <Controller
+                  control={control}
+                  name="paymentRef"
+                  render={({ field: { value, onChange } }) => (
+                    <KpayPanel
+                      store={store}
+                      method={paymentMethod as "kpay" | "mmqr"}
+                      value={value}
+                      onChangeText={onChange}
+                      error={errors.paymentRef?.message}
+                    />
+                  )}
+                />
+              </View>
+            )}
         </Section>
 
         <Section title="Order summary">
