@@ -5,7 +5,7 @@ import { useNotificationStore } from "@/stores/notificationStore";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 
@@ -18,6 +18,17 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// True when `pathname` already points at the screen a notification would open.
+// Tolerant of query strings / hash / trailing slashes.
+function isOnTargetScreen(
+  pathname: string,
+  orderId: string,
+  isChat: boolean,
+): boolean {
+  const clean = pathname.split(/[?#]/)[0].replace(/\/$/, "");
+  return clean === `/orders/${orderId}/${isChat ? "chat" : "tracking"}`;
+}
+
 export function usePushNotifications() {
   const userId = useAuthStore((s) => s.session?.user.id);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
@@ -26,10 +37,12 @@ export function usePushNotifications() {
   const pendingOrderIdRef = useRef<string | null>(null);
   const pendingTypeRef = useRef<string | null>(null);
   const isAuthLoadingRef = useRef(isAuthLoading);
-
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
   useEffect(() => {
     isAuthLoadingRef.current = isAuthLoading;
-  }, [isAuthLoading]);
+    pathnameRef.current = pathname;
+  }, [isAuthLoading, pathname]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +114,9 @@ export function usePushNotifications() {
       const orderId = (data?.orderId ?? data?.order_id) as string | undefined;
       if (!orderId) return;
       const isChat = (data?.type as string | undefined) === "chat";
+
+      // Already on the destination screen for this order — don't stack it.
+      if (isOnTargetScreen(pathnameRef.current, orderId, isChat)) return;
       // Cold start: the Stack isn't mounted and the session isn't restored
       // yet — park the tap and flush it once auth settles.
       if (isAuthLoadingRef.current) {
@@ -109,9 +125,9 @@ export function usePushNotifications() {
         return;
       }
       if (isChat) {
-        router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+        router.replace({ pathname: "/orders/[id]/chat", params: { id: orderId } });
       } else {
-        router.push(`/orders/${orderId}/tracking`);
+        router.replace(`/orders/${orderId}/tracking`);
       }
     },
     [],
@@ -141,10 +157,13 @@ export function usePushNotifications() {
     // Signed out (or into another account) — the screens are
     // session-guarded, so a stale tap has nowhere to land.
     if (!userId) return;
-    if (type === "chat") {
-      router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+    const isChat = type === "chat";
+    // Already on the destination screen for this order — don't stack it.
+    if (isOnTargetScreen(pathnameRef.current, orderId, isChat)) return;
+    if (isChat) {
+      router.replace({ pathname: "/orders/[id]/chat", params: { id: orderId } });
     } else {
-      router.push(`/orders/${orderId}/tracking`);
+      router.replace(`/orders/${orderId}/tracking`);
     }
   }, [isAuthLoading, userId]);
 
