@@ -54,7 +54,7 @@ export default function OrderChatScreen() {
           backgroundColor: colors.bg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.dismiss(2)}>
+        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text

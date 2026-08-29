@@ -37,7 +37,6 @@ const schema = z.object({
     .refine((v) => !isNaN(Number(v)) && Number(v) > 0, "Enter a valid price"),
   imageUrl: z.string().url("Enter a valid URL").or(z.literal("")),
   categoryId: z.string().min(1, "Choose a category"),
-  isFeatured: z.boolean(),
   isActive: z.boolean(),
 });
 type FormValues = z.infer<typeof schema>;
@@ -80,7 +79,6 @@ export default function CoffeeFormScreen() {
       basePrice: "",
       imageUrl: "",
       categoryId: "",
-      isFeatured: false,
       isActive: true,
     },
   });
@@ -99,7 +97,6 @@ export default function CoffeeFormScreen() {
         basePrice: String(existingCoffee.base_price),
         imageUrl: existingCoffee.image_url ?? "",
         categoryId: existingCoffee.category_id ?? "",
-        isFeatured: existingCoffee.is_featured ?? false,
         isActive: existingCoffee.is_active ?? true,
       });
     }
@@ -114,7 +111,7 @@ export default function CoffeeFormScreen() {
         base_price: Number(values.basePrice),
         image_url: values.imageUrl,
         category_id: values.categoryId,
-        is_featured: values.isFeatured,
+        is_featured: existingCoffee?.is_featured ?? false,
         is_active: values.isActive,
       };
       try {
@@ -130,7 +127,7 @@ export default function CoffeeFormScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     },
-    [myStore, isEditing, id, queryClient, router],
+    [myStore, isEditing, id, queryClient, router, existingCoffee],
   );
 
   const handlePickImage = useCallback(async () => {
@@ -428,35 +425,7 @@ export default function CoffeeFormScreen() {
             justifyContent: "space-between",
             alignItems: "center",
             marginTop: spacing.xl,
-          }}
-        >
-          <Text
-            style={{
-              color: colors.ink,
-              fontSize: typography.bodySmall,
-              fontWeight: "600",
-            }}
-          >
-            Featured
-          </Text>
-          <Controller
-            control={control}
-            name="isFeatured"
-            render={({ field: { value, onChange } }) => (
-              <Switch
-                value={value}
-                onValueChange={onChange}
-                trackColor={{ true: colors.green, false: colors.line }}
-              />
-            )}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: spacing.md,
+            marginBottom: spacing.lg,
           }}
         >
           <Text

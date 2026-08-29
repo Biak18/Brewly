@@ -36,11 +36,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import {
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
+} from "react-native-keyboard-controller";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -354,7 +357,7 @@ export default function OrderTrackingScreen() {
 
   useEffect(() => {
     const onBackPress = () => {
-      router.dismiss(2);
+      router.back();
       return true;
     };
 
@@ -438,7 +441,7 @@ export default function OrderTrackingScreen() {
       >
         <IconButton
           accessibilityLabel="Go back"
-          onPress={() => router.dismiss(2)}
+          onPress={() => router.back()}
         >
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
@@ -454,9 +457,10 @@ export default function OrderTrackingScreen() {
         </Text>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{ paddingBottom: spacing.xxxl }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={{ paddingVertical: spacing.xl }}>
           {order.status === "cancelled" ? (
@@ -729,17 +733,30 @@ export default function OrderTrackingScreen() {
           )}
         </View>
 
-        <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}>
-          <Button
-            label={isCustomerOrder ? "Talk with Shop" : "Chat with customer"}
-            onPress={() =>
-              router.push({ pathname: "/orders/[id]/chat", params: { id: order.id } })
-            }
-            variant="soft"
-            icon={<MessageCircle size={18} color={colors.espresso} strokeWidth={1.8} />}
-          />
-        </View>
-      </ScrollView>
+        {order.status !== "completed" && (
+          <View
+            style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}
+          >
+            <Button
+              label={isCustomerOrder ? "Talk with Shop" : "Chat with customer"}
+              onPress={() =>
+                router.push({
+                  pathname: "/orders/[id]/chat",
+                  params: { id: order.id },
+                })
+              }
+              variant="soft"
+              icon={
+                <MessageCircle
+                  size={18}
+                  color={colors.espresso}
+                  strokeWidth={1.8}
+                />
+              }
+            />
+          </View>
+        )}
+      </KeyboardAwareScrollView>
 
       {/* {canManage && nextStatus && (
         <View
@@ -795,47 +812,52 @@ export default function OrderTrackingScreen() {
         order.status === "received" &&
         order.payment_status === "unpaid" &&
         (order.payment_method === "kpay" || order.payment_method === "mmqr") ? (
-        <View
+        <KeyboardStickyView
           style={{
-            padding: spacing.xl,
             borderTopWidth: 1,
             borderTopColor: colors.line,
             backgroundColor: colors.surface,
-            gap: spacing.sm,
           }}
         >
-          <Text
+          <View
             style={{
-              color: colors.ink,
-              fontSize: typography.bodySmall,
-              fontWeight: "800",
+              padding: spacing.xl,
+              gap: spacing.sm,
             }}
           >
-            Submit payment proof
-          </Text>
-          <TextInput
-            value={paymentRef}
-            onChangeText={setPaymentRef}
-            placeholder="Enter transaction ID"
-            placeholderTextColor={colors.muted}
-            autoCapitalize="characters"
-            style={{
-              borderWidth: 1,
-              borderColor: colors.line,
-              borderRadius: radius.md,
-              color: colors.ink,
-              paddingHorizontal: spacing.md,
-              height: 46,
-            }}
-          />
-          <Button
-            label="Submit payment proof"
-            onPress={handleRetryPayment}
-            loading={isAdvancing}
-            disabled={!paymentRef.trim()}
-            variant="primary"
-          />
-        </View>
+            <Text
+              style={{
+                color: colors.ink,
+                fontSize: typography.bodySmall,
+                fontWeight: "800",
+              }}
+            >
+              Submit payment proof
+            </Text>
+            <TextInput
+              value={paymentRef}
+              onChangeText={setPaymentRef}
+              placeholder="Enter transaction ID"
+              placeholderTextColor={colors.muted}
+              autoCapitalize="characters"
+              style={{
+                borderWidth: 1,
+                borderColor: colors.line,
+                borderRadius: radius.md,
+                color: colors.ink,
+                paddingHorizontal: spacing.md,
+                height: 46,
+              }}
+            />
+            <Button
+              label="Submit payment proof"
+              onPress={handleRetryPayment}
+              loading={isAdvancing}
+              disabled={!paymentRef.trim()}
+              variant="primary"
+            />
+          </View>
+        </KeyboardStickyView>
       ) : order.status === "completed" ? (
         <View
           style={{

@@ -10,9 +10,9 @@ import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { useFocusEffect } from "expo-router";
 import { Send } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -144,6 +144,25 @@ export function OrderChat({
         >
           <ActivityIndicator color={colors.muted} />
         </View>
+      ) : messages.length === 0 ? (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: spacing.xl,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.body,
+              textAlign: "center",
+            }}
+          >
+            No messages yet. Say something about your order.
+          </Text>
+        </View>
       ) : (
         <FlatList
           data={invertedData}
@@ -160,32 +179,10 @@ export function OrderChat({
           contentContainerStyle={{
             padding: spacing.lg,
             flexGrow: 1,
-            justifyContent: invertedData.length === 0 ? "center" : "flex-end",
+            justifyContent: "flex-end",
           }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            // Inverted FlatList applies a scaleY flip to its whole content area,
-            // which silently upside-downs anything rendered here too unless
-            // counter-flipped back — an easy, easy-to-miss gotcha with this pattern.
-            <View
-              style={{
-                transform: [{ scaleY: -1 }],
-                alignItems: "center",
-                padding: spacing.xl,
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.muted,
-                  fontSize: typography.body,
-                  textAlign: "center",
-                }}
-              >
-                No messages yet. Say something about your order.
-              </Text>
-            </View>
-          }
         />
       )}
 

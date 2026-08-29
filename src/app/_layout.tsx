@@ -75,11 +75,30 @@ function RootNavigator() {
           <Stack.Screen name="cart" />
           <Stack.Screen name="checkout" />
           <Stack.Screen name="addresses" />
-          <Stack.Screen name="orders/[id]/tracking" />
-          <Stack.Screen name="orders/[id]/chat" />
+          <Stack.Screen
+            name="orders/[id]/tracking"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="orders/[id]/chat"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
           <Stack.Screen name="shop/[id]" />
           <Stack.Screen name="my-store" />
           <Stack.Screen name="become-seller" />
+          <Stack.Screen
+            name="search"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 50,
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected
           guard={!session && !isPasswordRecovery && hasOnboarded}
