@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Send } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -60,7 +61,7 @@ export function OrderChat({
   currentUserId: string;
 }) {
   const { height } = useGradualAnimation();
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const showToast = useToastStore((s) => s.show);
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
@@ -118,6 +119,14 @@ export function OrderChat({
     if (!draft.trim() || send.isPending) return;
     send.mutate();
   }, [draft, send]);
+
+  // Re-sync whenever the screen is focused (e.g. opened from a push) so the
+  // most recent message is never missed if a realtime event was dropped.
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["chat", orderId] });
+    }, [queryClient, orderId]),
+  );
 
   const fakeView = useAnimatedStyle(
     () => ({

@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       sound: "default",
       title,
       body,
-      data: { orderId: record.id },
+      data: { orderId: record.id, type: "order" },
     }));
 
     await fetch(EXPO_PUSH_URL, {
@@ -139,7 +139,7 @@ async function notifyChatMessage(supabase: any, record: any): Promise<Response> 
     sound: "default",
     title,
     body,
-    data: { orderId: orderId },
+    data: { orderId: orderId, type: "chat" },
   }));
 
   await fetch(EXPO_PUSH_URL, {

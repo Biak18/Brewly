@@ -65,13 +65,20 @@ export async function sendOrderMessage(params: {
 }
 
 // Live updates for one thread. Returns an unsubscribe function.
+//
+// The channel name is made unique per call (not just `chat:${orderId}`):
+// Supabase caches channels by topic, so reusing the same name while a prior
+// subscription is still subscribed throws "cannot add postgres_changes
+// callbacks … after subscribe()". A unique topic avoids that collision
+// entirely even if the screen remounts (e.g. a notification tap re-opens it).
 export function subscribeOrderMessages(
   orderId: string,
   onInsert: (message: ChatMessage) => void,
   onError?: (error: Error) => void,
 ): () => void {
+  const channelName = `chat:${orderId}:${Math.random().toString(36).slice(2, 10)}`;
   const channel = supabase
-    .channel(`chat:${orderId}`)
+    .channel(channelName)
     .on(
       "postgres_changes",
       {

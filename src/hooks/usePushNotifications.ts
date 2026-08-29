@@ -24,6 +24,7 @@ export function usePushNotifications() {
   const enabled = useNotificationStore((s) => s.pushEnabled);
   const tokenRef = useRef<string | null>(null);
   const pendingOrderIdRef = useRef<string | null>(null);
+  const pendingTypeRef = useRef<string | null>(null);
   const isAuthLoadingRef = useRef(isAuthLoading);
 
   useEffect(() => {
@@ -99,13 +100,19 @@ export function usePushNotifications() {
       const data = response?.notification.request.content.data;
       const orderId = (data?.orderId ?? data?.order_id) as string | undefined;
       if (!orderId) return;
+      const isChat = (data?.type as string | undefined) === "chat";
       // Cold start: the Stack isn't mounted and the session isn't restored
       // yet — park the tap and flush it once auth settles.
       if (isAuthLoadingRef.current) {
         pendingOrderIdRef.current = orderId;
+        pendingTypeRef.current = isChat ? "chat" : "order";
         return;
       }
-      router.push(`/orders/${orderId}/tracking`);
+      if (isChat) {
+        router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+      } else {
+        router.push(`/orders/${orderId}/tracking`);
+      }
     },
     [],
   );
@@ -127,12 +134,18 @@ export function usePushNotifications() {
   useEffect(() => {
     if (isAuthLoading) return;
     const orderId = pendingOrderIdRef.current;
+    const type = pendingTypeRef.current;
     if (!orderId) return;
     pendingOrderIdRef.current = null;
-    // Signed out (or into another account) — the tracking screen is
+    pendingTypeRef.current = null;
+    // Signed out (or into another account) — the screens are
     // session-guarded, so a stale tap has nowhere to land.
     if (!userId) return;
-    router.push(`/orders/${orderId}/tracking`);
+    if (type === "chat") {
+      router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+    } else {
+      router.push(`/orders/${orderId}/tracking`);
+    }
   }, [isAuthLoading, userId]);
 
   // App is open and every queued push is on screen — badge can be cleared.
