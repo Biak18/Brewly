@@ -51,7 +51,7 @@ function flushAsync() {
 
 describe("usePushNotifications", () => {
   const getLastResponse =
-    Notifications.getLastNotificationResponseAsync as jest.Mock;
+    Notifications.getLastNotificationResponse as jest.Mock;
   const addResponseListener =
     Notifications.addNotificationResponseReceivedListener as jest.Mock;
 
@@ -101,10 +101,12 @@ describe("usePushNotifications", () => {
     signIn();
 
     let listener: (response: unknown) => void = () => {};
-    addResponseListener.mockImplementation((cb: (response: unknown) => void) => {
-      listener = cb;
-      return { remove: jest.fn() };
-    });
+    addResponseListener.mockImplementation(
+      (cb: (response: unknown) => void) => {
+        listener = cb;
+        return { remove: jest.fn() };
+      },
+    );
 
     render(<Harness />);
     listener(responseWithOrderId("order-99"));
