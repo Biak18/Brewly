@@ -1,116 +1,53 @@
 # Brewly
 
-Brewly is an Expo 57 coffee ordering app with customer ordering, pickup and
-delivery checkout, loyalty rewards, promotions, seller menu management, and
-KPay/MMQR payment proof support.
+Brewly is a coffee ordering app that connects coffee lovers with local coffee
+shops. Browse menus, place pickup or delivery orders, pay with the methods you
+already use, and follow your order in real time — all from your phone.
 
-## Requirements
+## For Customers
 
-- Node.js 22.13 or newer
-- Android Studio and an Android emulator or device for Android development
-- Xcode 16.4 or newer for iOS development
-- A Supabase project for authentication, data, storage, and realtime updates
+- **Discover local coffee shops** — browse shops and their menus, with prices,
+  descriptions, and featured picks.
+- **Easy ordering** — build your cart, choose pickup or delivery, and check out
+  in a few taps.
+- **Flexible payments** — pay with **KPay (KBZPay)**, **MMQR**, or **cash** at
+  handoff. KPay and MMQR use simple payment-proof upload, so no card is
+  required.
+- **Loyalty rewards** — earn rewards on the coffee you already buy.
+- **Promotions** — apply promo codes and see automatic discounts at checkout.
+- **Live order tracking** — watch your order move from received to ready to
+  completed, with status updates pushed to your device.
+- **Talk to the shop** — chat with the shop or call them directly if you need to
+  change something.
+- **Ratings** — rate your order and help others find great coffee.
 
-Install dependencies:
+## For Coffee Shops (Sellers)
 
-```powershell
-npm install
-```
+- **Manage your menu** — add and edit coffees, set prices, and highlight
+  featured items.
+- **Handle orders** — confirm, reject, or advance orders through each stage and
+  keep customers informed.
+- **Stay in touch** — chat with customers and call them straight from an order.
+- **Track earnings** — see your sales and payouts at a glance.
+- **Shop profile** — set your contact number and store details so customers can
+  reach you.
 
-## Environment
+## How an order works
 
-Create a `.env` file in the project root:
+1. Pick a shop and add coffees to your cart.
+2. Choose **pickup** or **delivery** (delivery uses a flat delivery fee).
+3. Pay with KPay, MMQR, or cash.
+4. Follow the order live and get a notification at each step.
+5. Collect your coffee or receive it at your door, then rate your experience.
 
-```env
-EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-EXPO_PUBLIC_SENTRY_DSN=optional-sentry-dsn
-SENTRY_AUTH_TOKEN=optional-sentry-token
-SENTRY_ORG=optional-sentry-organization
-SENTRY_PROJECT=optional-sentry-project
-```
+## Payments
 
-Do not commit `.env`, service-role keys, database passwords, or signing keys.
+Brewly uses manual proof-based checkout — there is no in-app card gateway:
 
-## Supabase
+- **KPay (KBZPay)** and **MMQR** — complete the transfer in your banking app,
+  then paste the transaction ID into Brewly to confirm.
+- **Cash** — no proof needed; pay when you collect or receive your order.
 
-The linked project reference is stored in `supabase/.temp/project-ref`.
-Apply migrations to the linked project with:
+## Platforms
 
-```powershell
-npx supabase db push --linked
-```
-
-The migrations contain authoritative order pricing, idempotent checkout,
-address-default handling, RLS policies, payment authorization, and seller
-ownership checks.
-
-The current migrations are hardening migrations for the existing Supabase
-project. A fresh project also needs the original application schema and RPC
-baseline before applying these files. Keep that baseline in version control
-before attempting a clean-environment restore.
-
-The migration history was reconciled against the linked project on 2026-08-28.
-Do not mark migrations as applied or reverted unless the remote schema has been
-verified first.
-
-Run database tests locally when Docker is available:
-
-```powershell
-npx supabase start
-npx supabase test db --local
-```
-
-## Development
-
-Start the Expo development server:
-
-```powershell
-npm start
-```
-
-Run on Android, iOS, or web:
-
-```powershell
-npm run android
-npm run ios
-npm run web
-```
-
-The app uses the `brewly` URL scheme. Development links use the Expo Router
-development URL; production links use `brewly://`.
-
-## Validation
-
-```powershell
-npm run typecheck
-npm run lint
-npm test -- --runInBand
-```
-
-The test suite covers customer screens, seller screens, cart behavior, order
-pricing helpers, address snapshots, and store-hours logic.
-
-## Builds
-
-EAS profiles are defined in `eas.json`:
-
-```powershell
-npx eas build --profile development
-npx eas build --profile preview
-npx eas build --profile production
-npx eas submit --profile production
-```
-
-Production Android signing must be configured before publishing. The checked-in
-native project should not be used to publish a debug-signed release build.
-
-## Project Structure
-
-- `src/app`: Expo Router screens and layouts
-- `src/features`: feature components, hooks, and API logic
-- `src/services`: Supabase services and domain operations
-- `src/stores`: Zustand state stores
-- `src/utils`: pricing, currency, geography, and validation helpers
-- `supabase/migrations`: versioned database changes
-- `supabase/tests`: pgTAP database tests
+Brewly is available on **iOS** and **Android**.
