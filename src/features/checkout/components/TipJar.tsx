@@ -4,7 +4,7 @@ import { formatCurrency } from "@/utils/currency";
 import { HandCoins } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
-const TIP_OPTIONS = [0, 0.5, 1, 2];
+const TIP_OPTIONS = [0, 500, 1000, 2000];
 
 export function TipJar({
   value,
