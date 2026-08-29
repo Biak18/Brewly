@@ -200,6 +200,7 @@ export default function ShopMenuScreen() {
           alignItems: "center",
           gap: spacing.sm,
           paddingHorizontal: spacing.xl,
+          marginTop: spacing.md,
         }}
       >
         <SearchBar value={searchText} onChangeText={setSearchText} />
@@ -255,6 +256,7 @@ export default function ShopMenuScreen() {
           numColumns={2}
           keyExtractor={(item) => item.id}
           onEndReachedThreshold={0.5}
+          keyboardDismissMode={"on-drag"}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
           }}

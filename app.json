@@ -17,7 +17,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "predictiveBackGestureEnabled": false,
-      "softwareKeyboardLayoutMode": "resize",
+      "softwareKeyboardLayoutMode": "pan",
       "package": "com.chanorg.grabcoffee",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",

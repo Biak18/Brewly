@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pulse } from "@/components/ui/Pulse";
-import { OrderChat } from "@/features/chat/components/OrderChat";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { ShareReceiptButton } from "@/features/orders/components/ShareReceiptButton";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
@@ -29,14 +28,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   CheckCircle2,
   ChevronLeft,
+  MessageCircle,
   PackageX,
-  Phone,
   XCircle,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
-  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -387,14 +385,6 @@ export default function OrderTrackingScreen() {
     }
   }, [order, nextStatus, queryClient, id]);
 
-  const handleCallShop = useCallback(() => {
-    const phone = receiptStore?.contact_phone?.trim();
-    if (!phone) return;
-    Linking.openURL(`tel:${phone}`).catch(() => {
-      showToast("Could not open the dialer");
-    });
-  }, [receiptStore, showToast]);
-
   if (isLoading) {
     return (
       <View
@@ -739,19 +729,15 @@ export default function OrderTrackingScreen() {
           )}
         </View>
 
-        {isCustomerOrder && !!receiptStore?.contact_phone && (
-          <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}>
-            <Button
-              label={`Call ${receiptStore?.name ?? "shop"}`}
-              onPress={handleCallShop}
-              variant="soft"
-              icon={<Phone size={18} color={colors.espresso} strokeWidth={1.8} />}
-            />
-          </View>
-        )}
-
         <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}>
-          <OrderChat orderId={order.id} currentUserId={userId ?? ""} />
+          <Button
+            label={isCustomerOrder ? "Talk with Shop" : "Chat with customer"}
+            onPress={() =>
+              router.push({ pathname: "/orders/[id]/chat", params: { id: order.id } })
+            }
+            variant="soft"
+            icon={<MessageCircle size={18} color={colors.espresso} strokeWidth={1.8} />}
+          />
         </View>
       </ScrollView>
 
