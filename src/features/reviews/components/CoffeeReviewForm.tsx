@@ -84,7 +84,7 @@ export function CoffeeReviewForm({
       <TextInput
         value={comment}
         onChangeText={setComment}
-        placeholder="Optional — tell others what you think"
+        placeholder="Optional. Tell others what you think"
         placeholderTextColor={colors.muted}
         multiline
         maxLength={500}

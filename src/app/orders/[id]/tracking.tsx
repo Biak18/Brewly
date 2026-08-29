@@ -91,7 +91,7 @@ function CompletedBanner() {
           fontSize: typography.bodySmall,
         }}
       >
-        Order complete — enjoy!
+        Order complete. Enjoy!
       </Text>
     </Animated.View>
   );
@@ -787,7 +787,7 @@ export default function OrderTrackingScreen() {
                 fontWeight: "600",
               }}
             >
-              Reject — wrong TRX ID
+              Reject: wrong TRX ID
             </Text>
           </Pressable>
         </View>

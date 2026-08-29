@@ -278,7 +278,7 @@ export default function CoffeeFormScreen() {
             marginBottom: spacing.xl,
           }}
         >
-          Paste a link for now — direct photo upload is next.
+          Paste a link for now. Direct photo upload is next.
         </Text>
 
         <Controller

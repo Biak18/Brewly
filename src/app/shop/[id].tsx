@@ -189,7 +189,7 @@ export default function ShopMenuScreen() {
                 flex: 1,
               }}
             >
-              Closed now — opens at {openState.opensAt}. You can still browse.
+              Closed now. Opens at {openState.opensAt}. You can still browse.
             </Text>
           </View>
         );

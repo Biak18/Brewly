@@ -99,7 +99,7 @@ export function OptionFormSheet({
     if (!option) return;
     showConfirm({
       title: "Delete this option?",
-      message: `"${option.label}" will be removed. Coffees already ordered with it keep their record — this only affects future orders.`,
+        message: `"${option.label}" will be removed. Coffees already ordered with it keep their record. This only affects future orders.`,
       confirmLabel: "Delete",
       destructive: true,
       onConfirm: async () => {

@@ -199,7 +199,7 @@ export default function EditStoreScreen() {
       return;
     }
     setPinOverride(coords);
-    setPinSource("your current location — stand at the shop before tapping");
+    setPinSource("your current location. Stand at the shop before tapping");
     setLinkError(null);
     Haptics.selectionAsync();
   }, [showToast]);
@@ -379,7 +379,7 @@ export default function EditStoreScreen() {
           >
             {pin
               ? `Pin saved${pinSource ? ` (${pinSource})` : ""}: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`
-              : "No pin yet — customers won't see how far your shop is until it's set."}
+              : "No pin yet. Customers won't see how far your shop is until it's set."}
           </Text>
         )}
 
@@ -475,8 +475,8 @@ export default function EditStoreScreen() {
                 }}
               >
                 {openState.isOpen
-                  ? `Open now — customers see "Open · until ${closeTime}"`
-                  : `Closed now — customers see "Closed · opens ${openTime}"`}
+                  ? `Open now. Customers see "Open · until ${closeTime}"`
+                  : `Closed now. Customers see "Closed · opens ${openTime}"`}
               </Text>
               {isOvernight && (
                 <Text
@@ -486,7 +486,7 @@ export default function EditStoreScreen() {
                     marginTop: 4,
                   }}
                 >
-                  Overnight window — this shop closes past midnight.
+                  Overnight window. This shop closes past midnight.
                 </Text>
               )}
             </>
@@ -498,7 +498,7 @@ export default function EditStoreScreen() {
                 fontWeight: "600",
               }}
             >
-              No hours set — no Open/Closed badge is shown and ordering never
+              No hours set. No Open/Closed badge is shown and ordering never
               blocks.
             </Text>
           )}

@@ -99,7 +99,7 @@ function ReviewCard({ review }: { review: CoffeeReview }) {
       <Text
         style={{ color: colors.muted, fontSize: typography.micro, marginTop: spacing.xs }}
       >
-        — {review.reviewer_name}
+        · {review.reviewer_name}
       </Text>
     </View>
   );

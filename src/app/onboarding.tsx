@@ -34,7 +34,7 @@ const SLIDES = [
     icon: Heart,
     title: "Save your favorites",
     description:
-      "Keep the drinks and shops you love one tap away — we'll remember them.",
+      "Keep the drinks and shops you love one tap away. We'll remember them.",
   },
   {
     icon: ReceiptText,

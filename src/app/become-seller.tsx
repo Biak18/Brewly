@@ -39,8 +39,6 @@ export default function BecomeSellerScreen() {
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
   const [serverError, setServerError] = useState<string | null>(null);
-  // Shop pin lets customers see real distances. Optional at creation —
-  // sellers can also add it later in Store settings.
   const [mapLink, setMapLink] = useState("");
   const [pin, setPin] = useState<PinCoords | null>(null);
   const [pinSource, setPinSource] = useState<string | null>(null);
@@ -55,7 +53,7 @@ export default function BecomeSellerScreen() {
     const resolved = await resolveMapLink(mapLink);
     if (!resolved) {
       setLinkError(
-        "Couldn't read coordinates from that link. Use Share → Copy link in Google Maps, or pin your current location at the shop.",
+        "Couldn't read coordinates from that link. Use Share then Copy link in Google Maps, or pin your current location at the shop.",
       );
       return;
     }
@@ -70,7 +68,7 @@ export default function BecomeSellerScreen() {
       return;
     }
     setPin(coords);
-    setPinSource("your current location — stand at the shop before tapping");
+    setPinSource("your current location. Stand at the shop before tapping");
     setLinkError(null);
   }, [showToast]);
 
@@ -94,8 +92,6 @@ export default function BecomeSellerScreen() {
   const onSubmit = useCallback(
     async (values: FormValues) => {
       setServerError(null);
-      // Resolve the pin before creating the shop so a bad map link fails
-      // fast instead of leaving a half-configured store behind.
       let nextPin = pin;
       if (!nextPin && values.mapLink.trim()) {
         const resolved = await resolveMapLink(values.mapLink);
@@ -120,8 +116,6 @@ export default function BecomeSellerScreen() {
       });
       if (error) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        // Surfaces the RPC's own "You already have a store" message when relevant,
-        // generic fallback otherwise — no reason to hide the specific case.
         setServerError(
           error.message.includes("already have a store")
             ? "You already have a store."
@@ -131,9 +125,6 @@ export default function BecomeSellerScreen() {
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await refreshProfile();
-      // Attach KPay receiving details without touching the become_seller RPC.
-      // Failure here must never block shop creation — sellers can edit later
-      // in Store settings.
       try {
         const userId = useAuthStore.getState().session?.user.id;
         if (userId) {
@@ -157,13 +148,19 @@ export default function BecomeSellerScreen() {
     [router, pin],
   );
 
+  const inputStyle = {
+    borderWidth: 1,
+    borderColor: colors.line,
+    height: 48,
+    paddingHorizontal: 14,
+    fontSize: 14,
+    color: colors.ink,
+    borderRadius: radius.md,
+  } as const;
+
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        paddingTop: spacing.sm,
-        backgroundColor: colors.bg,
-      }}
+      style={{ flex: 1, paddingTop: spacing.sm, backgroundColor: colors.bg }}
     >
       <View
         style={{
@@ -192,12 +189,10 @@ export default function BecomeSellerScreen() {
           style={{
             color: colors.muted,
             fontSize: typography.bodySmall,
-            marginBottom: spacing.xl,
-            lineHeight: 20,
+            marginBottom: spacing.lg,
           }}
         >
-          Set up your shop to start selling coffee on Brewly. You can add your
-          menu right after.
+          Set up your shop, then add your menu.
         </Text>
 
         <Controller
@@ -209,27 +204,12 @@ export default function BecomeSellerScreen() {
               onChangeText={onChange}
               placeholder="Shop name"
               placeholderTextColor={colors.muted}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.xs,
-              }}
+              style={{ ...inputStyle, marginBottom: spacing.sm }}
             />
           )}
         />
         {errors.storeName && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
+          <Text style={errorStyle(colors.danger, spacing)}>
             {errors.storeName.message}
           </Text>
         )}
@@ -243,28 +223,12 @@ export default function BecomeSellerScreen() {
               onChangeText={onChange}
               placeholder="Address"
               placeholderTextColor={colors.muted}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-              }}
+              style={{ ...inputStyle, marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
         {errors.address && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
+          <Text style={errorStyle(colors.danger, spacing)}>
             {errors.address.message}
           </Text>
         )}
@@ -283,39 +247,28 @@ export default function BecomeSellerScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               multiline
-              placeholder="Google Maps link (Share → Copy link)"
+              placeholder="Google Maps link (Share then Copy link)"
               placeholderTextColor={colors.muted}
               style={{
-                borderWidth: 1,
-                borderColor: linkError ? colors.danger : colors.line,
+                ...inputStyle,
                 minHeight: 48,
                 paddingVertical: 12,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
                 textAlignVertical: "top",
+                marginTop: spacing.sm,
+                marginBottom: spacing.sm,
               }}
             />
           )}
         />
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: spacing.sm,
-          }}
-        >
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
           <Chip label="Find coordinates" active={false} onPress={readMapLink} />
           <Chip
-            label="Use my current location"
+            label="Use my location"
             active={false}
             onPress={useCurrentLocation}
           />
         </View>
-        <Text style={{ fontSize: 11, marginTop: 6 }}>
+        <Text style={hintStyle(colors, spacing)}>
           {linkError ? (
             <Text style={{ color: colors.danger }}>{linkError}</Text>
           ) : pin ? (
@@ -324,19 +277,12 @@ export default function BecomeSellerScreen() {
             </Text>
           ) : (
             <Text style={{ color: colors.muted }}>
-              Optional — but customers can&apos;t see how far your shop is
-              without a location pin.
+              Add a location so customers see how far you are. Optional.
             </Text>
           )}
         </Text>
 
-        <View
-          style={{
-            flexDirection: "row",
-            gap: spacing.sm,
-            marginTop: spacing.sm,
-          }}
-        >
+        <View style={{ flexDirection: "row", gap: spacing.sm, marginTop: spacing.md }}>
           <View style={{ flex: 1 }}>
             <Controller
               control={control}
@@ -347,15 +293,7 @@ export default function BecomeSellerScreen() {
                   onChangeText={onChange}
                   placeholder="Opens (e.g. 07:00)"
                   placeholderTextColor={colors.muted}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.line,
-                    height: 48,
-                    paddingHorizontal: 14,
-                    fontSize: 14,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                  }}
+                  style={inputStyle}
                 />
               )}
             />
@@ -370,29 +308,14 @@ export default function BecomeSellerScreen() {
                   onChangeText={onChange}
                   placeholder="Closes (e.g. 19:00)"
                   placeholderTextColor={colors.muted}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.line,
-                    height: 48,
-                    paddingHorizontal: 14,
-                    fontSize: 14,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                  }}
+                  style={inputStyle}
                 />
               )}
             />
           </View>
         </View>
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.caption,
-            marginTop: spacing.xs,
-            marginBottom: spacing.xl,
-          }}
-        >
-          Hours are optional — you can skip these for now.
+        <Text style={[hintStyle(colors, spacing), { marginTop: spacing.xs }]}>
+          Opening hours are optional.
         </Text>
 
         <Text
@@ -402,6 +325,7 @@ export default function BecomeSellerScreen() {
             fontWeight: "800",
             textTransform: "uppercase",
             letterSpacing: 1,
+            marginTop: spacing.lg,
             marginBottom: spacing.sm,
           }}
         >
@@ -417,16 +341,7 @@ export default function BecomeSellerScreen() {
               placeholder="KBZPay number (e.g. 09XXXXXXXXX)"
               placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.sm,
-              }}
+              style={{ ...inputStyle, marginBottom: spacing.sm }}
             />
           )}
         />
@@ -437,7 +352,7 @@ export default function BecomeSellerScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Note for customers (account name, MMQR hint…)"
+              placeholder="Note for customers (account name, MMQR hint)"
               placeholderTextColor={colors.muted}
               multiline
               style={{
@@ -449,40 +364,47 @@ export default function BecomeSellerScreen() {
                 color: colors.ink,
                 borderRadius: radius.md,
                 textAlignVertical: "top",
-                marginBottom: spacing.xs,
+                marginBottom: spacing.sm,
               }}
             />
           )}
         />
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: typography.micro,
-            marginBottom: spacing.xl,
-          }}
-        >
-          Customers see this at checkout when paying by KPay or MMQR. Optional —
-          you can change it later in Store settings.
+        <Text style={hintStyle(colors, spacing)}>
+          Shown at checkout for KPay or MMQR. Optional; change it later in Store
+          settings.
         </Text>
 
         {serverError && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.md,
-            }}
-          >
-            {serverError}
-          </Text>
+          <Text style={errorStyle(colors.danger, spacing)}>{serverError}</Text>
         )}
         <Button
           label="Create my shop"
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"
+          style={{ marginTop: spacing.lg }}
         />
       </FormScrollView>
     </SafeAreaView>
   );
+}
+
+function hintStyle(
+  colors: ReturnType<typeof useTheme>["colors"],
+  spacing: ReturnType<typeof useTheme>["spacing"],
+) {
+  return {
+    color: colors.muted,
+    fontSize: 12,
+    marginTop: 6,
+    marginBottom: spacing.sm,
+  };
+}
+
+function errorStyle(color: string, spacing: ReturnType<typeof useTheme>["spacing"]) {
+  return {
+    color,
+    fontSize: 11,
+    marginBottom: spacing.sm,
+  };
 }

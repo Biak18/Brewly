@@ -163,7 +163,7 @@ export default function CheckoutScreen() {
       setPromoInput("");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setPromoError("Couldn't check that code — try again.");
+      setPromoError("Couldn't check that code. Try again.");
     } finally {
       setPromoBusy(false);
     }
@@ -308,7 +308,7 @@ export default function CheckoutScreen() {
             marginTop: spacing.sm,
           }}
         >
-          You&apos;re offline — connect to place your order.
+          You&apos;re offline. Connect to place your order.
         </Text>
       )}
       {isShopClosed && (
@@ -321,7 +321,7 @@ export default function CheckoutScreen() {
             marginTop: spacing.sm,
           }}
         >
-          {store?.name} is closed right now — opens at {openState.opensAt}.
+          {store?.name} is closed right now. Opens at {openState.opensAt}.
         </Text>
       )}
       <View
