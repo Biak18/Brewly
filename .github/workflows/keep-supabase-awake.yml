@@ -1,0 +1,31 @@
+# .github/workflows/keep-supabase-awake.yml
+name: Keep Supabase awake
+
+on:
+  schedule:
+    # Every 2 days at 09:00 UTC (safe under the 7-day free-tier pause window).
+    - cron: "0 9 */2 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase project
+        env:
+          # Project URL is not sensitive; anon key MUST come from a secret.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://wiscnurivaskypxuldjz.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_ANON_KEY secret is not set. Add it in repo Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          # A request to the project's API counts as activity, preventing the
+          # free-tier project from being paused for inactivity.
+          # -f makes the job fail (visible alert) if the project is unreachable
+          # (e.g. already paused and needing a manual resume in the dashboard).
+          curl -f -s -o /dev/null \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/auth/v1/settings"
