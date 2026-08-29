@@ -25,6 +25,7 @@ function isOnTargetScreen(
   orderId: string,
   isChat: boolean,
 ): boolean {
+  if (!pathname) return false;
   const clean = pathname.split(/[?#]/)[0].replace(/\/$/, "");
   return clean === `/orders/${orderId}/${isChat ? "chat" : "tracking"}`;
 }
