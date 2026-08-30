@@ -51,6 +51,19 @@ export async function uploadAvatar(
 }
 
 export async function deleteAccount() {
+  // Avatar files can only be removed through the Storage API — direct
+  // storage.objects deletes are blocked by Supabase (SQLSTATE 42501).
+  // Best-effort: a leftover orphan file is acceptable if this fails.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    await supabase.storage
+      .from("avatars")
+      .remove([`${user.id}/avatar.jpg`])
+      .catch(() => {});
+  }
+
   const { error } = await supabase.rpc("delete_account");
   if (error) throw error;
 }
