@@ -29,8 +29,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { SearchX } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, ListRenderItem, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { FlatList, ListRenderItem, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function SectionLabel({ children }: { children: string }) {
@@ -83,7 +83,6 @@ export default function SearchScreen() {
     if ((stores.data?.length ?? 0) > 0 || (coffees.data?.length ?? 0) > 0) {
       if (!stores.isFetching && !coffees.isFetching) addRecent(debounced);
     }
-     
   }, [
     hasTerm,
     stores.data,
@@ -187,8 +186,11 @@ export default function SearchScreen() {
           paddingBottom: spacing.md,
         }}
       >
-        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
-          <Text style={{ color: colors.ink, fontSize: 20 }}>в†ђ</Text>
+        <IconButton
+          accessibilityLabel={t("common.back")}
+          onPress={() => router.back()}
+        >
+          <Text style={{ color: colors.ink, fontSize: 20 }}>←</Text>
         </IconButton>
         <View style={{ flex: 1, marginLeft: spacing.sm }}>
           <SearchBar value={term} onChangeText={setTerm} />

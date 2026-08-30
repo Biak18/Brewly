@@ -11,11 +11,11 @@ import { usePromotionsRealtimeSync } from "@/features/promotions/hooks/usePromot
 import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
 import { useNetworkSync } from "@/hooks/useNetworkSync";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import "@/i18n";
 import { useAuthStore } from "@/stores/authStore";
 import { useLanguageStore } from "@/stores/languageStore";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/theme/themeStore";
-import "@/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -105,6 +105,7 @@ function RootNavigator() {
               animationDuration: 50,
             }}
           />
+          <Stack.Screen name="become-driver" />
         </Stack.Protected>
         <Stack.Protected
           guard={!session && !isPasswordRecovery && hasOnboarded}
@@ -121,6 +122,11 @@ function RootNavigator() {
           <Stack.Screen name="seller/menu/options" />
           <Stack.Screen name="seller/promotions/index" />
           <Stack.Screen name="seller/promotions/form" />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={!!session && !isPasswordRecovery && profile?.role === "driver"}
+        >
+          <Stack.Screen name="(driver)" />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />

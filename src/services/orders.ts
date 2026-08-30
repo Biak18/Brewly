@@ -8,6 +8,9 @@ export type OrderStatus =
   | "preparing"
   | "ready"
   | "completed"
+  | "driver_assigned"
+  | "out_for_delivery"
+  | "delivered"
   | "cancelled";
 export type OrderSummary = {
   id: string;
@@ -58,7 +61,11 @@ export async function fetchExpectedCartPrices(
     });
     if (error) throw error;
     (data ?? []).forEach(
-      (row: { item_index: number; unit_price: number | null; full_price: number | null }) => {
+      (row: {
+        item_index: number;
+        unit_price: number | null;
+        full_price: number | null;
+      }) => {
         const line = lines[row.item_index];
         if (!line) return;
         if (row.unit_price == null) {
@@ -187,6 +194,8 @@ export type OrderWithItems = {
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
   payment_ref: string | null;
+  driver_id: string | null;
+  drivers: { full_name: string | null; phone: string | null } | null;
   order_items: {
     id: string;
     coffee_id: string;
@@ -201,12 +210,22 @@ export type OrderWithItems = {
   }[];
 };
 
+export type Driver = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  vehicle: string | null;
+  is_available: boolean;
+};
+
 export async function fetchOrderWithItems(
   orderId: string,
 ): Promise<OrderWithItems> {
   const { data, error } = await supabase
     .from("orders")
-    .select("*, order_items(*, coffees(name, image_url))")
+    .select(
+      "*, driver_id, drivers(full_name, phone), order_items(*, coffees(name, image_url))",
+    )
     .eq("id", orderId)
     .single();
   if (error) throw error;
@@ -221,7 +240,67 @@ export async function updateOrderStatus(
     p_order_id: orderId,
     p_status: status,
   });
+  console.log(error);
   if (error) throw error;
+}
+
+export async function assignDriver(
+  orderId: string,
+  driverId: string,
+): Promise<void> {
+  const { error } = await supabase.rpc("assign_driver", {
+    p_order_id: orderId,
+    p_driver_id: driverId,
+  });
+  if (error) throw error;
+}
+
+// Current user registers themselves as a driver. Handled by the SECURITY
+// DEFINER register_driver RPC so the role flip can't be done client-side
+// (which would also let anyone self-promote to "seller").
+export async function registerAsDriver(params: {
+  fullName?: string | null;
+  phone?: string | null;
+  vehicle?: string | null;
+}): Promise<void> {
+  const { error } = await supabase.rpc("register_driver", {
+    p_full_name: params.fullName ?? null,
+    p_phone: params.phone ?? null,
+    p_vehicle: params.vehicle ?? null,
+  });
+
+  if (error) throw error;
+}
+
+export async function fetchAvailableDrivers(): Promise<Driver[]> {
+  const { data, error } = await supabase
+    .from("drivers")
+    .select("id, full_name, phone, vehicle, is_available")
+    .eq("is_available", true)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Driver[];
+}
+
+export type DriverDelivery = {
+  id: string;
+  status: OrderStatus;
+  total: number;
+  placed_at: string;
+  delivery_address: string | null;
+};
+
+export async function fetchDriverOrders(
+  userId: string,
+): Promise<DriverDelivery[]> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, status, total, placed_at, delivery_address")
+    .eq("driver_id", userId)
+    .in("status", ["driver_assigned", "out_for_delivery"])
+    .order("placed_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as DriverDelivery[];
 }
 
 // Server-guarded: the RPC re-checks ownership and that the order is still in

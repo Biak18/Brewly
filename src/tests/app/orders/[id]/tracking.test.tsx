@@ -24,6 +24,8 @@ const mockOrder: OrderWithItems = {
   payment_method: "cash",
   payment_status: "unpaid",
   payment_ref: null,
+  driver_id: null,
+  drivers: null,
   order_items: [
     {
       id: "oi1",

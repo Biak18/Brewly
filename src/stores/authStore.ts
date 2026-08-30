@@ -4,7 +4,7 @@ import { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
 import { useCartStore } from "./cartStore";
 
-type Role = "seller" | "customer";
+type Role = "seller" | "customer" | "driver";
 type Profile = {
   id: string;
   full_name: string | null;

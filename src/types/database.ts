@@ -172,6 +172,8 @@ export type Database = {
           idempotency_key: string | null;
           delivery_fee: number;
           delivery_address: string | null;
+          driver_id: string | null;
+          delivered_at: string | null;
           user_id: string;
         };
         Insert: {
@@ -187,6 +189,7 @@ export type Database = {
           total: number;
           delivery_fee?: number;
           delivery_address?: string | null;
+          driver_id?: string | null;
           user_id: string;
         };
         Update: {
@@ -209,7 +212,35 @@ export type Database = {
           idempotency_key?: string | null;
           delivery_fee?: number;
           delivery_address?: string | null;
+          driver_id?: string | null;
+          delivered_at?: string | null;
           user_id?: string;
+        };
+      };
+      drivers: {
+        Row: {
+          id: string;
+          full_name: string | null;
+          phone: string | null;
+          vehicle: string | null;
+          is_available: boolean;
+          created_at: string | null;
+        };
+        Insert: {
+          id: string;
+          full_name?: string | null;
+          phone?: string | null;
+          vehicle?: string | null;
+          is_available?: boolean;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          full_name?: string | null;
+          phone?: string | null;
+          vehicle?: string | null;
+          is_available?: boolean;
+          created_at?: string | null;
         };
       };
       profiles: {

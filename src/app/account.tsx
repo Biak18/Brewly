@@ -363,6 +363,36 @@ export default function AccountScreen() {
           />
         </View>
 
+        {/* Driver */}
+        {profile?.role !== "seller" && (
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              padding: spacing.md,
+              marginBottom: spacing.xl,
+            }}
+          >
+            <Button
+              label={
+                profile?.role === "driver"
+                  ? t("driver.title")
+                  : t("driver.becomeDriver")
+              }
+              onPress={() =>
+                router.push(
+                  (profile?.role === "driver"
+                    ? "/(driver)"
+                    : "/become-driver") as any,
+                )
+              }
+              variant="soft"
+            />
+          </View>
+        )}
+
         {/* Danger zone */}
         <Text
           style={[

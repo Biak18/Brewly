@@ -1,6 +1,7 @@
 // src/features/orders/components/StatusTimeline.tsx
 import { OrderStatus } from "@/services/orders";
 import { useTheme } from "@/theme";
+import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react-native";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
@@ -10,20 +11,36 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const STEPS: { key: OrderStatus; label: string }[] = [
-  { key: "received", label: "Received" },
-  { key: "preparing", label: "Preparing" },
-  { key: "ready", label: "Ready" },
-  { key: "completed", label: "Completed" },
+const PICKUP_STEPS: OrderStatus[] = [
+  "received",
+  "preparing",
+  "ready",
+  "completed",
+];
+const DELIVERY_STEPS: OrderStatus[] = [
+  "received",
+  "preparing",
+  "ready",
+  "driver_assigned",
+  "out_for_delivery",
+  "delivered",
 ];
 
-export function StatusTimeline({ status }: { status: OrderStatus }) {
+export function StatusTimeline({
+  status,
+  fulfillment,
+}: {
+  status: OrderStatus;
+  fulfillment?: string;
+}) {
+  const { t } = useTranslation();
   const { colors, spacing, typography } = useTheme();
-  const currentIndex = STEPS.findIndex((s) => s.key === status);
+  const steps = fulfillment === "delivery" ? DELIVERY_STEPS : PICKUP_STEPS;
+  const currentIndex = steps.indexOf(status);
   const progress = useSharedValue(0);
 
   useEffect(() => {
-    progress.value = withTiming(currentIndex / (STEPS.length - 1), {
+    progress.value = withTiming(currentIndex / (steps.length - 1), {
       duration: 500,
     });
   }, [currentIndex, progress]);
@@ -58,10 +75,10 @@ export function StatusTimeline({ status }: { status: OrderStatus }) {
           marginTop: spacing.md,
         }}
       >
-        {STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const done = index <= currentIndex;
           return (
-            <View key={step.key} style={{ alignItems: "center", width: 70 }}>
+            <View key={step} style={{ alignItems: "center", width: 70 }}>
               <View
                 style={{
                   width: 24,
@@ -83,7 +100,7 @@ export function StatusTimeline({ status }: { status: OrderStatus }) {
                   textAlign: "center",
                 }}
               >
-                {step.label}
+                {t(`tracking.status.${step}`)}
               </Text>
             </View>
           );

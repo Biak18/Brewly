@@ -1,18 +1,23 @@
 // src/features/orders/components/StatusBadge.tsx
 import { OrderStatus } from "@/services/orders";
 import { useTheme } from "@/theme";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 
 const TONE: Record<OrderStatus, "active" | "ready" | "done" | "cancelled"> = {
   received: "active",
   preparing: "active",
   ready: "ready",
+  driver_assigned: "active",
+  out_for_delivery: "ready",
+  delivered: "done",
   completed: "done",
   cancelled: "cancelled",
 };
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   const { colors, radius, typography } = useTheme();
+  const { t } = useTranslation();
   const tone = TONE[status];
   const bg =
     tone === "ready"
@@ -45,7 +50,7 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
           textTransform: "capitalize",
         }}
       >
-        {status}
+        {t(`tracking.status.${status}`)}
       </Text>
     </View>
   );
