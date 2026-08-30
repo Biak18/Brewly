@@ -1,14 +1,24 @@
 // src/app/(driver)/index.tsx
 import { EmptyState } from "@/components/ui/EmptyState";
-import { DriverDelivery, fetchDriverOrders, OrderStatus } from "@/services/orders";
+import {
+  DriverDelivery,
+  fetchDriverOrders,
+  OrderStatus,
+} from "@/services/orders";
 import { useAuthStore } from "@/stores/authStore";
-import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Package, Truck } from "lucide-react-native";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DriverHome() {
@@ -28,7 +38,10 @@ export default function DriverHome() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView
-        contentContainerStyle={{ padding: spacing.xl, gap: spacing.md }}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.xl,
+          gap: spacing.md,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}

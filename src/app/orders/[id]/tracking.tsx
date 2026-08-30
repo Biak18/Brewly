@@ -905,10 +905,8 @@ export default function OrderTrackingScreen() {
           }}
         >
           <Button
-            label={t("tracking.markAs", {
-              status: t(`tracking.status.${nextStatus}`),
-            })}
-            onPress={handleAdvance}
+            label={t("tracking.confirmPaymentReceived")}
+            onPress={() => handleSetPayment(true)}
             loading={isAdvancing}
             variant="primary"
           />
