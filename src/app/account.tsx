@@ -9,6 +9,7 @@ import {
   deleteAccount,
   updateDisplayName,
 } from "@/services/profile";
+import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
@@ -126,7 +127,11 @@ export default function AccountScreen() {
       onConfirm: async () => {
         try {
           await deleteAccount();
-          // Session is gone server-side; auth listener clears local state.
+          showToast(t("account.deleted"));
+          // Explicitly clear the local session and route to auth so there is
+          // no back-stack into the now-deleted account.
+          await supabase.auth.signOut();
+          router.replace("/sign-in");
         } catch (err: any) {
           showToast(err?.message ?? t("account.deleteFailed"));
         }

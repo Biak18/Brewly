@@ -302,6 +302,7 @@
     "deleteAccount": "Delete account",
     "deleteCopy": "Deleting removes your orders, favorites, and loyalty stamps for good.",
     "deleteFailed": "Could not delete your account.",
+    "deleted": "Account deleted",
     "deleteForever": "Delete forever",
     "deleteMessage": "This permanently deletes your account, orders, favorites, and loyalty stamps. This cannot be undone.",
     "deleteTitle": "Delete account?",
