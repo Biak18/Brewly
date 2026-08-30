@@ -45,7 +45,7 @@ export function ConfirmDialogHost() {
         if (finished) runOnJS(setMounted)(false);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [options]);
 
   const backdropStyle = useAnimatedStyle(() => ({

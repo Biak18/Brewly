@@ -21,7 +21,7 @@ export function useRefresh(...queryKeys: string[][]) {
     }
     // Call sites pass static key literals; re-running on identity churn of a
     // rest parameter would only recreate a stable callback.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [queryClient]);
 
   return { refreshing, onRefresh };

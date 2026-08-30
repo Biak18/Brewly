@@ -34,26 +34,28 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const addressSchema = z.object({
-  label: z.string().trim().min(1, "Add a label"),
-  fullName: z.string().trim().min(1, "Enter the recipient name"),
-  phone: z.string().trim().min(5, "Enter a contact phone"),
-  address: z.string().trim().min(6, "Enter the street address"),
+  label: z.string().trim().min(1, "addresses.labelRequired"),
+  fullName: z.string().trim().min(1, "addresses.recipientRequired"),
+  phone: z.string().trim().min(5, "addresses.phoneRequired"),
+  address: z.string().trim().min(6, "addresses.addressRequired"),
 });
 type AddressForm = z.infer<typeof addressSchema>;
 
 function AddressFormFields() {
   const { colors, radius } = useTheme();
+  const { t } = useTranslation();
   const {
     control,
     formState: { errors },
   } = useFormContext<AddressForm>();
 
   const fields = [
-    { name: "label" as const, placeholder: "Label (Home, Work…)" },
-    { name: "fullName" as const, placeholder: "Recipient name" },
-    { name: "phone" as const, placeholder: "Phone (09XXXXXXXXX)" },
+    { name: "label" as const, placeholder: t("addresses.labelPlaceholder") },
+    { name: "fullName" as const, placeholder: t("addresses.recipientPlaceholder") },
+    { name: "phone" as const, placeholder: t("addresses.phonePlaceholder") },
   ];
 
   return (
@@ -83,7 +85,7 @@ function AddressFormFields() {
           />
           {errors[f.name] && (
             <Text style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}>
-              {errors[f.name]?.message}
+              {t(errors[f.name]?.message ?? "")}
             </Text>
           )}
         </View>
@@ -95,7 +97,7 @@ function AddressFormFields() {
           <TextInput
             value={value}
             onChangeText={onChange}
-            placeholder="Street address, township, landmark…"
+            placeholder={t("addresses.addressPlaceholder")}
             placeholderTextColor={colors.muted}
             multiline
             style={{
@@ -113,7 +115,7 @@ function AddressFormFields() {
       />
       {errors.address && (
         <Text style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}>
-          {errors.address.message}
+          {t(errors.address.message ?? "")}
         </Text>
       )}
     </>
@@ -128,6 +130,7 @@ function AddressCard({
   onEdit: (a: Address) => void;
 }) {
   const { colors, radius, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const setDefault = useSetDefaultAddress();
   const deleteAddress = useDeleteAddress();
   const showConfirm = useConfirmDialogStore((s) => s.show);
@@ -185,15 +188,15 @@ function AddressCard({
                 paddingVertical: 2,
               }}
             >
-              <Text
-                style={{
-                  color: colors.green,
-                  fontSize: typography.micro,
-                  fontWeight: "800",
-                }}
-              >
-                Default
-              </Text>
+                <Text
+                  style={{
+                    color: colors.green,
+                    fontSize: typography.micro,
+                    fontWeight: "800",
+                  }}
+                >
+                  {t("addresses.default")}
+                </Text>
             </View>
           )}
         </View>
@@ -232,33 +235,33 @@ function AddressCard({
                 fontSize: typography.micro,
                 fontWeight: "800",
               }}
-            >
-              Set as default
-            </Text>
+                >
+                  {t("addresses.setAsDefault")}
+                </Text>
           </Pressable>
         )}
       </View>
       <View style={{ flexDirection: "row", gap: 2 }}>
         <IconButton
-          accessibilityLabel={`Edit ${address.label}`}
+          accessibilityLabel={t("addresses.editLabel", { label: address.label })}
           onPress={() => onEdit(address)}
         >
           <Pencil size={16} color={colors.muted} strokeWidth={1.8} />
         </IconButton>
         <IconButton
-          accessibilityLabel={`Delete ${address.label}`}
+          accessibilityLabel={t("addresses.deleteLabel", { label: address.label })}
           onPress={() =>
             showConfirm({
-              title: `Delete "${address.label}"?`,
-              message: "This address will be removed from your address book.",
-              confirmLabel: "Delete",
+              title: t("addresses.deleteTitle", { label: address.label }),
+              message: t("addresses.deleteMessage"),
+              confirmLabel: t("common.delete"),
               destructive: true,
               onConfirm: async () => {
                 try {
                   await deleteAddress.mutateAsync(address.id);
-                  showToast("Address deleted");
+                  showToast(t("addresses.toastDeleted"));
                 } catch {
-                  showToast("Could not delete this address");
+                  showToast(t("addresses.toastDeleteFailed"));
                 }
               },
             })
@@ -273,6 +276,7 @@ function AddressCard({
 
 export default function AddressesScreen() {
   const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
   const { data: addresses = [], isLoading } = useAddresses();
@@ -323,10 +327,10 @@ export default function AddressesScreen() {
           isDefault: makeDefault,
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showToast(editing ? "Address updated" : "Address added");
+        showToast(editing ? t("addresses.toastUpdated") : t("addresses.toastAdded"));
         setSheetVisible(false);
       } catch {
-        showToast("Could not save this address");
+        showToast(t("addresses.toastSaveFailed"));
       }
     },
     [editing, makeDefault, saveAddress, showToast],
@@ -348,7 +352,7 @@ export default function AddressesScreen() {
           paddingBottom: spacing.md,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -359,16 +363,16 @@ export default function AddressesScreen() {
             marginLeft: spacing.md,
           }}
         >
-          Delivery addresses
+          {t("addresses.title")}
         </Text>
       </View>
 
       {isLoading ? null : addresses.length === 0 ? (
         <EmptyState
           icon={<MapPin size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="No addresses yet"
-          description="Add an address to get your orders delivered."
-          actionLabel="Add address"
+          title={t("addresses.emptyTitle")}
+          description={t("addresses.emptyDescription")}
+          actionLabel={t("addresses.addAddress")}
           onAction={openAdd}
         />
       ) : (
@@ -391,7 +395,7 @@ export default function AddressesScreen() {
             backgroundColor: colors.surface,
           }}
         >
-          <Button label="Add address" onPress={openAdd} variant="primary" />
+          <Button label={t("addresses.addAddress")} onPress={openAdd} variant="primary" />
         </View>
       )}
 
@@ -408,7 +412,7 @@ export default function AddressesScreen() {
               marginBottom: spacing.md,
             }}
           >
-            {editing ? "Edit address" : "New address"}
+            {editing ? t("addresses.editAddress") : t("addresses.newAddress")}
           </Text>
           <FormProvider {...form}>
             <AddressFormFields />
@@ -427,9 +431,9 @@ export default function AddressesScreen() {
                 fontSize: typography.bodySmall,
                 fontWeight: "600",
               }}
-            >
-              Use as default
-            </Text>
+              >
+                {t("addresses.useAsDefault")}
+              </Text>
             <Switch
               value={makeDefault}
               onValueChange={setMakeDefault}
@@ -438,7 +442,7 @@ export default function AddressesScreen() {
           </View>
 
           <Button
-            label={editing ? "Save changes" : "Add address"}
+            label={editing ? t("addresses.saveChanges") : t("addresses.addAddress")}
             onPress={form.handleSubmit(onSubmit)}
             loading={saveAddress.isPending}
             variant="primary"

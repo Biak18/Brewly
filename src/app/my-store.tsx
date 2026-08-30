@@ -11,6 +11,7 @@ import {
 import { useSellerEarnings } from "@/features/seller/hooks/useSellerEarnings";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -24,6 +25,7 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyStoreScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -53,7 +55,7 @@ export default function MyStoreScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -63,9 +65,7 @@ export default function MyStoreScreen() {
             fontWeight: "800",
             marginLeft: spacing.md,
           }}
-        >
-          My Store
-        </Text>
+        >{t("store.title")}</Text>
       </View>
 
       {isLoading ? (
@@ -77,8 +77,8 @@ export default function MyStoreScreen() {
           icon={
             <StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="No store found"
-          description="Contact support if you believe this is a mistake."
+          title={t("store.noStoreFound")}
+          description={t("store.contactSupport")}
         />
       ) : (
         <View style={{ padding: spacing.xl }}>
@@ -153,17 +153,17 @@ export default function MyStoreScreen() {
 
           <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
             <Button
-              label="Manage Menu"
+              label={t("store.manageMenu")}
               onPress={() => router.push("/seller/menu")}
               variant="primary"
             />
             <Button
-              label="Manage Promotions"
+              label={t("store.managePromotions")}
               onPress={() => router.push("/seller/promotions")}
               variant="soft"
             />
             <Button
-              label="Store settings"
+              label={t("store.settings")}
               onPress={() => router.push("/my-store/edit")}
               variant="soft"
             />

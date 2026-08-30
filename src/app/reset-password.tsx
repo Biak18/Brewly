@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useTheme } from "@/theme";
@@ -14,20 +15,20 @@ import { Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { z } from "zod";
 
-const schema = z
-  .object({
-    password: z.string().min(6, "At least 6 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-type FormValues = z.infer<typeof schema>;
-
 export default function ResetPasswordScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, typography } = useTheme();
   const [serverError, setServerError] = useState<string | null>(null);
+  const schema = z
+    .object({
+      password: z.string().min(6, t("auth.passwordMinLength")),
+      confirmPassword: z.string(),
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      message: t("auth.passwordsDontMatch"),
+      path: ["confirmPassword"],
+    });
+  type FormValues = z.infer<typeof schema>;
   const {
     control,
     handleSubmit,
@@ -42,17 +43,15 @@ export default function ResetPasswordScreen() {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setServerError(
-        "Could not update your password. Try requesting a new link.",
-      );
+      setServerError(t("auth.passwordUpdateFailed"));
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // The recovery session IS a valid session the moment this succeeds —
+    // The recovery session IS a valid session the moment this succeeds вЂ”
     // clearing the flag hands control back to the normal session guard,
     // which drops them straight into the app. No second sign-in needed.
     useAuthStore.setState({ isPasswordRecovery: false });
-  }, []);
+  }, [t]);
 
   return (
     <FormScrollView
@@ -81,7 +80,7 @@ export default function ResetPasswordScreen() {
             marginBottom: spacing.xl,
           }}
         >
-          Set a new password
+          {t("auth.setNewPassword")}
         </Text>
         <View>
           <Controller
@@ -92,7 +91,7 @@ export default function ResetPasswordScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="New password"
+                placeholder={t("auth.newPasswordPlaceholder")}
                 containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
@@ -121,7 +120,7 @@ export default function ResetPasswordScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Confirm new password"
+                placeholder={t("auth.confirmNewPasswordPlaceholder")}
                 containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
@@ -153,7 +152,7 @@ export default function ResetPasswordScreen() {
           )}
         </View>
         <Button
-          label="Update password"
+          label={t("auth.updatePassword")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"

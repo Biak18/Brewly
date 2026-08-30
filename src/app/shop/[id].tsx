@@ -25,6 +25,7 @@ import { track } from "@/lib/analytics";
 import { MenuSort } from "@/services/coffees";
 import { fetchStoreById } from "@/services/stores";
 import { useTheme } from "@/theme";
+import { useTranslation } from "react-i18next";
 import { toCoffeeCardData } from "@/utils/pricing";
 import { getStoreOpenState } from "@/utils/storeHours";
 import { AnimatedFlashList } from "@shopify/flash-list";
@@ -45,18 +46,20 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-const SORT_OPTIONS: { value: MenuSort; label: string }[] = [
-  { value: "popular", label: "Popular" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "name", label: "Name" },
-];
+
 
 export default function ShopMenuScreen() {
   const { id: storeId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors, spacing, radius, typography } = useTheme();
+  const { t } = useTranslation();
+  const SORT_OPTIONS: { value: MenuSort; label: string }[] = [
+    { value: "popular", label: t("shops.sortPopular") },
+    { value: "price_asc", label: t("shops.sortPriceAsc") },
+    { value: "price_desc", label: t("shops.sortPriceDesc") },
+    { value: "name", label: t("shops.sortName") },
+  ];
   const bottomInset = useCartAwareBottomInset();
 
   useEffect(() => {
@@ -134,7 +137,7 @@ export default function ShopMenuScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -147,11 +150,11 @@ export default function ShopMenuScreen() {
           }}
           numberOfLines={1}
         >
-          {store?.name ?? "Menu"}
+          {store?.name ?? t("shops.menu")}
         </Text>
         <IconButton
           accessibilityLabel={
-            storeFavorited ? "Remove shop from favorites" : "Save shop"
+            storeFavorited ? t("shops.removeFromFavorites") : t("shops.saveShop")
           }
           onPress={handleToggleStoreFavorite}
         >
@@ -189,7 +192,7 @@ export default function ShopMenuScreen() {
                 flex: 1,
               }}
             >
-              Closed now. Opens at {openState.opensAt}. You can still browse.
+              {t("shops.closedNow", { time: openState.opensAt })}
             </Text>
           </View>
         );
@@ -205,7 +208,7 @@ export default function ShopMenuScreen() {
       >
         <SearchBar value={searchText} onChangeText={setSearchText} />
         <IconButton
-          accessibilityLabel="Sort"
+          accessibilityLabel={t("shops.sort")}
           variant={sort !== "popular" ? "filled" : "default"}
           onPress={() => setSortSheetVisible(true)}
         >
@@ -233,9 +236,9 @@ export default function ShopMenuScreen() {
           icon={
             <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="Couldn't load the menu"
-          description="Check your connection and try again."
-          actionLabel="Retry"
+          title={t("shops.menuLoadError")}
+          description={t("common.checkConnection")}
+          actionLabel={t("common.retry")}
           onAction={() => refetch()}
         />
       ) : coffees.length === 0 ? (
@@ -243,11 +246,11 @@ export default function ShopMenuScreen() {
           icon={
             <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="No coffee found"
+          title={t("shops.noCoffeeFound")}
           description={
             debouncedSearch
-              ? `Nothing matches "${debouncedSearch}".`
-              : "This shop has nothing here yet."
+              ? t("shops.noMatch", { term: debouncedSearch })
+              : t("shops.nothingHereYet")
           }
         />
       ) : (

@@ -2,13 +2,16 @@
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
+import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { ensureNotificationPermission } from "@/lib/notifications";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
+import { useLanguageStore } from "@/stores/languageStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
+import { useTranslation } from "react-i18next";
 import { Stagger } from "@animatereactnative/stagger";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -28,6 +31,7 @@ import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, typography, radius } = useTheme();
   const profile = useAuthStore((s) => s.profile);
   const session = useAuthStore((s) => s.session);
@@ -38,31 +42,35 @@ export default function ProfileScreen() {
   const pushEnabled = useNotificationStore((s) => s.pushEnabled);
   const setPushEnabled = useNotificationStore((s) => s.setPushEnabled);
   const showToast = useToastStore((s) => s.show);
+  const language = useLanguageStore((s) => s.language);
+  const setLanguage = useLanguageStore((s) => s.setLanguage);
 
-  // Only flip on when the OS permission is actually granted — otherwise the
+  // Only flip on when the OS permission is actually granted, otherwise the
   // toggle would claim pushes are on while the system blocks them.
   const togglePush = useCallback(async () => {
     const next = !pushEnabled;
     if (next && !(await ensureNotificationPermission())) {
-      showToast("Enable notifications for Brewly in system settings.");
+      showToast(t("profile.enableNotifications"));
       return;
     }
     setPushEnabled(next);
-  }, [pushEnabled, setPushEnabled, showToast]);
+  }, [pushEnabled, setPushEnabled, showToast, t]);
 
   const firstInitial = (profile?.full_name ??
     session?.user.email ??
     "?")[0]?.toUpperCase();
 
+  const roleLabel = profile?.role ? t(`role.${profile.role}`) : "?";
+
   const handleSignOut = useCallback(() => {
     showConfirm({
-      title: "Sign out?",
-      message: "You'll need to sign back in to place or manage orders.",
-      confirmLabel: "Sign out",
+      title: t("profile.signOutConfirmTitle"),
+      message: t("profile.signOutConfirmMessage"),
+      confirmLabel: t("profile.signOut"),
       destructive: true,
       onConfirm: () => signOut(),
     });
-  }, [showConfirm, signOut]);
+  }, [showConfirm, signOut, t]);
 
   return (
     <SafeAreaView
@@ -123,7 +131,7 @@ export default function ProfileScreen() {
                 fontWeight: "800",
               }}
             >
-              {profile?.full_name ?? "Your account"}
+              {profile?.full_name ?? t("profile.yourAccount")}
             </Text>
             <Text
               style={{
@@ -151,7 +159,7 @@ export default function ProfileScreen() {
                   textTransform: "capitalize",
                 }}
               >
-                {profile?.role ?? "—"}
+                {roleLabel}
               </Text>
             </View>
           </View>
@@ -166,7 +174,7 @@ export default function ProfileScreen() {
               marginBottom: spacing.xs,
             }}
           >
-            Rewards
+            {t("profile.rewards")}
           </Text>
           <View
             style={{
@@ -182,13 +190,13 @@ export default function ProfileScreen() {
           >
             <SettingsRow
               icon={<Gift size={18} color={colors.muted} strokeWidth={1.8} />}
-              label="Loyalty cards"
+              label={t("profile.loyaltyCards")}
               onPress={() => router.push("/loyalty")}
             />
             <View style={{ height: 1, backgroundColor: colors.line }} />
             <SettingsRow
               icon={<MapPin size={18} color={colors.muted} strokeWidth={1.8} />}
-              label="Delivery addresses"
+              label={t("profile.deliveryAddresses")}
               onPress={() => router.push("/addresses")}
             />
             <View style={{ height: 1, backgroundColor: colors.line }} />
@@ -196,7 +204,7 @@ export default function ProfileScreen() {
               icon={
                 <Settings size={18} color={colors.muted} strokeWidth={1.8} />
               }
-              label="Account settings"
+              label={t("profile.accountSettings")}
               onPress={() => router.push("/account")}
             />
           </View>
@@ -211,7 +219,7 @@ export default function ProfileScreen() {
               marginBottom: spacing.xs,
             }}
           >
-            Preferences
+            {t("profile.preferences")}
           </Text>
           <View
             style={{
@@ -225,7 +233,7 @@ export default function ProfileScreen() {
           >
             <SettingsRow
               icon={<Bell size={18} color={colors.muted} strokeWidth={1.8} />}
-              label="Push notifications"
+              label={t("profile.pushNotifications")}
               onPress={togglePush}
               right={
                 <Switch
@@ -245,15 +253,49 @@ export default function ProfileScreen() {
                 marginBottom: spacing.sm,
               }}
             >
-              Appearance
+              {t("profile.appearance")}
             </Text>
             <View style={{ flexDirection: "row", gap: spacing.sm }}>
               {(["system", "light", "dark"] as const).map((m) => (
                 <Chip
                   key={m}
-                  label={m.charAt(0).toUpperCase() + m.slice(1)}
+                  label={t(`profile.${m}`)}
                   active={mode === m}
                   onPress={() => setMode(m)}
+                />
+              ))}
+            </View>
+          </View>
+
+          <Text
+            style={{
+              color: colors.muted,
+              fontSize: typography.caption,
+              fontWeight: "800",
+              textTransform: "uppercase",
+              letterSpacing: 1,
+              marginBottom: spacing.xs,
+            }}
+          >
+            {t("profile.language")}
+          </Text>
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.lg,
+              borderWidth: 1,
+              borderColor: colors.line,
+              padding: spacing.md,
+              marginBottom: spacing.xl,
+            }}
+          >
+            <View style={{ flexDirection: "row", gap: spacing.sm }}>
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <Chip
+                  key={l.code}
+                  label={l.label}
+                  active={language === l.code}
+                  onPress={() => setLanguage(l.code)}
                 />
               ))}
             </View>
@@ -271,7 +313,7 @@ export default function ProfileScreen() {
                   marginBottom: spacing.xs,
                 }}
               >
-                Shop management
+                {t("profile.shopManagement")}
               </Text>
               <View
                 style={{
@@ -291,7 +333,7 @@ export default function ProfileScreen() {
                       strokeWidth={1.8}
                     />
                   }
-                  label="My Store"
+                  label={t("profile.myStore")}
                   onPress={() => router.push("/my-store")}
                 />
                 <View style={{ height: 1, backgroundColor: colors.line }} />
@@ -303,7 +345,7 @@ export default function ProfileScreen() {
                       strokeWidth={1.8}
                     />
                   }
-                  label="Manage menu"
+                  label={t("profile.manageMenu")}
                   onPress={() => router.push("/seller/menu")}
                 />
               </View>
@@ -322,7 +364,7 @@ export default function ProfileScreen() {
                   marginBottom: spacing.xs,
                 }}
               >
-                Selling on Brewly
+                {t("profile.sellingOnBrewly")}
               </Text>
               <View
                 style={{
@@ -338,7 +380,7 @@ export default function ProfileScreen() {
                   icon={
                     <Store size={18} color={colors.muted} strokeWidth={1.8} />
                   }
-                  label="Become a Seller"
+                  label={t("profile.becomeSeller")}
                   onPress={() => {
                     router.push("/become-seller");
                   }}
@@ -348,7 +390,7 @@ export default function ProfileScreen() {
           )}
 
           <Button
-            label="Sign out"
+            label={t("profile.signOut")}
             onPress={handleSignOut}
             variant="soft"
             icon={

@@ -12,8 +12,10 @@ import { useAuthDeepLink } from "@/hooks/useAuthDeepLink";
 import { useNetworkSync } from "@/hooks/useNetworkSync";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuthStore } from "@/stores/authStore";
+import { useLanguageStore } from "@/stores/languageStore";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/theme/themeStore";
+import "@/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -44,6 +46,10 @@ function RootNavigator() {
   const hasOnboardingHydrated = useOnboardingStore((s) => s.hasHydrated);
   const hasOnboarded = useOnboardingStore((s) => s.hasOnboarded);
   const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
+
+  useEffect(() => {
+    useLanguageStore.getState().initLanguage();
+  }, []);
 
   useEffect(() => {
     if (!isLoading && hasThemeHydrated && hasOnboardingHydrated)

@@ -1,5 +1,6 @@
 // src/app/onboarding.tsx
 import { Button } from "@/components/ui/Button";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useTheme } from "@/theme";
@@ -26,25 +27,23 @@ import {
 const SLIDES = [
   {
     icon: Coffee,
-    title: "Order ahead",
-    description:
-      "Browse menus from local roasters, customize your drink, and skip the queue.",
+    title: "onboarding.slide1Title",
+    description: "onboarding.slide1Desc",
   },
   {
     icon: Heart,
-    title: "Save your favorites",
-    description:
-      "Keep the drinks and shops you love one tap away. We'll remember them.",
+    title: "onboarding.slide2Title",
+    description: "onboarding.slide2Desc",
   },
   {
     icon: ReceiptText,
-    title: "Earn every sip",
-    description:
-      "Collect loyalty stamps with each order and track your receipt history.",
+    title: "onboarding.slide3Title",
+    description: "onboarding.slide3Desc",
   },
 ];
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -77,7 +76,11 @@ export default function OnboardingScreen() {
       }}
     >
       <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-        <Pressable onPress={finish} hitSlop={8} accessibilityLabel="Skip intro">
+        <Pressable
+          onPress={finish}
+          hitSlop={8}
+          accessibilityLabel={t("onboarding.skipIntro")}
+        >
           <Text
             style={{
               color: colors.muted,
@@ -86,7 +89,7 @@ export default function OnboardingScreen() {
               paddingVertical: spacing.md,
             }}
           >
-            Skip
+            {t("onboarding.skip")}
           </Text>
         </Pressable>
       </View>
@@ -118,7 +121,7 @@ export default function OnboardingScreen() {
             textAlign: "center",
           }}
         >
-          {slide.title}
+          {t(slide.title)}
         </Text>
         <Text
           style={{
@@ -130,7 +133,7 @@ export default function OnboardingScreen() {
             maxWidth: 300,
           }}
         >
-          {slide.description}
+          {t(slide.description)}
         </Text>
       </Animated.View>
 
@@ -158,7 +161,7 @@ export default function OnboardingScreen() {
 
       <View style={{ paddingBottom: Math.max(insets.bottom, spacing.lg) }}>
         <Button
-          label={isLast ? "Get started" : "Next"}
+          label={isLast ? t("onboarding.getStarted") : t("common.next")}
           onPress={handleNext}
           variant="primary"
         />
@@ -174,7 +177,7 @@ export default function OnboardingScreen() {
                 fontWeight: "700",
               }}
             >
-              I already have an account
+              {t("onboarding.alreadyHaveAccount")}
             </Text>
           </Pressable>
         )}

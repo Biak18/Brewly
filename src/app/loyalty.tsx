@@ -9,6 +9,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, Coffee, Gift, Stamp } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 function StampDots({ filled }: { filled: number }) {
   const { colors } = useTheme();
@@ -39,6 +40,7 @@ function StampDots({ filled }: { filled: number }) {
 
 export default function LoyaltyScreen() {
   const { colors, spacing, radius, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
 
@@ -63,7 +65,7 @@ export default function LoyaltyScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -74,15 +76,15 @@ export default function LoyaltyScreen() {
             marginLeft: spacing.md,
           }}
         >
-          Loyalty cards
+          {t("loyalty.title")}
         </Text>
       </View>
 
       {isLoading ? null : cards.length === 0 ? (
         <EmptyState
           icon={<Stamp size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="No stamps yet"
-          description="Complete an order to start collecting stamps toward a free coffee."
+          title={t("loyalty.emptyTitle")}
+          description={t("loyalty.emptyDescription")}
         />
       ) : (
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
@@ -138,7 +140,7 @@ export default function LoyaltyScreen() {
                           marginLeft: 4,
                         }}
                       >
-                        Free coffee ready!
+                        {t("loyalty.freeCoffeeReady")}
                       </Text>
                     </View>
                   ) : (
@@ -164,8 +166,7 @@ export default function LoyaltyScreen() {
                       marginTop: 8,
                     }}
                   >
-                    {remaining} more order{remaining === 1 ? "" : "s"} until a
-                    free coffee.
+                    {t("loyalty.remaining", { count: remaining })}
                   </Text>
                 )}
               </View>

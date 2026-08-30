@@ -1,4 +1,4 @@
-// src/app/(tabs)/orders.tsx — full replacement
+// src/app/(tabs)/orders.tsx Р Р†Р вЂљРІР‚Сњ full replacement
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pulse } from "@/components/ui/Pulse";
@@ -19,19 +19,22 @@ import { useRouter } from "expo-router";
 import { ReceiptText } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "received", label: "Received" },
-  { value: "preparing", label: "Preparing" },
-  { value: "ready", label: "Ready" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
+
 
 export default function OrdersScreen() {
   const { colors, spacing } = useTheme();
+  const { t } = useTranslation();
+  const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
+    { value: "all", label: t("ordersTab.filterAll") },
+    { value: "received", label: t("ordersTab.filterReceived") },
+    { value: "preparing", label: t("ordersTab.filterPreparing") },
+    { value: "ready", label: t("ordersTab.filterReady") },
+    { value: "completed", label: t("ordersTab.filterCompleted") },
+    { value: "cancelled", label: t("ordersTab.filterCancelled") },
+  ];
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -43,7 +46,7 @@ export default function OrdersScreen() {
     enabled: !!userId && isSeller,
   });
 
-  // Sellers land on "shop" by default — orders needing fulfillment is the
+  // Sellers land on "shop" by default Р Р†Р вЂљРІР‚Сњ orders needing fulfillment is the
   // actionable view; their own purchase history is secondary.
   const [viewMode, setViewMode] = useState<"purchases" | "shop">(
     isSeller ? "shop" : "purchases",
@@ -120,12 +123,12 @@ export default function OrdersScreen() {
           }}
         >
           <Chip
-            label="My Shop"
+            label={t("ordersTab.myShop")}
             active={viewMode === "shop"}
             onPress={() => setViewMode("shop")}
           />
           <Chip
-            label="My Purchases"
+            label={t("ordersTab.myPurchases")}
             active={viewMode === "purchases"}
             onPress={() => setViewMode("purchases")}
           />
@@ -164,9 +167,9 @@ export default function OrdersScreen() {
           icon={
             <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="Couldn't load orders"
-          description="Check your connection and try again."
-          actionLabel="Retry"
+          title={t("ordersTab.loadError")}
+          description={t("common.checkConnection")}
+          actionLabel={t("common.retry")}
           onAction={() => refetch()}
         />
       ) : orders.length === 0 ? (
@@ -174,11 +177,11 @@ export default function OrdersScreen() {
           icon={
             <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="No orders yet"
+          title={t("ordersTab.emptyTitle")}
           description={
             viewMode === "shop"
-              ? "Orders placed at your shop will show up here."
-              : "Orders you place will show up here."
+              ? t("ordersTab.emptyShopDescription")
+              : t("ordersTab.emptyPurchasesDescription")
           }
         />
       ) : filteredOrders.length === 0 ? (
@@ -186,8 +189,8 @@ export default function OrdersScreen() {
           icon={
             <ReceiptText size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="No orders here"
-          description={`No ${statusFilter} orders right now.`}
+          title={t("ordersTab.noOrdersHere")}
+          description={t("ordersTab.noOrdersFiltered", { status: statusFilter })}
         />
       ) : (
         <FlashList

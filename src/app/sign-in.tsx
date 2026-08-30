@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
@@ -14,15 +15,15 @@ import { Pressable, StyleSheet, Text, TextInput } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
-const signInSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "At least 6 characters"),
-});
-type SignInForm = z.infer<typeof signInSchema>;
-
 export default function SignInScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const [serverError, setServerError] = useState<string | null>(null);
+  const signInSchema = z.object({
+    email: z.string().email(t("auth.emailInvalid")),
+    password: z.string().min(6, t("auth.passwordMinLength")),
+  });
+  type SignInForm = z.infer<typeof signInSchema>;
   const {
     control,
     handleSubmit,
@@ -37,11 +38,11 @@ export default function SignInScreen() {
     const { error } = await supabase.auth.signInWithPassword(values);
     if (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setServerError("Incorrect email or password.");
+      setServerError(t("auth.incorrectCredentials"));
     }
     // No manual navigation here: authStore's listener updates session state,
     // Stack.Protected reacts to it, root layout swaps to (tabs) on its own.
-  }, []);
+  }, [t]);
 
   return (
     <FormScrollView
@@ -64,7 +65,7 @@ export default function SignInScreen() {
             marginBottom: spacing.xxl,
           }}
         >
-          Brewly
+          {t("auth.appName")}
         </Text>
 
         <Controller
@@ -75,7 +76,7 @@ export default function SignInScreen() {
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              placeholder="Email"
+              placeholder={t("auth.emailPlaceholder")}
               placeholderTextColor={colors.muted}
               autoCapitalize="none"
               autoComplete="email"
@@ -106,7 +107,7 @@ export default function SignInScreen() {
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              placeholder="Password"
+              placeholder={t("auth.passwordPlaceholder")}
               containerStyle={{
                 marginTop: spacing.sm,
                 marginBottom: spacing.sm,
@@ -132,7 +133,7 @@ export default function SignInScreen() {
         )}
 
         <Button
-          label="Sign in"
+          label={t("auth.signIn")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"
@@ -149,7 +150,7 @@ export default function SignInScreen() {
               fontWeight: "600",
             }}
           >
-            Forgot password?
+            {t("auth.forgotPassword")}
           </Text>
         </Pressable>
 
@@ -164,9 +165,9 @@ export default function SignInScreen() {
               fontWeight: "600",
             }}
           >
-            Don&apos;t have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Text style={{ color: colors.espresso, fontWeight: "800" }}>
-              Sign up
+              {t("auth.signUp")}
             </Text>
           </Text>
         </Pressable>

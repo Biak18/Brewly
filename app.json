@@ -40,7 +40,6 @@
         {
           "backgroundColor": "#f6efe6",
           "image": "./assets/images/splash-icon.png",
-          // "resizeMode": "contain"
           "imageWidth": 200
         }
       ],
@@ -55,7 +54,8 @@
       "expo-font",
       "expo-status-bar",
       "expo-web-browser",
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -64,9 +64,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "981d62c9-3507-4520-ac84-ca51428ba2a0"
+        "projectId": "9b8d8318-e6f7-4eab-b99e-8887102d1012"
       }
-    },
-    "owner": "chanorg"
+    }
   }
 }

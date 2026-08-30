@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
@@ -14,24 +15,24 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
-const schema = z
-  .object({
-    fullName: z.string().min(1, "Enter your name"),
-    email: z.string().email("Enter a valid email"),
-    password: z.string().min(6, "At least 6 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-type FormValues = z.infer<typeof schema>;
-
 export default function SignUpScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const schema = z
+    .object({
+      fullName: z.string().min(1, t("auth.nameRequired")),
+      email: z.string().email(t("auth.emailInvalid")),
+      password: z.string().min(6, t("auth.passwordMinLength")),
+      confirmPassword: z.string(),
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      message: t("auth.passwordsDontMatch"),
+      path: ["confirmPassword"],
+    });
+  type FormValues = z.infer<typeof schema>;
   const {
     control,
     handleSubmit,
@@ -58,15 +59,15 @@ export default function SignUpScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
           error.message.toLowerCase().includes("already registered")
-            ? "An account with this email already exists."
-            : "Could not create your account. Please try again.",
+            ? t("auth.accountExists")
+            : t("auth.accountCreateFailed"),
         );
         return;
       }
 
       if (!data.session) setNeedsConfirmation(true);
     },
-    [],
+    [t],
   );
 
   if (needsConfirmation) {
@@ -98,7 +99,7 @@ export default function SignUpScreen() {
               textAlign: "center",
             }}
           >
-            Check your email
+            {t("auth.checkEmail")}
           </Text>
           <Text
             style={{
@@ -108,10 +109,10 @@ export default function SignUpScreen() {
               marginBottom: spacing.xl,
             }}
           >
-            Confirm your address to finish creating your account.
+            {t("auth.confirmEmailInstruction")}
           </Text>
           <Button
-            label="Back to sign in"
+            label={t("auth.backToSignIn")}
             onPress={() => router.replace("/sign-in")}
             variant="soft"
           />
@@ -146,7 +147,7 @@ export default function SignUpScreen() {
             marginBottom: spacing.xxl,
           }}
         >
-          Create your account
+          {t("auth.createAccountTitle")}
         </Text>
 
         <View>
@@ -158,7 +159,7 @@ export default function SignUpScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Full name"
+                placeholder={t("auth.fullNamePlaceholder")}
                 placeholderTextColor={colors.muted}
                 style={{
                   borderWidth: 1,
@@ -195,7 +196,7 @@ export default function SignUpScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Email"
+                placeholder={t("auth.emailPlaceholder")}
                 placeholderTextColor={colors.muted}
                 autoCapitalize="none"
                 autoComplete="email"
@@ -236,7 +237,7 @@ export default function SignUpScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Password"
+                placeholder={t("auth.passwordPlaceholder")}
                 containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
@@ -266,7 +267,7 @@ export default function SignUpScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Confirm password"
+                placeholder={t("auth.confirmPasswordPlaceholder")}
                 containerStyle={{
                   marginTop: spacing.sm,
                   marginBottom: spacing.sm,
@@ -299,7 +300,7 @@ export default function SignUpScreen() {
         </View>
 
         <Button
-          label="Create account"
+          label={t("auth.createAccount")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"
@@ -316,7 +317,7 @@ export default function SignUpScreen() {
               fontWeight: "600",
             }}
           >
-            Already have an account? Sign in
+            {t("auth.alreadyHaveAccount")}
           </Text>
         </Pressable>
       </Stagger>

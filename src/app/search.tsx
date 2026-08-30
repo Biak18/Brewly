@@ -30,6 +30,7 @@ import { useRouter } from "expo-router";
 import { SearchX } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, ListRenderItem, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function SectionLabel({ children }: { children: string }) {
@@ -52,6 +53,7 @@ function SectionLabel({ children }: { children: string }) {
 
 export default function SearchScreen() {
   const { colors, spacing, radius } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const [term, setTerm] = useState("");
   const debounced = useDebouncedValue(term, 300);
@@ -81,7 +83,7 @@ export default function SearchScreen() {
     if ((stores.data?.length ?? 0) > 0 || (coffees.data?.length ?? 0) > 0) {
       if (!stores.isFetching && !coffees.isFetching) addRecent(debounced);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [
     hasTerm,
     stores.data,
@@ -185,8 +187,8 @@ export default function SearchScreen() {
           paddingBottom: spacing.md,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
-          <Text style={{ color: colors.ink, fontSize: 20 }}>←</Text>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
+          <Text style={{ color: colors.ink, fontSize: 20 }}>в†ђ</Text>
         </IconButton>
         <View style={{ flex: 1, marginLeft: spacing.sm }}>
           <SearchBar value={term} onChangeText={setTerm} />
@@ -204,8 +206,8 @@ export default function SearchScreen() {
             icon={
               <SearchX size={28} color={colors.espresso} strokeWidth={1.8} />
             }
-            title="Nothing found"
-            description={`No matches for "${debounced.trim()}".`}
+            title={t("search.nothingFound")}
+            description={t("search.noMatches", { term: debounced.trim() })}
           />
         </View>
       ) : isSearching ? (
@@ -232,7 +234,7 @@ export default function SearchScreen() {
         >
           {(stores.data?.length ?? 0) > 0 && (
             <>
-              <SectionLabel>Shops</SectionLabel>
+              <SectionLabel>{t("search.shops")}</SectionLabel>
               <FlatList
                 horizontal
                 data={stores.data}
@@ -248,7 +250,7 @@ export default function SearchScreen() {
           )}
           {(coffees.data?.length ?? 0) > 0 && (
             <>
-              <SectionLabel>Coffees</SectionLabel>
+              <SectionLabel>{t("search.coffees")}</SectionLabel>
               <FlatList
                 horizontal
                 data={coffees.data}

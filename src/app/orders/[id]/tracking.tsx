@@ -20,6 +20,7 @@ import { fetchMyStore, fetchStoreById } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +57,7 @@ import {
 } from "react-native-safe-area-context";
 
 function CompletedBanner() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const scale = useSharedValue(0.8);
   const opacity = useSharedValue(0);
@@ -93,21 +95,20 @@ function CompletedBanner() {
           fontWeight: "800",
           fontSize: typography.bodySmall,
         }}
-      >
-        Order complete. Enjoy!
-      </Text>
+      >{t("tracking.orderComplete")}</Text>
     </Animated.View>
   );
 }
 
 function PaymentStatusChip({ status }: { status: PaymentStatus }) {
+  const { t } = useTranslation();
   const { colors, radius, typography } = useTheme();
   const label =
     status === "verified"
-      ? "Paid"
+      ? t("tracking.paid")
       : status === "awaiting_verification"
-        ? "Verifying"
-        : "Unpaid";
+        ? t("tracking.verifying")
+        : t("tracking.unpaid");
   const fg =
     status === "verified"
       ? colors.green
@@ -150,6 +151,7 @@ const STATUS_FLOW: OrderStatus[] = [
 ];
 
 function CancelledBanner() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const scale = useSharedValue(0.8);
   const opacity = useSharedValue(0);
@@ -187,14 +189,13 @@ function CancelledBanner() {
           fontWeight: "800",
           fontSize: typography.bodySmall,
         }}
-      >
-        This order was cancelled
-      </Text>
+      >{t("tracking.orderCancelled")}</Text>
     </Animated.View>
   );
 }
 
 export default function OrderTrackingScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -230,11 +231,11 @@ export default function OrderTrackingScreen() {
       if (pendingSelfChangeRef.current === order.status) {
         pendingSelfChangeRef.current = null;
       } else {
-        showToast("This order was updated on another device");
+        showToast(t("tracking.updatedOnAnotherDevice"));
       }
     }
     prevStatusRef.current = order.status;
-  }, [order, showToast]);
+  }, [order, showToast, t]);
 
   const currentIndex = order ? STATUS_FLOW.indexOf(order.status) : -1;
   const nextStatus =
@@ -255,9 +256,9 @@ export default function OrderTrackingScreen() {
   const handleRevert = useCallback(() => {
     if (!order || !previousStatus) return;
     showConfirm({
-      title: "Revert status?",
-      message: `This moves the order back to "${previousStatus}".`,
-      confirmLabel: "Revert",
+      title: t("tracking.revertStatusTitle"),
+      message: t("tracking.revertStatusMessage", { status: t(`tracking.status.${previousStatus}`) }),
+      confirmLabel: t("tracking.revert"),
       destructive: true,
       onConfirm: async () => {
         pendingSelfChangeRef.current = previousStatus;
@@ -276,14 +277,14 @@ export default function OrderTrackingScreen() {
         }
       },
     });
-  }, [order, previousStatus, queryClient, id, showConfirm]);
+  }, [order, previousStatus, queryClient, id, showConfirm, t]);
 
   const handleCancel = useCallback(() => {
     if (!order) return;
     showConfirm({
-      title: "Cancel this order?",
-      message: "The shop hasn't started preparing it yet.",
-      confirmLabel: "Cancel order",
+      title: t("tracking.cancelOrderTitle"),
+      message: t("tracking.cancelOrderMessage"),
+      confirmLabel: t("tracking.cancelOrder"),
       destructive: true,
       onConfirm: async () => {
         setIsAdvancing(true);
@@ -304,7 +305,7 @@ export default function OrderTrackingScreen() {
         }
       },
     });
-  }, [order, showConfirm, queryClient, id, showToast]);
+  }, [order, showConfirm, queryClient, id, showToast, t]);
 
   const handleSetPayment = useCallback(
     async (verified: boolean) => {
@@ -323,15 +324,15 @@ export default function OrderTrackingScreen() {
           paid_at: verified ? new Date().toISOString() : null,
         });
         queryClient.invalidateQueries({ queryKey: ["orders"] });
-        showToast(verified ? "Payment confirmed" : "Payment rejected");
+        showToast(verified ? t("tracking.paymentConfirmed") : t("tracking.paymentRejected"));
       } catch {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        showToast("Could not update payment");
+        showToast(t("tracking.couldNotUpdatePayment"));
       } finally {
         setIsAdvancing(false);
       }
     },
-    [order, queryClient, id, showToast],
+    [order, queryClient, id, showToast, t],
   );
 
   const handleRetryPayment = useCallback(async () => {
@@ -347,13 +348,13 @@ export default function OrderTrackingScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["orders", "detail", id],
       });
-      showToast("Payment proof submitted");
+      showToast(t("tracking.paymentProofSubmitted"));
     } catch {
-      showToast("Could not submit payment proof");
+      showToast(t("tracking.couldNotSubmitProof"));
     } finally {
       setIsAdvancing(false);
     }
-  }, [order, paymentRef, queryClient, id, showToast]);
+  }, [order, paymentRef, queryClient, id, showToast, t]);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -410,9 +411,9 @@ export default function OrderTrackingScreen() {
     return (
       <EmptyState
         icon={<PackageX size={28} color={colors.espresso} strokeWidth={1.8} />}
-        title="Order not found"
-        description="It may have been removed."
-        actionLabel="Retry"
+        title={t("tracking.orderNotFound")}
+        description={t("tracking.orderRemoved")}
+        actionLabel={t("common.retry")}
         onAction={() => refetch()}
       />
     );
@@ -440,7 +441,7 @@ export default function OrderTrackingScreen() {
         }}
       >
         <IconButton
-          accessibilityLabel="Go back"
+          accessibilityLabel={t("common.back")}
           onPress={() => router.back()}
         >
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
@@ -452,9 +453,7 @@ export default function OrderTrackingScreen() {
             fontWeight: "800",
             marginLeft: spacing.md,
           }}
-        >
-          Order tracking
-        </Text>
+        >{t("tracking.title")}</Text>
       </View>
 
       <KeyboardAwareScrollView
@@ -495,9 +494,7 @@ export default function OrderTrackingScreen() {
               fontWeight: "800",
               marginBottom: spacing.md,
             }}
-          >
-            Items
-          </Text>
+          >{t("tracking.items")}</Text>
           <OrderItemsList items={order.order_items} />
           <View
             style={{
@@ -515,9 +512,7 @@ export default function OrderTrackingScreen() {
           >
             <Text
               style={{ color: colors.muted, fontSize: typography.bodySmall }}
-            >
-              Subtotal
-            </Text>
+            >{t("tracking.subtotal")}</Text>
             <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
               {formatCurrency(order.subtotal)}
             </Text>
@@ -531,9 +526,7 @@ export default function OrderTrackingScreen() {
           >
             <Text
               style={{ color: colors.muted, fontSize: typography.bodySmall }}
-            >
-              Tax
-            </Text>
+            >{t("tracking.tax")}</Text>
             <Text style={{ color: colors.ink, fontSize: typography.bodySmall }}>
               {formatCurrency(order.tax)}
             </Text>
@@ -548,9 +541,7 @@ export default function OrderTrackingScreen() {
             >
               <Text
                 style={{ color: colors.green, fontSize: typography.bodySmall }}
-              >
-                You saved
-              </Text>
+              >{t("tracking.youSaved")}</Text>
               <Text
                 style={{
                   color: colors.green,
@@ -578,8 +569,8 @@ export default function OrderTrackingScreen() {
                 }}
               >
                 {order.promo_code
-                  ? `Promo · ${order.promo_code}`
-                  : "Free coffee (loyalty)"}
+                  ? `Promo В· ${order.promo_code}`
+                  : t("tracking.freeCoffeeLoyalty")}
               </Text>
               <Text
                 style={{
@@ -602,9 +593,7 @@ export default function OrderTrackingScreen() {
             >
               <Text
                 style={{ color: colors.muted, fontSize: typography.bodySmall }}
-              >
-                Tip
-              </Text>
+              >{t("tracking.tip")}</Text>
               <Text
                 style={{ color: colors.ink, fontSize: typography.bodySmall }}
               >
@@ -622,9 +611,7 @@ export default function OrderTrackingScreen() {
             >
               <Text
                 style={{ color: colors.muted, fontSize: typography.bodySmall }}
-              >
-                Delivery fee
-              </Text>
+              >{t("tracking.deliveryFee")}</Text>
               <Text
                 style={{ color: colors.ink, fontSize: typography.bodySmall }}
               >
@@ -646,9 +633,7 @@ export default function OrderTrackingScreen() {
                     color: colors.muted,
                     fontSize: typography.bodySmall,
                   }}
-                >
-                  Delivery to
-                </Text>
+                >{t("tracking.deliveryTo")}</Text>
               </View>
               <Text
                 style={{ color: colors.muted, fontSize: typography.caption }}
@@ -666,9 +651,7 @@ export default function OrderTrackingScreen() {
                 fontSize: typography.body,
                 fontWeight: "800",
               }}
-            >
-              Total
-            </Text>
+            >{t("tracking.total")}</Text>
             <Text
               style={{
                 color: colors.ink,
@@ -701,9 +684,9 @@ export default function OrderTrackingScreen() {
                 textTransform: "capitalize",
               }}
             >
-              Payment ·{" "}
+              Payment В·{" "}
               {order.payment_method === "cash"
-                ? "Cash on pickup"
+                ? t("tracking.cashOnPickup")
                 : order.payment_method.toUpperCase()}
             </Text>
             <PaymentStatusChip status={order.payment_status} />
@@ -717,7 +700,7 @@ export default function OrderTrackingScreen() {
                 marginTop: spacing.xs,
               }}
             >
-              TRX ID: {order.payment_ref}
+              {t("tracking.trxId", { ref: order.payment_ref })}
             </Text>
           )}
           {!canManage && order.payment_status === "awaiting_verification" && (
@@ -727,9 +710,7 @@ export default function OrderTrackingScreen() {
                 fontSize: typography.micro,
                 marginTop: spacing.xs,
               }}
-            >
-              Waiting for the shop to confirm your payment.
-            </Text>
+            >{t("tracking.waitingPaymentConfirm")}</Text>
           )}
         </View>
 
@@ -738,7 +719,7 @@ export default function OrderTrackingScreen() {
             style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}
           >
             <Button
-              label={isCustomerOrder ? "Talk with Shop" : "Chat with customer"}
+              label={isCustomerOrder ? t("tracking.talkWithShop") : t("tracking.chatWithCustomer")}
               onPress={() =>
                 router.push({
                   pathname: "/orders/[id]/chat",
@@ -768,7 +749,7 @@ export default function OrderTrackingScreen() {
           }}
         >
           <Button
-            label={`Mark as ${nextStatus}`}
+            label={t("tracking.markAs", { status: t(`tracking.status.${nextStatus}`) })}
             onPress={handleAdvance}
             loading={isAdvancing}
             variant="primary"
@@ -787,7 +768,7 @@ export default function OrderTrackingScreen() {
           }}
         >
           <Button
-            label="Confirm payment received"
+            label={t("tracking.confirmPaymentReceived")}
             onPress={() => handleSetPayment(true)}
             loading={isAdvancing}
             variant="primary"
@@ -803,9 +784,7 @@ export default function OrderTrackingScreen() {
                 fontSize: typography.caption,
                 fontWeight: "600",
               }}
-            >
-              Reject: wrong TRX ID
-            </Text>
+            >{t("tracking.rejectWrongTrx")}</Text>
           </Pressable>
         </View>
       ) : isCustomerOrder &&
@@ -831,13 +810,11 @@ export default function OrderTrackingScreen() {
                 fontSize: typography.bodySmall,
                 fontWeight: "800",
               }}
-            >
-              Submit payment proof
-            </Text>
+            >{t("tracking.submitPaymentProof")}</Text>
             <TextInput
               value={paymentRef}
               onChangeText={setPaymentRef}
-              placeholder="Enter transaction ID"
+              placeholder={t("tracking.enterTransactionId")}
               placeholderTextColor={colors.muted}
               autoCapitalize="characters"
               style={{
@@ -850,7 +827,7 @@ export default function OrderTrackingScreen() {
               }}
             />
             <Button
-              label="Submit payment proof"
+              label={t("tracking.submitPaymentProof")}
               onPress={handleRetryPayment}
               loading={isAdvancing}
               disabled={!paymentRef.trim()}
@@ -872,7 +849,7 @@ export default function OrderTrackingScreen() {
             <ShareReceiptButton order={order} storeName={receiptStore?.name} />
           )}
           <Button
-            label="Done"
+            label={t("common.done")}
             onPress={() => router.back()}
             variant="primary"
           />
@@ -890,7 +867,7 @@ export default function OrderTrackingScreen() {
           {isCustomerOrder && (
             <ShareReceiptButton order={order} storeName={receiptStore?.name} />
           )}
-          <Button label="Done" onPress={() => router.back()} variant="soft" />
+          <Button label={t("common.done")} onPress={() => router.back()} variant="soft" />
         </View>
       ) : canManage && nextStatus ? (
         <View
@@ -902,7 +879,7 @@ export default function OrderTrackingScreen() {
           }}
         >
           <Button
-            label={`Mark as ${nextStatus}`}
+            label={t("tracking.markAs", { status: t(`tracking.status.${nextStatus}`) })}
             onPress={handleAdvance}
             loading={isAdvancing}
             variant="primary"
@@ -934,7 +911,7 @@ export default function OrderTrackingScreen() {
           }}
         >
           <Button
-            label="Cancel order"
+            label={t("tracking.cancelOrder")}
             onPress={handleCancel}
             loading={isAdvancing}
             variant="soft"

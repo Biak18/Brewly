@@ -3,6 +3,10 @@
 // FlatList, expo-router is stubbed, and Supabase resolves empty data so pages
 // deterministically land on their empty/error states.
 
+// Initialize i18next with the bundled English resources so that `t("key")`
+// resolves to real copy in tests (otherwise it returns the raw key).
+require("@/i18n");
+
 /* ------------------------------------------------------------------ */
 /* react-native-reanimated — universal no-op mock                      */
 /* ------------------------------------------------------------------ */

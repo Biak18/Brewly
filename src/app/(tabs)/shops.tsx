@@ -19,10 +19,12 @@ import { Store as StoreIcon } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import Animated, { ZoomInEasyDown } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ShopsScreen() {
   const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const {
     data: stores = [],
@@ -58,7 +60,7 @@ export default function ShopsScreen() {
   );
   const { refreshing, onRefresh } = useRefresh(["stores"]);
 
-  // Distance filter — only meaningful once the user's location is known.
+  // Distance filter Р Р†Р вЂљРІР‚Сњ only meaningful once the user's location is known.
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const hasLocation = locationStatus === "granted" && !!location;
   const filtered = useMemo(() => {
@@ -91,9 +93,9 @@ export default function ShopsScreen() {
     return (
       <EmptyState
         icon={<StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />}
-        title="Couldn't load shops"
-        description="Check your connection and try again."
-        actionLabel="Retry"
+        title={t("shops.loadError")}
+        description={t("common.checkConnection")}
+        actionLabel={t("common.retry")}
         onAction={() => refetch()}
       />
     );
@@ -102,8 +104,8 @@ export default function ShopsScreen() {
     return (
       <EmptyState
         icon={<StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />}
-        title="No shops yet"
-        description="Check back soon."
+        title={t("shops.emptyTitle")}
+        description={t("shops.emptyDescription")}
       />
     );
   }
@@ -125,7 +127,7 @@ export default function ShopsScreen() {
           marginBottom: spacing.xs,
         }}
       >
-        Shops
+        {t("shops.heading")}
       </Text>
       <Text
         style={{
@@ -136,10 +138,10 @@ export default function ShopsScreen() {
         }}
       >
         {locationStatus === "granted" && location
-          ? "Sorted by nearest to you"
+          ? t("shops.sortedByNearest")
           : locationStatus === "denied"
-            ? "Turn on location to sort shops by distance."
-            : "Finding your location…"}
+            ? t("shops.enableLocationToSort")
+            : t("shops.findingLocation")}
       </Text>
       {hasLocation && (
         <View
@@ -153,7 +155,7 @@ export default function ShopsScreen() {
           {[null, 1, 3, 5].map((r) => (
             <Chip
               key={String(r)}
-              label={r == null ? "All" : `≤ ${r} km`}
+              label={r == null ? t("shops.all") : t("shops.withinKm", { radius: r })}
               active={radiusKm === r}
               onPress={() => setRadiusKm(r)}
             />
@@ -165,9 +167,9 @@ export default function ShopsScreen() {
           icon={
             <StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title={`No shops within ${radiusKm} km`}
-          description="Widen the distance filter to see more shops."
-          actionLabel="Show all"
+          title={t("shops.noShopsWithin", { radius: radiusKm })}
+          description={t("shops.widenFilter")}
+          actionLabel={t("shops.showAll")}
           onAction={() => setRadiusKm(null)}
         />
       ) : (

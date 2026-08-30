@@ -29,4 +29,10 @@ module.exports = defineConfig([
     ],
     rules: { "react-hooks/immutability": "off" },
   },
+  {
+    // React Compiler is enabled, so it owns memoization correctness and
+    // `react-hooks/exhaustive-deps` is both redundant and conflicting with
+    // `react-hooks/preserve-manual-memoization`. Disable it project-wide.
+    rules: { "react-hooks/exhaustive-deps": "off" },
+  },
 ]);

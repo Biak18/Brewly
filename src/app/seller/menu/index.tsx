@@ -10,6 +10,7 @@ import {
 import { Coffee } from "@/services/coffees";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { AnimatedFlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
@@ -76,6 +77,7 @@ function AnimatedSellerCoffeeCard({
 }
 
 export default function ManageMenuScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -121,7 +123,7 @@ export default function ManageMenuScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -132,19 +134,17 @@ export default function ManageMenuScreen() {
             marginLeft: spacing.md,
             flex: 1,
           }}
-        >
-          Manage Menu
-        </Text>
+        >{t("seller.manageMenu")}</Text>
         <View style={{ flexDirection: "row", gap: 4 }}>
           <IconButton
-            accessibilityLabel="Add coffee"
+            accessibilityLabel={t("seller.addCoffee")}
             variant="filled"
             onPress={() => router.push("/seller/menu/coffee-form")}
           >
             <Plus size={18} color={colors.espresso} strokeWidth={2} />
           </IconButton>
           <IconButton
-            accessibilityLabel="Manage options"
+            accessibilityLabel={t("seller.manageOptions")}
             onPress={() => router.push("/seller/menu/options")}
           >
             <Sliders size={18} color={colors.espresso} strokeWidth={1.8} />
@@ -163,9 +163,9 @@ export default function ManageMenuScreen() {
           icon={
             <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="No coffees yet"
-          description="Add your first item to start selling."
-          actionLabel="Add coffee"
+          title={t("seller.noCoffeesYet")}
+          description={t("seller.addFirstItem")}
+          actionLabel={t("seller.addCoffee")}
           onAction={() => router.push("/seller/menu/coffee-form")}
         />
       ) : (

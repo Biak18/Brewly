@@ -33,6 +33,7 @@ import Animated, {
   ZoomIn,
   ZoomOut,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CoffeeDetailScreen() {
@@ -40,6 +41,7 @@ export default function CoffeeDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const { coffee, options } = useCoffeeDetail(id);
   const { data: favoriteIds } = useFavoriteIds();
   const toggleFavorite = useToggleFavorite();
@@ -81,7 +83,7 @@ export default function CoffeeDetailScreen() {
   }, [options.data]);
 
   useEffect(() => {
-    // Bridging query results into form defaults once they load — an external
+    // Bridging query results into form defaults once they load вЂ” an external
     // system sync, not a cascading render hazard.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (grouped.size.length && !size) setSize(grouped.size[0].id);
@@ -190,11 +192,11 @@ export default function CoffeeDetailScreen() {
         icon={
           <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
         }
-        title="Couldn't load this coffee"
-        description="Check your connection and try again."
-        actionLabel="Retry"
+        title={t("coffee.loadError")}
+        description={t("common.checkConnection")}
+        actionLabel={t("common.retry")}
         onAction={() => coffee.refetch()}
-        secondaryActionLabel="Go back"
+        secondaryActionLabel={t("common.back")}
         onSecondaryAction={() => router.back()}
       />
     );
@@ -267,28 +269,28 @@ export default function CoffeeDetailScreen() {
           </Text>
 
           <OptionGroup
-            title="Size"
+            title={t("coffee.size")}
             options={grouped.size}
             mode="single"
             selected={size ?? ""}
             onSelect={setSize}
           />
           <OptionGroup
-            title="Temperature"
+            title={t("coffee.temperature")}
             options={grouped.temperature}
             mode="single"
             selected={temperature ?? ""}
             onSelect={setTemperature}
           />
           <OptionGroup
-            title="Milk"
+            title={t("coffee.milk")}
             options={grouped.milk}
             mode="single"
             selected={milk ?? ""}
             onSelect={setMilk}
           />
           <OptionGroup
-            title="Extras"
+            title={t("coffee.extras")}
             options={grouped.extra}
             mode="multi"
             selected={extras}
@@ -312,7 +314,7 @@ export default function CoffeeDetailScreen() {
                 fontWeight: "800",
               }}
             >
-              Quantity
+              {t("coffee.quantity")}
             </Text>
             <QuantityStepper value={quantity} onChange={setQuantity} />
           </View>
@@ -344,7 +346,7 @@ export default function CoffeeDetailScreen() {
         </Text>
       </Animated.View>
       <View style={[styles.backButtonWrap, { top: insets.top + 8 }]}>
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
       </View>

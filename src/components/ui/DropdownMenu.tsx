@@ -57,7 +57,7 @@ export function DropdownMenu<T extends string>({
         if (finished) runOnJS(setMounted)(false);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [visible]);
 
   const style = useAnimatedStyle(() => ({

@@ -15,6 +15,7 @@ import {
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,37 +29,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const schema = z
-  .object({
-    title: z.string().min(1, "Enter a title"),
-    description: z.string().min(1, "Enter a description"),
-    discountPercent: z
-      .string()
-      .refine(
-        (v) => !isNaN(Number(v)) && Number(v) > 0 && Number(v) <= 100,
-        "Enter 1–100",
-      ),
-    scope: z.enum(["all", "category", "coffee"]),
-    categoryId: z.string().optional(),
-    coffeeId: z.string().optional(),
-    code: z.string().optional(),
-    startsAt: z.string().regex(DATE_REGEX, "Use YYYY-MM-DD"),
-    endsAt: z.string().regex(DATE_REGEX, "Use YYYY-MM-DD"),
-    isActive: z.boolean(),
-  })
-  .refine((d) => d.scope !== "category" || !!d.categoryId, {
-    message: "Choose a category",
-    path: ["categoryId"],
-  })
-  .refine((d) => d.scope !== "coffee" || !!d.coffeeId, {
-    message: "Choose a coffee",
-    path: ["coffeeId"],
-  })
-  .refine((d) => d.endsAt >= d.startsAt, {
-    message: "End date must be after start date",
-    path: ["endsAt"],
-  });
-type FormValues = z.infer<typeof schema>;
+
 
 function todayPlus(days: number) {
   const d = new Date();
@@ -67,6 +38,38 @@ function todayPlus(days: number) {
 }
 
 export default function PromotionFormScreen() {
+  const { t } = useTranslation();
+  const schema = z
+    .object({
+      title: z.string().min(1, t("seller.enterTitle")),
+      description: z.string().min(1, t("seller.enterDescription")),
+      discountPercent: z
+        .string()
+        .refine(
+          (v) => !isNaN(Number(v)) && Number(v) > 0 && Number(v) <= 100,
+          t("seller.enterPercent"),
+        ),
+      scope: z.enum(["all", "category", "coffee"]),
+      categoryId: z.string().optional(),
+      coffeeId: z.string().optional(),
+      code: z.string().optional(),
+      startsAt: z.string().regex(DATE_REGEX, t("seller.useYYYYMMDD")),
+      endsAt: z.string().regex(DATE_REGEX, t("seller.useYYYYMMDD")),
+      isActive: z.boolean(),
+    })
+    .refine((d) => d.scope !== "category" || !!d.categoryId, {
+      message: "Choose a category",
+      path: ["categoryId"],
+    })
+    .refine((d) => d.scope !== "coffee" || !!d.coffeeId, {
+      message: "Choose a coffee",
+      path: ["coffeeId"],
+    })
+    .refine((d) => d.endsAt >= d.startsAt, {
+      message: "End date must be after start date",
+      path: ["endsAt"],
+    });
+  type FormValues = z.infer<typeof schema>;
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const router = useRouter();
@@ -163,10 +166,10 @@ export default function PromotionFormScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
           err?.code === "23P01"
-            ? "This overlaps with another active promo on the same target. End or edit the existing one first."
+            ? t("seller.overlapError")
             : err?.code === "23505"
-              ? "That voucher code is already in use. Pick another."
-              : "Could not save this promotion. Please try again.",
+              ? t("seller.voucherInUse")
+              : t("seller.couldNotSavePromo"),
         );
       }
     },
@@ -176,9 +179,9 @@ export default function PromotionFormScreen() {
   const handleDelete = useCallback(() => {
     if (!existing) return;
     showConfirm({
-      title: "Delete this promotion?",
-      message: `"${existing.title}" will be removed immediately.`,
-      confirmLabel: "Delete",
+      title: t("seller.deletePromotionTitle"),
+      message: t("seller.deletePromotionMessage", { title: existing.title }),
+      confirmLabel: t("common.delete"),
       destructive: true,
       onConfirm: async () => {
         await deletePromotion(existing.id);
@@ -208,7 +211,7 @@ export default function PromotionFormScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -219,7 +222,7 @@ export default function PromotionFormScreen() {
             marginLeft: spacing.md,
           }}
         >
-          {isEditing ? "Edit promotion" : "Add promotion"}
+          {isEditing ? t("seller.editPromotion") : t("seller.addPromotion")}
         </Text>
       </View>
 
@@ -231,7 +234,7 @@ export default function PromotionFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Title (e.g. Cold Brew week)"
+              placeholder={t("seller.titlePlaceholder")}
               placeholderTextColor={colors.muted}
               style={{
                 borderWidth: 1,
@@ -265,7 +268,7 @@ export default function PromotionFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Description (shown to customers)"
+              placeholder={t("seller.descriptionPlaceholder2")}
               placeholderTextColor={colors.muted}
               multiline
               numberOfLines={2}
@@ -303,7 +306,7 @@ export default function PromotionFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Discount %"
+              placeholder={t("seller.discountPercentPlaceholder")}
               placeholderTextColor={colors.muted}
               keyboardType="decimal-pad"
               style={{
@@ -339,7 +342,7 @@ export default function PromotionFormScreen() {
             <TextInput
               value={value}
               onChangeText={(v) => onChange(v.toUpperCase())}
-              placeholder="Voucher code (optional, e.g. LATTE10)"
+              placeholder={t("seller.voucherCodePlaceholder")}
               placeholderTextColor={colors.muted}
               autoCapitalize="characters"
               autoCorrect={false}
@@ -363,9 +366,7 @@ export default function PromotionFormScreen() {
             fontSize: 11,
             marginBottom: spacing.sm,
           }}
-        >
-          Customers can enter this code at checkout.
-        </Text>
+        >{t("seller.customersEnterCode")}</Text>
 
         <Text
           style={{
@@ -375,26 +376,24 @@ export default function PromotionFormScreen() {
             marginTop: spacing.md,
             marginBottom: spacing.sm,
           }}
-        >
-          Applies to
-        </Text>
+        >{t("seller.appliesTo")}</Text>
         <Controller
           control={control}
           name="scope"
           render={({ field: { value, onChange } }) => (
             <View style={{ flexDirection: "row", gap: spacing.sm }}>
               <Chip
-                label="Whole shop"
+                label={t("seller.wholeShop")}
                 active={value === "all"}
                 onPress={() => onChange("all")}
               />
               <Chip
-                label="One category"
+                label={t("seller.oneCategory")}
                 active={value === "category"}
                 onPress={() => onChange("category")}
               />
               <Chip
-                label="One coffee"
+                label={t("seller.oneCoffee")}
                 active={value === "coffee"}
                 onPress={() => onChange("coffee")}
               />
@@ -486,9 +485,7 @@ export default function PromotionFormScreen() {
             marginTop: spacing.xl,
             marginBottom: spacing.sm,
           }}
-        >
-          Duration
-        </Text>
+        >{t("seller.duration")}</Text>
         <View
           style={{
             flexDirection: "row",
@@ -497,17 +494,17 @@ export default function PromotionFormScreen() {
           }}
         >
           <Chip
-            label="1 week"
+            label={t("seller.week1")}
             active={false}
             onPress={() => applyDuration(7)}
           />
           <Chip
-            label="2 weeks"
+            label={t("seller.weeks2")}
             active={false}
             onPress={() => applyDuration(14)}
           />
           <Chip
-            label="1 month"
+            label={t("seller.month1")}
             active={false}
             onPress={() => applyDuration(30)}
           />
@@ -521,7 +518,7 @@ export default function PromotionFormScreen() {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  placeholder="Start (YYYY-MM-DD)"
+                  placeholder={t("seller.startPlaceholder")}
                   placeholderTextColor={colors.muted}
                   style={{
                     borderWidth: 1,
@@ -555,7 +552,7 @@ export default function PromotionFormScreen() {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  placeholder="End (YYYY-MM-DD)"
+                  placeholder={t("seller.endPlaceholder")}
                   placeholderTextColor={colors.muted}
                   style={{
                     borderWidth: 1,
@@ -597,9 +594,7 @@ export default function PromotionFormScreen() {
               fontSize: typography.bodySmall,
               fontWeight: "600",
             }}
-          >
-            Active
-          </Text>
+          >{t("seller.active")}</Text>
           <Controller
             control={control}
             name="isActive"
@@ -635,7 +630,7 @@ export default function PromotionFormScreen() {
         }}
       >
         <Button
-          label={isEditing ? "Save changes" : "Add promotion"}
+          label={isEditing ? t("common.saveChanges") : t("seller.addPromotion")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"
@@ -643,7 +638,7 @@ export default function PromotionFormScreen() {
         {isEditing && (
           <View style={{ marginTop: spacing.sm }}>
             <Button
-              label="Delete promotion"
+              label={t("seller.deletePromotion")}
               onPress={handleDelete}
               variant="danger"
             />

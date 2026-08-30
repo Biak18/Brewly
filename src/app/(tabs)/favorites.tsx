@@ -29,6 +29,7 @@ import Animated, {
   LinearTransition,
   ZoomInEasyDown,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type FavoritesTab = "drinks" | "shops";
@@ -41,16 +42,17 @@ function SegmentControl({
   onChange: (t: FavoritesTab) => void;
 }) {
   const { colors, spacing, radius, typography } = useTheme();
+  const { t } = useTranslation();
   const options: { key: FavoritesTab; label: string; icon: React.ReactNode }[] =
     [
       {
         key: "drinks",
-        label: "Drinks",
+        label: t("favorites.drinks"),
         icon: <Heart size={14} color={colors.espresso} strokeWidth={2} />,
       },
       {
         key: "shops",
-        label: "Shops",
+        label: t("favorites.shops"),
         icon: <StoreIcon size={14} color={colors.espresso} strokeWidth={2} />,
       },
     ];
@@ -100,6 +102,7 @@ function SegmentControl({
 
 export default function FavoritesScreen() {
   const { colors, spacing } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
   const [tab, setTab] = useState<FavoritesTab>("drinks");
@@ -177,9 +180,9 @@ export default function FavoritesScreen() {
         <SegmentControl value={tab} onChange={setTab} />
         <EmptyState
           icon={<Heart size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="Couldn't load favorites"
-          description="Check your connection and try again."
-          actionLabel="Retry"
+          title={t("favorites.loadError")}
+          description={t("common.checkConnection")}
+          actionLabel={t("common.retry")}
           onAction={() => refetch()}
         />
       </View>
@@ -203,9 +206,9 @@ export default function FavoritesScreen() {
             icon={
               <StoreIcon size={28} color={colors.espresso} strokeWidth={1.8} />
             }
-            title="No saved shops yet"
-            description="Tap the heart on a shop to keep it here."
-            actionLabel="Browse shops"
+            title={t("favorites.noShopsTitle")}
+            description={t("favorites.noShopsDescription")}
+            actionLabel={t("favorites.browseShops")}
             onAction={() => router.push("/(tabs)/shops")}
           />
         ) : (
@@ -247,9 +250,9 @@ export default function FavoritesScreen() {
       ) : coffees.length === 0 ? (
         <EmptyState
           icon={<Heart size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="No favorites yet"
-          description="Tap the heart on any coffee to save it here."
-          actionLabel="Browse menu"
+          title={t("favorites.emptyTitle")}
+          description={t("favorites.emptyDescription")}
+          actionLabel={t("favorites.browseMenu")}
           onAction={() => router.push("/(tabs)/shops")}
         />
       ) : (

@@ -13,6 +13,7 @@ import {
 } from "@/services/sellerOptions";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -21,14 +22,10 @@ import { useCallback, useMemo, useState } from "react";
 import { SectionList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const TYPE_LABELS: Record<OptionType, string> = {
-  size: "Size",
-  temperature: "Temperature",
-  milk: "Milk",
-  extra: "Extra",
-};
+
 
 export default function ManageOptionsScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -57,9 +54,9 @@ export default function ManageOptionsScreen() {
     };
     options.forEach((o) => grouped[o.type].push(o));
     return (Object.keys(grouped) as OptionType[])
-      .filter((t) => grouped[t].length > 0)
-      .map((t) => ({ title: TYPE_LABELS[t], data: grouped[t] }));
-  }, [options]);
+      .filter((type) => grouped[type].length > 0)
+      .map((type) => ({ title: t(`seller.optionType.${type}`), data: grouped[type] }));
+  }, [options, t]);
 
   const openCreate = useCallback(() => {
     setEditingOption(null);
@@ -89,7 +86,7 @@ export default function ManageOptionsScreen() {
           paddingBottom: spacing.md,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -100,11 +97,9 @@ export default function ManageOptionsScreen() {
             marginLeft: spacing.md,
             flex: 1,
           }}
-        >
-          Manage Options
-        </Text>
+        >{t("seller.manageOptionsTitle")}</Text>
         <IconButton
-          accessibilityLabel="Add option"
+          accessibilityLabel={t("seller.addOption")}
           variant="filled"
           onPress={openCreate}
         >
@@ -121,9 +116,9 @@ export default function ManageOptionsScreen() {
       ) : options.length === 0 ? (
         <EmptyState
           icon={<Sliders size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="No options yet"
-          description="Add sizes, milk choices, and extras your customers can pick."
-          actionLabel="Add option"
+          title={t("seller.noOptionsYet")}
+          description={t("seller.addOptionsDesc")}
+          actionLabel={t("seller.addOption")}
           onAction={openCreate}
         />
       ) : (

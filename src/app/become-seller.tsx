@@ -6,6 +6,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { supabase } from "@/services/supabase";
 import { refreshProfile, useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { useToastStore } from "@/stores/toastStore";
 import {
@@ -23,18 +24,20 @@ import { Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
-const schema = z.object({
-  storeName: z.string().min(1, "Enter your shop name"),
-  address: z.string().min(1, "Enter your shop address"),
-  mapLink: z.string(),
-  openTime: z.string().optional(),
-  closeTime: z.string().optional(),
-  kpayPhone: z.string(),
-  paymentNote: z.string(),
-});
-type FormValues = z.infer<typeof schema>;
+
 
 export default function BecomeSellerScreen() {
+  const { t } = useTranslation();
+  const schema = z.object({
+    storeName: z.string().min(1, t("seller.enterShopName")),
+    address: z.string().min(1, t("seller.enterShopAddress")),
+    mapLink: z.string(),
+    openTime: z.string().optional(),
+    closeTime: z.string().optional(),
+    kpayPhone: z.string(),
+    paymentNote: z.string(),
+  });
+  type FormValues = z.infer<typeof schema>;
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
@@ -46,7 +49,7 @@ export default function BecomeSellerScreen() {
 
   const readMapLink = useCallback(async () => {
     if (!mapLink.trim()) {
-      setLinkError("Paste a Google Maps link first.");
+      setLinkError(t("seller.pasteMapsLinkFirst"));
       return;
     }
     setLinkError(null);
@@ -64,7 +67,7 @@ export default function BecomeSellerScreen() {
   const useCurrentLocation = useCallback(async () => {
     const coords = await getCurrentCoordinates();
     if (!coords) {
-      showToast("Could not get your location");
+      showToast(t("seller.couldNotGetLocation"));
       return;
     }
     setPin(coords);
@@ -118,8 +121,8 @@ export default function BecomeSellerScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
           error.message.includes("already have a store")
-            ? "You already have a store."
-            : "Could not create your shop. Please try again.",
+            ? t("seller.alreadyHaveStore")
+            : t("seller.couldNotCreateShop"),
         );
         return;
       }
@@ -169,7 +172,7 @@ export default function BecomeSellerScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -179,9 +182,7 @@ export default function BecomeSellerScreen() {
             fontWeight: "800",
             marginLeft: spacing.md,
           }}
-        >
-          Become a Seller
-        </Text>
+        >{t("seller.becomeSellerTitle")}</Text>
       </View>
 
       <FormScrollView contentContainerStyle={{ padding: spacing.xl }}>
@@ -191,9 +192,7 @@ export default function BecomeSellerScreen() {
             fontSize: typography.bodySmall,
             marginBottom: spacing.lg,
           }}
-        >
-          Set up your shop, then add your menu.
-        </Text>
+        >{t("seller.setupShop")}</Text>
 
         <Controller
           control={control}
@@ -202,7 +201,7 @@ export default function BecomeSellerScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Shop name"
+              placeholder={t("seller.shopName")}
               placeholderTextColor={colors.muted}
               style={{ ...inputStyle, marginBottom: spacing.sm }}
             />
@@ -221,7 +220,7 @@ export default function BecomeSellerScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Address"
+              placeholder={t("seller.address")}
               placeholderTextColor={colors.muted}
               style={{ ...inputStyle, marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
@@ -247,7 +246,7 @@ export default function BecomeSellerScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               multiline
-              placeholder="Google Maps link (Share then Copy link)"
+              placeholder={t("seller.googleMapsLink")}
               placeholderTextColor={colors.muted}
               style={{
                 ...inputStyle,
@@ -261,9 +260,9 @@ export default function BecomeSellerScreen() {
           )}
         />
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-          <Chip label="Find coordinates" active={false} onPress={readMapLink} />
+          <Chip label={t("seller.findCoordinates")} active={false} onPress={readMapLink} />
           <Chip
-            label="Use my location"
+            label={t("seller.useMyLocation")}
             active={false}
             onPress={useCurrentLocation}
           />
@@ -273,12 +272,10 @@ export default function BecomeSellerScreen() {
             <Text style={{ color: colors.danger }}>{linkError}</Text>
           ) : pin ? (
             <Text style={{ color: colors.green }}>
-              {`Pin saved${pinSource ? ` (${pinSource})` : ""}: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`}
+              {t("seller.pinSaved", { source: pinSource ? ` (${pinSource})` : "", lat: pin.lat.toFixed(5), lng: pin.lng.toFixed(5) })}
             </Text>
           ) : (
-            <Text style={{ color: colors.muted }}>
-              Add a location so customers see how far you are. Optional.
-            </Text>
+            <Text style={{ color: colors.muted }}>{t("seller.addLocationOptional")}</Text>
           )}
         </Text>
 
@@ -291,7 +288,7 @@ export default function BecomeSellerScreen() {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  placeholder="Opens (e.g. 07:00)"
+                  placeholder={t("seller.opensPlaceholder")}
                   placeholderTextColor={colors.muted}
                   style={inputStyle}
                 />
@@ -306,7 +303,7 @@ export default function BecomeSellerScreen() {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  placeholder="Closes (e.g. 19:00)"
+                  placeholder={t("seller.closesPlaceholder")}
                   placeholderTextColor={colors.muted}
                   style={inputStyle}
                 />
@@ -314,9 +311,7 @@ export default function BecomeSellerScreen() {
             />
           </View>
         </View>
-        <Text style={[hintStyle(colors, spacing), { marginTop: spacing.xs }]}>
-          Opening hours are optional.
-        </Text>
+        <Text style={[hintStyle(colors, spacing), { marginTop: spacing.xs }]}>{t("seller.openingHoursOptional")}</Text>
 
         <Text
           style={{
@@ -338,7 +333,7 @@ export default function BecomeSellerScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="KBZPay number (e.g. 09XXXXXXXXX)"
+              placeholder={t("seller.kbzPayNumber")}
               placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
               style={{ ...inputStyle, marginBottom: spacing.sm }}
@@ -352,7 +347,7 @@ export default function BecomeSellerScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Note for customers (account name, MMQR hint)"
+              placeholder={t("seller.paymentNoteHint")}
               placeholderTextColor={colors.muted}
               multiline
               style={{
@@ -369,16 +364,13 @@ export default function BecomeSellerScreen() {
             />
           )}
         />
-        <Text style={hintStyle(colors, spacing)}>
-          Shown at checkout for KPay or MMQR. Optional; change it later in Store
-          settings.
-        </Text>
+        <Text style={hintStyle(colors, spacing)}>{t("seller.kpayCheckoutHint")}</Text>
 
         {serverError && (
           <Text style={errorStyle(colors.danger, spacing)}>{serverError}</Text>
         )}
         <Button
-          label="Create my shop"
+          label={t("seller.createMyShop")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"

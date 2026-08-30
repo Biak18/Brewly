@@ -37,6 +37,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const checkoutSchema = z
   .object({
@@ -51,7 +52,7 @@ const checkoutSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["paymentRef"],
-        message: "Enter your transaction ID",
+        message: "checkout.transactionIdRequired",
       });
     }
   });
@@ -84,6 +85,7 @@ function Section({
 
 export default function CheckoutScreen() {
   const { colors, spacing, radius, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
@@ -98,7 +100,7 @@ export default function CheckoutScreen() {
   useEffect(() => {
     track("checkout_started", { store_id: storeId, item_count: items.length });
     // Fired once per checkout visit — cart contents at entry are the props.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
   const { data: store } = useQuery({
     queryKey: ["store", storeId],
@@ -149,7 +151,7 @@ export default function CheckoutScreen() {
     try {
       const promo = await lookupPromoCode(storeId, promoInput);
       if (!promo || !promo.code) {
-        setPromoError("That code isn't valid for this shop right now.");
+        setPromoError(t("checkout.promoInvalid"));
         return;
       }
       setAppliedPromo({
@@ -163,7 +165,7 @@ export default function CheckoutScreen() {
       setPromoInput("");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setPromoError("Couldn't check that code. Try again.");
+      setPromoError(t("checkout.promoCheckFailed"));
     } finally {
       setPromoBusy(false);
     }
@@ -256,7 +258,7 @@ export default function CheckoutScreen() {
               values.paymentRef.trim(),
             );
           } catch {
-            showToast?.("Order placed, but payment proof failed to save");
+            showToast?.(t("checkout.paymentProofFailed"));
           }
         }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -266,8 +268,8 @@ export default function CheckoutScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         setServerError(
           error instanceof Error && error.message.includes("Menu price changed")
-            ? "Your menu changed. Please return to your cart and refresh it before trying again."
-            : "Something went wrong placing your order. Please try again.",
+            ? t("checkout.menuChanged")
+            : t("checkout.orderError"),
         );
       }
     },
@@ -308,7 +310,7 @@ export default function CheckoutScreen() {
             marginTop: spacing.sm,
           }}
         >
-          You&apos;re offline. Connect to place your order.
+          {t("checkout.offline")}
         </Text>
       )}
       {isShopClosed && (
@@ -321,7 +323,7 @@ export default function CheckoutScreen() {
             marginTop: spacing.sm,
           }}
         >
-          {store?.name} is closed right now. Opens at {openState.opensAt}.
+          {t("checkout.closed", { name: store?.name, time: openState.opensAt })}
         </Text>
       )}
       <View
@@ -331,7 +333,7 @@ export default function CheckoutScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -342,7 +344,7 @@ export default function CheckoutScreen() {
             marginLeft: spacing.md,
           }}
         >
-          Checkout
+          {t("checkout.title")}
         </Text>
       </View>
 
@@ -350,15 +352,15 @@ export default function CheckoutScreen() {
         contentContainerStyle={{ padding: spacing.xl }}
         showsVerticalScrollIndicator={false}
       >
-        <Section title="Fulfillment">
+        <Section title={t("checkout.fulfillment")}>
           <FulfillmentToggle value={fulfillment} onChange={setFulfillment} />
         </Section>
         {fulfillment === "pickup" ? (
-          <Section title="Pickup from">
+          <Section title={t("checkout.pickupFrom")}>
             <PickupStoreDisplay store={store} />
           </Section>
         ) : (
-          <Section title="Deliver to">
+          <Section title={t("checkout.deliverTo")}>
             <DeliveryAddressPicker
               addresses={addresses}
               selectedId={selectedAddress?.id ?? null}
@@ -372,12 +374,12 @@ export default function CheckoutScreen() {
                 marginTop: spacing.sm,
               }}
             >
-              Free delivery applies.
+              {t("checkout.freeDeliveryApplies")}
             </Text>
           </Section>
         )}
 
-        <Section title="Pickup time">
+        <Section title={t("checkout.pickupTime")}>
           <Controller
             control={control}
             name="pickupTime"
@@ -391,11 +393,11 @@ export default function CheckoutScreen() {
           />
         </Section>
 
-        <Section title="Add a tip">
+        <Section title={t("checkout.addTip")}>
           <TipJar value={tip} onChange={setTip} />
         </Section>
 
-        <Section title="Payment">
+        <Section title={t("checkout.payment")}>
           <Controller
             control={control}
             name="paymentMethod"
@@ -414,7 +416,7 @@ export default function CheckoutScreen() {
                       method={paymentMethod as "kpay" | "mmqr"}
                       value={value}
                       onChangeText={onChange}
-                      error={errors.paymentRef?.message}
+                      error={errors.paymentRef?.message ? t(errors.paymentRef.message) : undefined}
                     />
                   )}
                 />
@@ -422,7 +424,7 @@ export default function CheckoutScreen() {
             )}
         </Section>
 
-        <Section title="Order summary">
+        <Section title={t("checkout.orderSummary")}>
           <PromoCodeInput
             value={promoInput}
             onChangeText={setPromoInput}
@@ -466,7 +468,7 @@ export default function CheckoutScreen() {
                     fontSize: typography.bodySmall,
                   }}
                 >
-                  Use my free coffee
+                  {t("checkout.useFreeCoffee")}
                 </Text>
                 <Text
                   style={{
@@ -474,9 +476,11 @@ export default function CheckoutScreen() {
                     fontSize: typography.micro,
                   }}
                 >
-                  10 stamps ·{" "}
-                  {formatCurrency(Math.min(...items.map((i) => i.unitPrice)))}{" "}
-                  off your cheapest drink
+                  {t("checkout.freeCoffeeHint", {
+                    price: formatCurrency(
+                      Math.min(...items.map((i) => i.unitPrice)),
+                    ),
+                  })}
                 </Text>
               </View>
               {redeemFree && (
@@ -508,7 +512,7 @@ export default function CheckoutScreen() {
         }}
       >
         <Button
-          label={isSubmitting ? "Placing order…" : "Place order"}
+          label={isSubmitting ? t("checkout.placingOrder") : t("checkout.placeOrder")}
           onPress={submitOrder}
           loading={isSubmitting}
           disabled={

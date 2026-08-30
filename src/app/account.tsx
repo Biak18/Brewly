@@ -23,9 +23,10 @@ import { Controller, useForm } from "react-hook-form";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const nameSchema = z.object({
-  fullName: z.string().trim().min(1, "Name can't be empty").max(60),
+  fullName: z.string().trim().min(1, "account.nameRequired").max(60),
 });
 type NameForm = z.infer<typeof nameSchema>;
 
@@ -35,17 +36,18 @@ const AVATAR_EPOCH = Date.now();
 
 const passwordSchema = z
   .object({
-    password: z.string().min(8, "At least 8 characters"),
+    password: z.string().min(8, "account.passwordMin"),
     confirm: z.string(),
   })
   .refine((v) => v.password === v.confirm, {
     path: ["confirm"],
-    message: "Passwords don't match",
+    message: "account.passwordsMismatch",
   });
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function AccountScreen() {
   const { colors, spacing, radius, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const session = useAuthStore((s) => s.session);
@@ -78,9 +80,9 @@ export default function AccountScreen() {
       try {
         await updateDisplayName(userId, values.fullName.trim());
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showToast("Name updated");
+        showToast(t("account.toastNameUpdated"));
       } catch {
-        setNameError("Could not update your name. Try again.");
+        setNameError("account.nameUpdateFailed");
       } finally {
         setIsSavingName(false);
       }
@@ -95,12 +97,10 @@ export default function AccountScreen() {
       try {
         await changePassword(values.password);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        showToast("Password updated");
+        showToast(t("account.toastPasswordUpdated"));
         passwordForm.reset({ password: "", confirm: "" });
       } catch {
-        setPasswordError(
-          "Could not change your password. Sign in again and retry.",
-        );
+        setPasswordError("account.passwordChangeFailed");
       } finally {
         setIsSavingPassword(false);
       }
@@ -112,24 +112,23 @@ export default function AccountScreen() {
     const url = await pickAndUpload();
     if (url) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showToast("Profile photo updated");
+      showToast(t("account.toastPhotoUpdated"));
       setAvatarCacheKey(Date.now());
     }
   }, [pickAndUpload, showToast]);
 
   const onDeleteAccount = useCallback(() => {
     showConfirm({
-      title: "Delete account?",
-      message:
-        "This permanently deletes your account, orders, favorites, and loyalty stamps. This cannot be undone.",
-      confirmLabel: "Delete forever",
+      title: t("account.deleteTitle"),
+      message: t("account.deleteMessage"),
+      confirmLabel: t("account.deleteForever"),
       destructive: true,
       onConfirm: async () => {
         try {
           await deleteAccount();
           // Session is gone server-side; auth listener clears local state.
         } catch (err: any) {
-          showToast(err?.message ?? "Could not delete your account.");
+          showToast(err?.message ?? t("account.deleteFailed"));
         }
       },
     });
@@ -158,7 +157,7 @@ export default function AccountScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -169,7 +168,7 @@ export default function AccountScreen() {
             marginLeft: spacing.md,
           }}
         >
-          Account settings
+          {t("account.title")}
         </Text>
       </View>
 
@@ -184,7 +183,7 @@ export default function AccountScreen() {
           <Pressable
             onPress={onPickAvatar}
             disabled={isUploading}
-            accessibilityLabel="Change profile photo"
+            accessibilityLabel={t("account.changePhoto")}
             style={{
               width: 96,
               height: 96,
@@ -239,7 +238,7 @@ export default function AccountScreen() {
             { color: colors.muted, marginBottom: spacing.xs },
           ]}
         >
-          Profile
+          {t("account.profile")}
         </Text>
         <View
           style={{
@@ -259,7 +258,7 @@ export default function AccountScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Display name"
+                placeholder={t("account.displayNamePlaceholder")}
                 placeholderTextColor={colors.muted}
                 style={[
                   styles.input,
@@ -276,11 +275,11 @@ export default function AccountScreen() {
                 marginTop: spacing.sm,
               }}
             >
-              {nameForm.formState.errors.fullName?.message ?? nameError}
+              {t(nameForm.formState.errors.fullName?.message ?? nameError ?? "")}
             </Text>
           )}
           <Button
-            label={isSavingName ? "Saving…" : "Save name"}
+            label={isSavingName ? t("account.saving") : t("account.saveName")}
             onPress={nameForm.handleSubmit(onSaveName)}
             loading={isSavingName}
             variant="soft"
@@ -295,7 +294,7 @@ export default function AccountScreen() {
             { color: colors.muted, marginBottom: spacing.xs },
           ]}
         >
-          Password
+          {t("account.password")}
         </Text>
         <View
           style={{
@@ -315,7 +314,7 @@ export default function AccountScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="New password"
+                placeholder={t("account.newPasswordPlaceholder")}
                 containerStyle={{ marginBottom: spacing.sm }}
               />
             )}
@@ -324,7 +323,7 @@ export default function AccountScreen() {
             <Text
               style={{ color: colors.danger, fontSize: typography.caption }}
             >
-              {passwordForm.formState.errors.password.message}
+              {t(passwordForm.formState.errors.password.message ?? "")}
             </Text>
           )}
           <Controller
@@ -335,7 +334,7 @@ export default function AccountScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Confirm new password"
+                placeholder={t("account.confirmPasswordPlaceholder")}
               />
             )}
           />
@@ -347,11 +346,11 @@ export default function AccountScreen() {
                 marginTop: spacing.sm,
               }}
             >
-              {passwordForm.formState.errors.confirm?.message ?? passwordError}
+              {t(passwordForm.formState.errors.confirm?.message ?? passwordError ?? "")}
             </Text>
           )}
           <Button
-            label={isSavingPassword ? "Updating…" : "Update password"}
+            label={isSavingPassword ? t("account.updating") : t("account.updatePassword")}
             onPress={passwordForm.handleSubmit(onChangePassword)}
             loading={isSavingPassword}
             variant="soft"
@@ -366,7 +365,7 @@ export default function AccountScreen() {
             { color: colors.danger, marginBottom: spacing.xs },
           ]}
         >
-          Danger zone
+          {t("account.dangerZone")}
         </Text>
         <View
           style={{
@@ -384,11 +383,10 @@ export default function AccountScreen() {
               marginBottom: spacing.md,
             }}
           >
-            Deleting removes your orders, favorites, and loyalty stamps for
-            good.
+            {t("account.deleteCopy")}
           </Text>
           <Button
-            label="Delete account"
+            label={t("account.deleteAccount")}
             onPress={onDeleteAccount}
             variant="danger"
           />

@@ -25,10 +25,12 @@ import Animated, {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CartScreen() {
   const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const savings = useCartStore(selectCartSavings);
@@ -74,7 +76,7 @@ export default function CartScreen() {
           }
         });
         if (unavailable.length > 0) {
-          showToast("Some unavailable items were removed from your cart");
+          showToast(t("cart.unavailableRemoved"));
         }
       })
       .catch(() => undefined);
@@ -114,9 +116,9 @@ export default function CartScreen() {
         }
       }
       if (removed > 0) {
-        showToast("Some unavailable items were removed from your cart");
+        showToast(t("cart.unavailableRemoved"));
       } else if (changed > 0) {
-        showToast("Cart prices were updated");
+        showToast(t("cart.pricesUpdated"));
       }
     } catch {
       // Pricing service unavailable — keep cached prices; checkout
@@ -135,8 +137,8 @@ export default function CartScreen() {
       const removed = items.find((i) => i.id === lineId);
       removeItem(lineId);
       if (removed) {
-        showToast("Removed from cart", {
-          actionLabel: "Undo",
+        showToast(t("cart.removed"), {
+          actionLabel: t("cart.undo"),
           onAction: () =>
             addItem({
               coffeeId: removed.coffeeId,
@@ -195,7 +197,7 @@ export default function CartScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -206,7 +208,7 @@ export default function CartScreen() {
             marginLeft: spacing.md,
           }}
         >
-          Your cart
+          {t("cart.title")}
         </Text>
       </View>
 
@@ -215,9 +217,9 @@ export default function CartScreen() {
           icon={
             <ShoppingBag size={28} color={colors.espresso} strokeWidth={1.8} />
           }
-          title="Your cart is empty"
-          description="Add something from the menu to get started."
-          actionLabel="Browse menu"
+          title={t("cart.emptyTitle")}
+          description={t("cart.emptyDescription")}
+          actionLabel={t("cart.browseMenu")}
           onAction={() => router.push("/(tabs)/shops")}
         />
       ) : (
@@ -251,7 +253,7 @@ export default function CartScreen() {
                     fontWeight: "600",
                   }}
                 >
-                  You&apos;re saving
+                  {t("cart.saving")}
                 </Text>
                 <Text
                   style={{
@@ -273,14 +275,14 @@ export default function CartScreen() {
               }}
             >
               <Text style={{ color: colors.muted, fontSize: typography.body }}>
-                Total
+                {t("cart.total")}
               </Text>
               <Animated.View style={totalStyle}>
                 <CoffeePrice value={total} size={22} />
               </Animated.View>
             </View>
             <Button
-              label="Proceed to checkout"
+              label={t("cart.proceedToCheckout")}
               onPress={() => router.push("/checkout")}
               variant="primary"
             />

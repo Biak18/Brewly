@@ -2,6 +2,7 @@
 import { useFavoriteIds } from "@/features/favorites/api/useFavorites";
 import { ThemeColors } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
+import { useTranslation } from "react-i18next";
 import { Tabs } from "expo-router";
 import {
   Heart,
@@ -21,11 +22,11 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TABS = [
-  { name: "index", label: "Home", Icon: Home },
-  { name: "shops", label: "Shops", Icon: Store },
-  { name: "orders", label: "Orders", Icon: ReceiptText },
-  { name: "favorites", label: "Favorites", Icon: Heart },
-  { name: "profile", label: "Profile", Icon: User },
+  { name: "index", labelKey: "tabs.home", Icon: Home },
+  { name: "shops", labelKey: "tabs.shops", Icon: Store },
+  { name: "orders", labelKey: "tabs.orders", Icon: ReceiptText },
+  { name: "favorites", labelKey: "tabs.favorites", Icon: Heart },
+  { name: "profile", labelKey: "tabs.profile", Icon: User },
 ] as const;
 
 const SPRING = { damping: 24, stiffness: 140, mass: 1 } as const;
@@ -39,7 +40,7 @@ type BottomTabBarProps = {
 
 type TabButtonProps = {
   Icon: LucideIcon;
-  label: string;
+  labelKey: string;
   focused: boolean;
   badge?: number | string;
   colors: ThemeColors;
@@ -50,7 +51,7 @@ type TabButtonProps = {
 
 function TabButton({
   Icon,
-  label,
+  labelKey,
   focused,
   badge,
   colors,
@@ -58,6 +59,7 @@ function TabButton({
   onLayout,
   onPress,
 }: TabButtonProps) {
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
 
   useEffect(() => {
@@ -86,7 +88,7 @@ function TabButton({
         style={[styles.tabLabel, { color, opacity: focused ? 1 : 0.65 }]}
         numberOfLines={1}
       >
-        {label}
+        {t(labelKey)}
       </Text>
       {badge ? (
         <View style={[styles.badge, { backgroundColor: colors.danger }]}>
@@ -119,7 +121,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   useEffect(() => {
     if (ready) goTo(activeIndex);
     // The indicator callback intentionally reads the latest measurements.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [activeIndex, ready]);
 
   const onMeasure = (index: number, x: number, width: number) => {
@@ -154,22 +156,22 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             indicatorStyle,
           ]}
         />
-        {TABS.map((t, i) => {
-          const routeIndex = state.routes.findIndex((r) => r.name === t.name);
+        {TABS.map((tTab, i) => {
+          const routeIndex = state.routes.findIndex((r) => r.name === tTab.name);
           const route = state.routes[routeIndex];
           const focused = routeIndex === activeIndex;
           const badge = descriptors[route.key]?.options?.tabBarBadge;
           return (
             <TabButton
-              key={t.name}
-              Icon={t.Icon}
-              label={t.label}
+              key={tTab.name}
+              Icon={tTab.Icon}
+              labelKey={tTab.labelKey}
               focused={focused}
               badge={badge as number | string | undefined}
               colors={colors}
               index={i}
               onLayout={onMeasure}
-              onPress={() => navigation.navigate(t.name)}
+              onPress={() => navigation.navigate(tTab.name)}
             />
           );
         })}
@@ -179,6 +181,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const coffees = useFavoriteIds();
   return (
     <View
@@ -191,17 +194,17 @@ export default function TabsLayout() {
         }}
         tabBar={(props) => <CustomTabBar {...props} />}
       >
-        <Tabs.Screen name="index" options={{ title: "Home" }} />
-        <Tabs.Screen name="shops" options={{ title: "Shops" }} />
-        <Tabs.Screen name="orders" options={{ title: "Orders" }} />
+        <Tabs.Screen name="index" options={{ title: t("tabs.home") }} />
+        <Tabs.Screen name="shops" options={{ title: t("tabs.shops") }} />
+        <Tabs.Screen name="orders" options={{ title: t("tabs.orders") }} />
         <Tabs.Screen
           name="favorites"
           options={{
-            title: "Favorites",
+            title: t("tabs.favorites"),
             tabBarBadge: coffees.data?.size || undefined,
           }}
         />
-        <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+        <Tabs.Screen name="profile" options={{ title: t("tabs.profile") }} />
       </Tabs>
     </View>
   );

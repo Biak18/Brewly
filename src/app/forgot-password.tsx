@@ -1,6 +1,7 @@
 // src/app/forgot-password.tsx
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
@@ -20,13 +21,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
-const schema = z.object({ email: z.string().email("Enter a valid email") });
-type FormValues = z.infer<typeof schema>;
-
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const [sent, setSent] = useState(false);
+  const schema = z.object({ email: z.string().email(t("auth.emailInvalid")) });
+  type FormValues = z.infer<typeof schema>;
   const {
     control,
     handleSubmit,
@@ -72,7 +73,7 @@ export default function ForgotPasswordScreen() {
               textAlign: "center",
             }}
           >
-            Check your email
+            {t("auth.checkEmail")}
           </Text>
           <Text
             style={{
@@ -82,11 +83,10 @@ export default function ForgotPasswordScreen() {
               marginBottom: spacing.xl,
             }}
           >
-            If an account exists for that address, we&apos;ve sent a link to
-            reset your password.
+            {t("auth.resetEmailSent")}
           </Text>
           <Button
-            label="Back to sign in"
+            label={t("auth.backToSignIn")}
             onPress={() => router.replace("/sign-in")}
             variant="soft"
           />
@@ -110,7 +110,10 @@ export default function ForgotPasswordScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton
+          accessibilityLabel={t("auth.goBack")}
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
       </View>
@@ -133,7 +136,7 @@ export default function ForgotPasswordScreen() {
               marginBottom: spacing.sm,
             }}
           >
-            Reset password
+            {t("auth.resetPassword")}
           </Text>
           <Text
             style={{
@@ -142,7 +145,7 @@ export default function ForgotPasswordScreen() {
               marginBottom: spacing.xl,
             }}
           >
-            Enter your email and we&apos;ll send you a reset link.
+            {t("auth.resetInstruction")}
           </Text>
         </View>
         <View>
@@ -154,7 +157,7 @@ export default function ForgotPasswordScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Email"
+                placeholder={t("auth.emailPlaceholder")}
                 placeholderTextColor={colors.muted}
                 autoCapitalize="none"
                 autoComplete="email"
@@ -185,7 +188,7 @@ export default function ForgotPasswordScreen() {
           )}
         </View>
         <Button
-          label="Send reset link"
+          label={t("auth.sendResetLink")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"

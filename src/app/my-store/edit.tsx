@@ -8,6 +8,7 @@ import { TimePickerSheet } from "@/features/seller/components/TimePickerSheet";
 import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { getStoreOpenState } from "@/utils/storeHours";
 import {
@@ -28,41 +29,43 @@ import { z } from "zod";
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-const schema = z
-  .object({
-    name: z.string().min(1, "Enter your shop name"),
-    address: z.string().min(1, "Enter your shop address"),
-    mapLink: z.string(),
-    openTime: z
-      .string()
-      .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
-    closeTime: z
-      .string()
-      .refine((v) => v === "" || TIME_REGEX.test(v), "Use HH:MM"),
-    kpayPhone: z.string(),
-    paymentNote: z.string(),
-    contactPhone: z.string(),
-  })
-  .superRefine((v, ctx) => {
-    const oneSet = !!v.openTime !== !!v.closeTime;
-    if (oneSet) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [v.openTime ? "closeTime" : "openTime"],
-        message: "Set both times or leave both empty",
-      });
-    }
-    if (v.openTime && v.closeTime && v.openTime === v.closeTime) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["closeTime"],
-        message: "Closing must differ from opening",
-      });
-    }
-  });
-type FormValues = z.infer<typeof schema>;
+
 
 export default function EditStoreScreen() {
+  const { t } = useTranslation();
+  const schema = z
+    .object({
+      name: z.string().min(1, t("store.enterShopName")),
+      address: z.string().min(1, t("store.enterShopAddress")),
+      mapLink: z.string(),
+      openTime: z
+        .string()
+        .refine((v) => v === "" || TIME_REGEX.test(v), t("store.useHHMM")),
+      closeTime: z
+        .string()
+        .refine((v) => v === "" || TIME_REGEX.test(v), t("store.useHHMM")),
+      kpayPhone: z.string(),
+      paymentNote: z.string(),
+      contactPhone: z.string(),
+    })
+    .superRefine((v, ctx) => {
+      const oneSet = !!v.openTime !== !!v.closeTime;
+      if (oneSet) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [v.openTime ? "closeTime" : "openTime"],
+          message: t("store.setBothTimes"),
+        });
+      }
+      if (v.openTime && v.closeTime && v.openTime === v.closeTime) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["closeTime"],
+          message: t("store.closingDiffer"),
+        });
+      }
+    });
+  type FormValues = z.infer<typeof schema>;
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -175,34 +178,32 @@ export default function EditStoreScreen() {
   const readMapLink = useCallback(async () => {
     const link = mapLinkValue?.trim() ?? "";
     if (!link) {
-      setLinkError("Paste a Google Maps link first.");
+      setLinkError(t("store.pasteMapsLinkFirst"));
       return;
     }
     setLinkError(null);
     const resolved = await resolveMapLink(link);
     if (!resolved) {
-      setLinkError(
-        "Couldn't read coordinates from that link. Use Share → Copy link in Google Maps, or pin your current location at the shop.",
-      );
+      setLinkError(t("store.couldNotReadCoords"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
     setPinOverride(resolved);
     setPinSource("from your map link");
     Haptics.selectionAsync();
-  }, [mapLinkValue]);
+  }, [mapLinkValue, t]);
 
   const useCurrentLocation = useCallback(async () => {
     const coords = await getCurrentCoordinates();
     if (!coords) {
-      showToast("Could not get your location");
+      showToast(t("store.couldNotGetLocation"));
       return;
     }
     setPinOverride(coords);
     setPinSource("your current location. Stand at the shop before tapping");
     setLinkError(null);
     Haptics.selectionAsync();
-  }, [showToast]);
+  }, [showToast, t]);
 
   const submit = useCallback(
     async (values: FormValues) => {
@@ -210,9 +211,7 @@ export default function EditStoreScreen() {
       if (!nextPin && values.mapLink.trim()) {
         const resolved = await resolveMapLink(values.mapLink);
         if (!resolved) {
-          setLinkError(
-            "Couldn't read coordinates from that link. Use Share → Copy link in Google Maps, or tap Find after pasting.",
-          );
+          setLinkError(t("store.couldNotReadCoordsTap"));
           return;
         }
         nextPin = resolved;
@@ -222,7 +221,7 @@ export default function EditStoreScreen() {
       setLinkError(null);
       await save.mutateAsync({ values, pin: nextPin });
     },
-    [pin, save],
+    [pin, save, t],
   );
 
   if (!store) return null;
@@ -243,7 +242,7 @@ export default function EditStoreScreen() {
           paddingBottom: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -253,9 +252,7 @@ export default function EditStoreScreen() {
             fontWeight: "800",
             marginLeft: spacing.md,
           }}
-        >
-          Store settings
-        </Text>
+        >{t("store.settings")}</Text>
       </View>
       <FormScrollView contentContainerStyle={{ paddingHorizontal: spacing.xl }}>
         <Text
@@ -264,9 +261,7 @@ export default function EditStoreScreen() {
             fontSize: typography.bodySmall,
             marginBottom: spacing.xl,
           }}
-        >
-          Update your shop details and the KPay number customers pay to.
-        </Text>
+        >{t("store.updateDetails")}</Text>
 
         {(
           [
@@ -320,9 +315,7 @@ export default function EditStoreScreen() {
             marginTop: spacing.md,
             marginBottom: spacing.sm,
           }}
-        >
-          Shop location
-        </Text>
+        >{t("store.shopLocation")}</Text>
         <Controller
           control={control}
           name="mapLink"
@@ -334,7 +327,7 @@ export default function EditStoreScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               multiline
-              placeholder="Paste a Google Maps link (Share → Copy link)"
+              placeholder={t("store.pasteMapsLink")}
               placeholderTextColor={colors.muted}
               style={{
                 borderWidth: 1,
@@ -359,12 +352,12 @@ export default function EditStoreScreen() {
           }}
         >
           <Chip
-            label="Find coordinates"
+            label={t("store.findCoordinates")}
             active={false}
             onPress={readMapLink}
           />
           <Chip
-            label="Use my current location"
+            label={t("store.useCurrentLocation")}
             active={false}
             onPress={useCurrentLocation}
           />
@@ -378,8 +371,8 @@ export default function EditStoreScreen() {
             style={{ color: colors.muted, fontSize: 11, marginTop: 6 }}
           >
             {pin
-              ? `Pin saved${pinSource ? ` (${pinSource})` : ""}: ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`
-              : "No pin yet. Customers won't see how far your shop is until it's set."}
+              ? t("store.pinSaved", { source: pinSource ? ` (${pinSource})` : "", lat: pin.lat.toFixed(5), lng: pin.lng.toFixed(5) })
+              : t("store.noPinYet")}
           </Text>
         )}
 
@@ -393,16 +386,14 @@ export default function EditStoreScreen() {
             marginTop: spacing.md,
             marginBottom: spacing.sm,
           }}
-        >
-          Opening hours
-        </Text>
+        >{t("store.openingHours")}</Text>
         <View style={{ flexDirection: "row", gap: spacing.sm }}>
           <Controller
             control={control}
             name="openTime"
             render={({ field: { value } }) => (
               <TimeField
-                label="Opens"
+                label={t("store.opens")}
                 value={value}
                 error={errors.openTime?.message}
                 onPress={() => setPickerField("open")}
@@ -414,7 +405,7 @@ export default function EditStoreScreen() {
             name="closeTime"
             render={({ field: { value } }) => (
               <TimeField
-                label="Closes"
+                label={t("store.closes")}
                 value={value}
                 error={errors.closeTime?.message}
                 onPress={() => setPickerField("close")}
@@ -448,7 +439,7 @@ export default function EditStoreScreen() {
             />
           ))}
           <Chip
-            label="No hours"
+            label={t("store.noHours")}
             active={!openTime && !closeTime}
             onPress={() => {
               setValue("openTime", "");
@@ -475,8 +466,8 @@ export default function EditStoreScreen() {
                 }}
               >
                 {openState.isOpen
-                  ? `Open now. Customers see "Open · until ${closeTime}"`
-                  : `Closed now. Customers see "Closed · opens ${openTime}"`}
+                  ? t("store.openNow", { time: closeTime })
+                  : t("store.closedNow", { time: openTime })}
               </Text>
               {isOvernight && (
                 <Text
@@ -485,9 +476,7 @@ export default function EditStoreScreen() {
                     fontSize: typography.micro,
                     marginTop: 4,
                   }}
-                >
-                  Overnight window. This shop closes past midnight.
-                </Text>
+                >{t("store.overnightWindow")}</Text>
               )}
             </>
           ) : (
@@ -497,10 +486,7 @@ export default function EditStoreScreen() {
                 fontSize: typography.caption,
                 fontWeight: "600",
               }}
-            >
-              No hours set. No Open/Closed badge is shown and ordering never
-              blocks.
-            </Text>
+            >{t("store.noHoursSet")}</Text>
           )}
         </View>
 
@@ -514,9 +500,7 @@ export default function EditStoreScreen() {
             marginTop: spacing.xl,
             marginBottom: spacing.sm,
           }}
-        >
-          KPay / MMQR receiving
-        </Text>
+        >{t("store.kpayMmqrReceiving")}</Text>
         <Controller
           control={control}
           name="kpayPhone"
@@ -524,7 +508,7 @@ export default function EditStoreScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="KBZPay number (e.g. 09XXXXXXXXX)"
+              placeholder={t("store.kbzPayNumber")}
               placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
               style={{
@@ -547,7 +531,7 @@ export default function EditStoreScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Note shown to customers (account name, MMQR hint…)"
+              placeholder={t("store.paymentNoteHint")}
               placeholderTextColor={colors.muted}
               multiline
               style={{
@@ -574,9 +558,7 @@ export default function EditStoreScreen() {
             marginTop: spacing.xl,
             marginBottom: spacing.sm,
           }}
-        >
-          Contact number
-        </Text>
+        >{t("store.contactNumber")}</Text>
         <Controller
           control={control}
           name="contactPhone"
@@ -584,7 +566,7 @@ export default function EditStoreScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Phone customers can call (e.g. 09XXXXXXXXX)"
+              placeholder={t("store.phoneCustomersCall")}
               placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
               style={{
@@ -602,7 +584,7 @@ export default function EditStoreScreen() {
 
         <View style={{ marginVertical: spacing.xxl }}>
           <Button
-            label="Save changes"
+            label={t("common.saveChanges")}
             onPress={handleSubmit(submit)}
             loading={isSubmitting || save.isPending}
             variant="primary"

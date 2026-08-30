@@ -5,6 +5,7 @@ import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
 import { fetchStoreById } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -14,6 +15,7 @@ import { Linking, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OrderChatScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors, spacing, typography } = useTheme();
@@ -32,9 +34,9 @@ export default function OrderChatScreen() {
     const phone = receiptStore?.contact_phone?.trim();
     if (!phone) return;
     Linking.openURL(`tel:${phone}`).catch(() => {
-      showToast("Could not open the dialer");
+      showToast(t("chat.couldNotOpenDialer"));
     });
-  }, [receiptStore, showToast]);
+  }, [receiptStore, showToast, t]);
 
   const storeName = receiptStore?.name ?? "shop";
   const canCall = isCustomerOrder && !!receiptStore?.contact_phone;
@@ -54,7 +56,7 @@ export default function OrderChatScreen() {
           backgroundColor: colors.bg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -67,10 +69,10 @@ export default function OrderChatScreen() {
           }}
           numberOfLines={1}
         >
-          {isCustomerOrder ? `Chat with ${storeName}` : "Chat with customer"}
+          {isCustomerOrder ? t("chat.chatWithShop", { name: storeName }) : t("chat.chatWithCustomer")}
         </Text>
         {canCall && (
-          <IconButton accessibilityLabel={`Call ${storeName}`} onPress={handleCallShop}>
+          <IconButton accessibilityLabel={t("chat.callShop", { name: storeName })} onPress={handleCallShop}>
             <Phone size={20} color={colors.espresso} strokeWidth={1.8} />
           </IconButton>
         )}

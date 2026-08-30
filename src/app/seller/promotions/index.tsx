@@ -10,6 +10,7 @@ import {
 import { Promotion } from "@/services/promotions";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManagePromotionsScreen() {
+  const { t } = useTranslation();
   const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user.id);
@@ -56,7 +58,7 @@ export default function ManagePromotionsScreen() {
           paddingHorizontal: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -67,11 +69,9 @@ export default function ManagePromotionsScreen() {
             marginLeft: spacing.md,
             flex: 1,
           }}
-        >
-          Manage Promotions
-        </Text>
+        >{t("seller.managePromotions")}</Text>
         <IconButton
-          accessibilityLabel="Add promotion"
+          accessibilityLabel={t("seller.addPromotion")}
           variant="filled"
           onPress={() => router.push("/seller/promotions/form")}
         >
@@ -88,9 +88,9 @@ export default function ManagePromotionsScreen() {
       ) : promotions.length === 0 ? (
         <EmptyState
           icon={<Tag size={28} color={colors.espresso} strokeWidth={1.8} />}
-          title="No promotions yet"
-          description="Run a discount on your menu to attract customers."
-          actionLabel="Add promotion"
+          title={t("seller.noPromotionsYet")}
+          description={t("seller.runDiscount")}
+          actionLabel={t("seller.addPromotion")}
           onAction={() => router.push("/seller/promotions/form")}
         />
       ) : (

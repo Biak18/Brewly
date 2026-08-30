@@ -10,6 +10,7 @@ import { fetchCoffeeById } from "@/services/coffees";
 import { createCoffee, updateCoffee } from "@/services/sellerMenu";
 import { fetchMyStore } from "@/services/stores";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,19 +30,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
-const schema = z.object({
-  name: z.string().min(1, "Enter a name"),
-  description: z.string().min(1, "Enter a description"),
-  basePrice: z
-    .string()
-    .refine((v) => !isNaN(Number(v)) && Number(v) > 0, "Enter a valid price"),
-  imageUrl: z.string().url("Enter a valid URL").or(z.literal("")),
-  categoryId: z.string().min(1, "Choose a category"),
-  isActive: z.boolean(),
-});
-type FormValues = z.infer<typeof schema>;
+
 
 export default function CoffeeFormScreen() {
+  const { t } = useTranslation();
+  const schema = z.object({
+    name: z.string().min(1, t("seller.enterName")),
+    description: z.string().min(1, t("seller.enterDescription")),
+    basePrice: z
+      .string()
+      .refine((v) => !isNaN(Number(v)) && Number(v) > 0, t("seller.enterValidPrice")),
+    imageUrl: z.string().url(t("seller.enterValidUrl")).or(z.literal("")),
+    categoryId: z.string().min(1, "Choose a category"),
+    isActive: z.boolean(),
+  });
+  type FormValues = z.infer<typeof schema>;
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const router = useRouter();
@@ -153,7 +156,7 @@ export default function CoffeeFormScreen() {
           paddingBottom: spacing.lg,
         }}
       >
-        <IconButton accessibilityLabel="Go back" onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text
@@ -164,7 +167,7 @@ export default function CoffeeFormScreen() {
             marginLeft: spacing.md,
           }}
         >
-          {isEditing ? "Edit coffee" : "Add coffee"}
+          {isEditing ? t("seller.editCoffee") : t("seller.addCoffee")}
         </Text>
       </View>
 
@@ -195,9 +198,7 @@ export default function CoffeeFormScreen() {
                       marginTop: spacing.sm,
                       fontWeight: "600",
                     }}
-                  >
-                    No image yet
-                  </Text>
+                  >{t("seller.noImageYet")}</Text>
                 </View>
               )}
               <View
@@ -241,7 +242,7 @@ export default function CoffeeFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Image URL"
+              placeholder={t("seller.imageUrl")}
               placeholderTextColor={colors.muted}
               autoCapitalize="none"
               style={{
@@ -274,9 +275,7 @@ export default function CoffeeFormScreen() {
             fontSize: typography.caption,
             marginBottom: spacing.xl,
           }}
-        >
-          Paste a link for now. Direct photo upload is next.
-        </Text>
+        >{t("seller.pasteLinkNote")}</Text>
 
         <Controller
           control={control}
@@ -285,7 +284,7 @@ export default function CoffeeFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Name"
+              placeholder={t("seller.namePlaceholder")}
               placeholderTextColor={colors.muted}
               style={{
                 borderWidth: 1,
@@ -319,7 +318,7 @@ export default function CoffeeFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Description"
+              placeholder={t("seller.descriptionPlaceholder")}
               placeholderTextColor={colors.muted}
               multiline
               numberOfLines={3}
@@ -357,7 +356,7 @@ export default function CoffeeFormScreen() {
             <TextInput
               value={value}
               onChangeText={onChange}
-              placeholder="Price (e.g. 4.50)"
+              placeholder={t("seller.pricePlaceholder")}
               placeholderTextColor={colors.muted}
               keyboardType="decimal-pad"
               style={{
@@ -393,9 +392,7 @@ export default function CoffeeFormScreen() {
             fontSize: typography.bodySmall,
             marginBottom: spacing.sm,
           }}
-        >
-          Category
-        </Text>
+        >{t("seller.category")}</Text>
         <Controller
           control={control}
           name="categoryId"
@@ -434,9 +431,7 @@ export default function CoffeeFormScreen() {
               fontSize: typography.bodySmall,
               fontWeight: "600",
             }}
-          >
-            Active (visible to customers)
-          </Text>
+          >{t("seller.activeVisibleCustomers")}</Text>
           <Controller
             control={control}
             name="isActive"
@@ -460,7 +455,7 @@ export default function CoffeeFormScreen() {
         }}
       >
         <Button
-          label={isEditing ? "Save changes" : "Add coffee"}
+          label={isEditing ? t("common.saveChanges") : t("seller.addCoffee")}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"

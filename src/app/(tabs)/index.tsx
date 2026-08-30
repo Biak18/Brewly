@@ -15,10 +15,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Coffee as CoffeeIcon } from "lucide-react-native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { ZoomInEasyDown } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { colors, spacing } = useTheme();
+  const { t } = useTranslation();
   const { refreshing, onRefresh } = useRefresh(["coffees"], ["stores"]);
 
   const popular = useQuery({
@@ -36,9 +38,9 @@ export default function HomeScreen() {
         icon={
           <CoffeeIcon size={28} color={colors.espresso} strokeWidth={1.8} />
         }
-        title="Couldn't load the menu"
-        description="Check your connection and try again."
-        actionLabel="Retry"
+        title={t("home.menuLoadError")}
+        description={t("common.checkConnection")}
+        actionLabel={t("common.retry")}
         onAction={() => popular.refetch()}
       />
     );
@@ -72,7 +74,7 @@ export default function HomeScreen() {
           <View style={{ marginTop: spacing.sm }} /> {/* spacer */}
           <PromoBanner />
           <HomeShopsRow />
-          <CoffeeRow title="Popular" coffees={popular.data ?? []} />
+          <CoffeeRow title={t("home.popular")} coffees={popular.data ?? []} />
           <RecentOrdersRow />
           <View style={{ marginBottom: spacing.xxl }} />
         </Stagger>
