@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
+import { DevAccountSwitcher } from "@/features/dev/DevAccountSwitcher";
 import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { ensureNotificationPermission } from "@/lib/notifications";
 import { useAuthStore } from "@/stores/authStore";
@@ -402,6 +403,8 @@ export default function ProfileScreen() {
               />
             }
           />
+
+          <DevAccountSwitcher />
         </Stagger>
       </ScrollView>
     </SafeAreaView>
