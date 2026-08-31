@@ -21,8 +21,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -263,47 +264,36 @@ export default function EditStoreScreen() {
           }}
         >{t("store.updateDetails")}</Text>
 
-        {(
-          [
-            { name: "name", placeholder: "Shop name", err: errors.name },
-            {
-              name: "address",
-              placeholder: "Address",
-              err: errors.address,
-            },
-          ] as const
-        ).map((f) => (
-          <View key={f.name} style={{ marginBottom: spacing.sm }}>
-            <Controller
-              control={control}
-              name={f.name}
-              render={({ field: { value, onChange } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder={f.placeholder}
-                  placeholderTextColor={colors.muted}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: f.err ? colors.danger : colors.line,
-                    height: 48,
-                    paddingHorizontal: 14,
-                    fontSize: 14,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                  }}
-                />
-              )}
+        <Controller
+          control={control}
+          name="name"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.shopName")}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={t("store.shopName")}
+              error={errors.name?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
-            {!!f.err && (
-              <Text
-                style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}
-              >
-                {f.err.message}
-              </Text>
-            )}
-          </View>
-        ))}
+          )}
+        />
+        <Controller
+          control={control}
+          name="address"
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.address")}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder={t("store.address")}
+              error={errors.address?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
+            />
+          )}
+        />
 
         <Text
           style={{
@@ -319,27 +309,21 @@ export default function EditStoreScreen() {
         <Controller
           control={control}
           name="mapLink"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.pasteMapsLink")}
               value={value}
               onChangeText={onChange}
-              onEndEditing={readMapLink}
+              onBlur={() => {
+                onBlur?.();
+                readMapLink();
+              }}
               autoCapitalize="none"
               autoCorrect={false}
               multiline
               placeholder={t("store.pasteMapsLink")}
-              placeholderTextColor={colors.muted}
-              style={{
-                borderWidth: 1,
-                borderColor: linkError ? colors.danger : colors.line,
-                minHeight: 48,
-                paddingVertical: 12,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                textAlignVertical: "top",
-              }}
+              error={linkError ?? undefined}
+              inputStyle={{ minHeight: 48, textAlignVertical: "top", paddingTop: 12 }}
             />
           )}
         />
@@ -504,46 +488,30 @@ export default function EditStoreScreen() {
         <Controller
           control={control}
           name="kpayPhone"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.kbzPayNumber")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("store.kbzPayNumber")}
-              placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.sm,
-              }}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
         <Controller
           control={control}
           name="paymentNote"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.paymentNoteHint")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("store.paymentNoteHint")}
-              placeholderTextColor={colors.muted}
               multiline
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                minHeight: 72,
-                padding: 12,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                textAlignVertical: "top",
-              }}
+              inputStyle={{ minHeight: 72, textAlignVertical: "top", paddingTop: 12 }}
             />
           )}
         />
@@ -562,22 +530,14 @@ export default function EditStoreScreen() {
         <Controller
           control={control}
           name="contactPhone"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("store.phoneCustomersCall")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("store.phoneCustomersCall")}
-              placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-              }}
             />
           )}
         />

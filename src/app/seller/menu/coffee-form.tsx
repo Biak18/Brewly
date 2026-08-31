@@ -19,12 +19,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Camera, ChevronLeft, ImageOff } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { FieldInput } from "@/components/ui/FieldInput";
 import {
   ActivityIndicator,
   Pressable,
   Switch,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -238,37 +238,19 @@ export default function CoffeeFormScreen() {
         <Controller
           control={control}
           name="imageUrl"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.imageUrl")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.imageUrl")}
-              placeholderTextColor={colors.muted}
+              error={errors.imageUrl?.message}
               autoCapitalize="none"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.xs,
-              }}
+              containerStyle={{ marginBottom: spacing.xs }}
             />
           )}
         />
-        {errors.imageUrl && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.imageUrl.message}
-          </Text>
-        )}
         <Text
           style={{
             color: colors.muted,
@@ -280,110 +262,54 @@ export default function CoffeeFormScreen() {
         <Controller
           control={control}
           name="name"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.namePlaceholder")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.namePlaceholder")}
-              placeholderTextColor={colors.muted}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.xs,
-              }}
+              error={errors.name?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.name && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.name.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="description"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.descriptionPlaceholder")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.descriptionPlaceholder")}
-              placeholderTextColor={colors.muted}
+              error={errors.description?.message}
               multiline
               numberOfLines={3}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                minHeight: 80,
-                padding: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-                textAlignVertical: "top",
-              }}
+              inputStyle={{ minHeight: 80, textAlignVertical: "top", paddingTop: 12 }}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.description && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.description.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="basePrice"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.pricePlaceholder")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.pricePlaceholder")}
-              placeholderTextColor={colors.muted}
+              error={errors.basePrice?.message}
               keyboardType="decimal-pad"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-              }}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.basePrice && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.basePrice.message}
-          </Text>
-        )}
 
         <Text
           style={{

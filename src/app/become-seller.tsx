@@ -20,7 +20,8 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Text, TextInput, View } from "react-native";
+import { FieldInput } from "@/components/ui/FieldInput";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -38,7 +39,7 @@ export default function BecomeSellerScreen() {
     paymentNote: z.string(),
   });
   type FormValues = z.infer<typeof schema>;
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -151,16 +152,6 @@ export default function BecomeSellerScreen() {
     [router, pin],
   );
 
-  const inputStyle = {
-    borderWidth: 1,
-    borderColor: colors.line,
-    height: 48,
-    paddingHorizontal: 14,
-    fontSize: 14,
-    color: colors.ink,
-    borderRadius: radius.md,
-  } as const;
-
   return (
     <SafeAreaView
       style={{ flex: 1, paddingTop: spacing.sm, backgroundColor: colors.bg }}
@@ -197,65 +188,56 @@ export default function BecomeSellerScreen() {
         <Controller
           control={control}
           name="storeName"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.shopName")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.shopName")}
-              placeholderTextColor={colors.muted}
-              style={{ ...inputStyle, marginBottom: spacing.sm }}
+              error={errors.storeName?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.storeName && (
-          <Text style={errorStyle(colors.danger, spacing)}>
-            {errors.storeName.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="address"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.address")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.address")}
-              placeholderTextColor={colors.muted}
-              style={{ ...inputStyle, marginTop: spacing.sm, marginBottom: spacing.sm }}
+              error={errors.address?.message}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.address && (
-          <Text style={errorStyle(colors.danger, spacing)}>
-            {errors.address.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="mapLink"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.googleMapsLink")}
               value={value}
               onChangeText={(v) => {
                 onChange(v);
                 setMapLink(v);
               }}
-              onEndEditing={readMapLink}
+              onBlur={() => {
+                onBlur?.();
+                readMapLink();
+              }}
               autoCapitalize="none"
               autoCorrect={false}
               multiline
               placeholder={t("seller.googleMapsLink")}
-              placeholderTextColor={colors.muted}
-              style={{
-                ...inputStyle,
-                minHeight: 48,
-                paddingVertical: 12,
-                textAlignVertical: "top",
-                marginTop: spacing.sm,
-                marginBottom: spacing.sm,
-              }}
+              inputStyle={{ minHeight: 48, textAlignVertical: "top", paddingTop: 12 }}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
@@ -284,13 +266,14 @@ export default function BecomeSellerScreen() {
             <Controller
               control={control}
               name="openTime"
-              render={({ field: { value, onChange } }) => (
-                <TextInput
-                  value={value}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <FieldInput
+                  label={t("seller.opensPlaceholder")}
+                  value={value ?? ""}
                   onChangeText={onChange}
+                  onBlur={onBlur}
                   placeholder={t("seller.opensPlaceholder")}
-                  placeholderTextColor={colors.muted}
-                  style={inputStyle}
+                  error={errors.openTime?.message}
                 />
               )}
             />
@@ -299,13 +282,14 @@ export default function BecomeSellerScreen() {
             <Controller
               control={control}
               name="closeTime"
-              render={({ field: { value, onChange } }) => (
-                <TextInput
-                  value={value}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <FieldInput
+                  label={t("seller.closesPlaceholder")}
+                  value={value ?? ""}
                   onChangeText={onChange}
+                  onBlur={onBlur}
                   placeholder={t("seller.closesPlaceholder")}
-                  placeholderTextColor={colors.muted}
-                  style={inputStyle}
+                  error={errors.closeTime?.message}
                 />
               )}
             />
@@ -329,38 +313,31 @@ export default function BecomeSellerScreen() {
         <Controller
           control={control}
           name="kpayPhone"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.kbzPayNumber")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.kbzPayNumber")}
-              placeholderTextColor={colors.muted}
               keyboardType="phone-pad"
-              style={{ ...inputStyle, marginBottom: spacing.sm }}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
         <Controller
           control={control}
           name="paymentNote"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.paymentNoteHint")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.paymentNoteHint")}
-              placeholderTextColor={colors.muted}
               multiline
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                minHeight: 72,
-                padding: 12,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                textAlignVertical: "top",
-                marginBottom: spacing.sm,
-              }}
+              inputStyle={{ minHeight: 72, textAlignVertical: "top", paddingTop: 12 }}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />

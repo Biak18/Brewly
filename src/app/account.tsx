@@ -20,8 +20,9 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Pencil, UserRound } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -259,30 +260,22 @@ export default function AccountScreen() {
             control={nameForm.control}
             name="fullName"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <FieldInput
+                label={t("account.displayNamePlaceholder")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={t("account.displayNamePlaceholder")}
-                placeholderTextColor={colors.muted}
-                style={[
-                  styles.input,
-                  { color: colors.ink, borderColor: colors.line },
-                ]}
+                error={
+                  nameForm.formState.errors.fullName?.message
+                    ? t(nameForm.formState.errors.fullName.message)
+                    : nameError
+                      ? t(nameError)
+                      : undefined
+                }
               />
             )}
           />
-          {(nameForm.formState.errors.fullName || nameError) && (
-            <Text
-              style={{
-                color: colors.danger,
-                fontSize: typography.caption,
-                marginTop: spacing.sm,
-              }}
-            >
-              {t(nameForm.formState.errors.fullName?.message ?? nameError ?? "")}
-            </Text>
-          )}
           <Button
             label={isSavingName ? t("account.saving") : t("account.saveName")}
             onPress={nameForm.handleSubmit(onSaveName)}
