@@ -67,6 +67,10 @@ export function FieldInput({
     fontWeight: "600" as const,
   };
 
+  // Avoid duplicate "Email" ghost: show native placeholder only when it differs from label and field is focused-empty
+  const nativePlaceholder =
+    focused && !value && placeholder && placeholder !== label ? placeholder : undefined;
+
   return (
     <View style={[{ gap: 4 }, containerStyle]}>
       <View
@@ -90,7 +94,7 @@ export function FieldInput({
             setFocused(false);
             onBlur?.(e);
           }}
-          placeholder={focused ? placeholder : undefined}
+          placeholder={nativePlaceholder}
           placeholderTextColor={colors.muted}
           style={[
             styles.input,
