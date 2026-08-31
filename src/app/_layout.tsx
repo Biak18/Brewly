@@ -96,7 +96,13 @@ function RootNavigator() {
             }}
           />
           <Stack.Screen name="shop/[id]" />
-          <Stack.Screen name="my-store" />
+          <Stack.Screen
+            name="my-store"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
           <Stack.Screen name="become-seller" />
           <Stack.Screen
             name="search"

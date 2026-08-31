@@ -1,11 +1,10 @@
 // src/components/ui/FieldInput.tsx
 // Modern replacement for placeholder-only TextInput: always shows a visible label,
 // animates a floating label when focused or filled, keeps hint as helper text.
-// Uses useTheme colors/spacing/radius/typography — no Tailwind.
+// Uses useTheme colors/spacing/radius/typography + reanimated (UI thread) — no Tailwind.
 import { useTheme } from "@/theme";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Animated,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +13,11 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 type FieldInputProps = Omit<TextInputProps, "style"> & {
   label: string;
@@ -38,30 +42,28 @@ export function FieldInput({
 }: FieldInputProps) {
   const { colors, radius, spacing, typography } = useTheme();
   const [focused, setFocused] = useState(false);
-  // Animated value persists for lifetime of field; interpolate is render-safe for Animated
-  const anim = useMemo(() => new Animated.Value(value ? 1 : 0), []);
+  const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    Animated.timing(anim, {
-      toValue: focused || !!value ? 1 : 0,
-      duration: 160,
-      useNativeDriver: false,
-    }).start();
-  }, [focused, value, anim]);
+    progress.value = withTiming(focused || !!value ? 1 : 0, { duration: 160 });
+  }, [focused, value, progress]);
 
   const hasError = !!error;
   const borderColor = hasError ? colors.danger : focused ? colors.espresso : colors.line;
   const bg = colors.surface;
 
-  const labelStyle = {
+  const animatedLabelStyle = useAnimatedStyle(() => ({
+    top: 14 + progress.value * -22, // 14 -> -8
+    fontSize: 14 + progress.value * -3, // 14 -> 11
+  }));
+
+  const staticLabelStyle = {
     position: "absolute" as const,
     left: 12,
     backgroundColor: bg,
     paddingHorizontal: 4,
     zIndex: 1,
     color: hasError ? colors.danger : focused ? colors.espresso : colors.muted,
-    top: anim.interpolate({ inputRange: [0, 1], outputRange: [14, -8] }),
-    fontSize: anim.interpolate({ inputRange: [0, 1], outputRange: [14, 11] }),
     fontWeight: "600" as const,
   };
 
@@ -77,7 +79,7 @@ export function FieldInput({
           },
         ]}
       >
-        <Animated.Text style={labelStyle}>{label}</Animated.Text>
+        <Animated.Text style={[staticLabelStyle, animatedLabelStyle]}>{label}</Animated.Text>
         <TextInput
           value={value}
           onFocus={(e) => {
