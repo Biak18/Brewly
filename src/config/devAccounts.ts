@@ -12,7 +12,22 @@ export type DevAccount = {
 };
 
 export const DEV_ACCOUNTS: DevAccount[] = [
-  { label: "Customer", email: "customer@test.com", password: "password123", role: "customer" },
-  { label: "Seller", email: "seller@test.com", password: "password123", role: "seller" },
-  { label: "Driver", email: "driver@test.com", password: "password123", role: "driver" },
+  {
+    label: "Customer",
+    email: "stockflow912@gmail.com",
+    password: "stockflow",
+    role: "customer",
+  },
+  {
+    label: "Seller",
+    email: "biakceu912@gmail.com",
+    password: "Biak18*",
+    role: "seller",
+  },
+  {
+    label: "Driver",
+    email: "eithinzarhtun@gmail.com",
+    password: "Biak18*",
+    role: "driver",
+  },
 ];

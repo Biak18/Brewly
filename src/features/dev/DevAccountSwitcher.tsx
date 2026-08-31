@@ -28,16 +28,19 @@ export function DevAccountSwitcher() {
     }
     setBusy(email);
     try {
-      // Clear stale caches before swapping session so role-gated screens remount clean
+      // No explicit signOut — signInWithPassword replaces the session atomically.
+      // Explicit signOut first emits SIGNED_OUT -> handleSession(null) -> RootNavigator
+      // briefly shows the sign-in stack (flash). Direct sign-in keeps isLoading=true
+      // and shows LoadingScreen instead.
+      useAuthStore.setState({ isLoading: true });
       queryClient.clear();
-      const { error: signOutError } = await supabase.auth.signOut();
-      // signOut may fail if no session — still try sign-in
-      if (signOutError) console.warn("dev switch signOut:", signOutError.message);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showToast(`Switched to ${label} · ${email}`);
     } catch (e: any) {
+      // Restore loading so UI doesn't stay stuck if sign-in fails
+      useAuthStore.setState({ isLoading: false });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       showToast(e?.message ?? "Switch failed — check devAccounts.ts");
     } finally {
