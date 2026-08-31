@@ -24,7 +24,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { Switch, Text, TextInput, View } from "react-native";
+import { FieldInput } from "@/components/ui/FieldInput";
+import { Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
@@ -73,7 +74,7 @@ export default function PromotionFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const router = useRouter();
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const userId = useAuthStore((s) => s.session?.user.id);
   const queryClient = useQueryClient();
   const showConfirm = useConfirmDialogStore((s) => s.show);
@@ -230,143 +231,72 @@ export default function PromotionFormScreen() {
         <Controller
           control={control}
           name="title"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.titlePlaceholder")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.titlePlaceholder")}
-              placeholderTextColor={colors.muted}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginBottom: spacing.xs,
-              }}
+              error={errors.title?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.title && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.title.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="description"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.descriptionPlaceholder2")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.descriptionPlaceholder2")}
-              placeholderTextColor={colors.muted}
+              error={errors.description?.message}
               multiline
               numberOfLines={2}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                minHeight: 60,
-                padding: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-                textAlignVertical: "top",
-              }}
+              inputStyle={{ minHeight: 60, textAlignVertical: "top", paddingTop: 12 }}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.description && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.description.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="discountPercent"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.discountPercentPlaceholder")}
               value={value}
               onChangeText={onChange}
+              onBlur={onBlur}
               placeholder={t("seller.discountPercentPlaceholder")}
-              placeholderTextColor={colors.muted}
+              error={errors.discountPercent?.message}
               keyboardType="decimal-pad"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-              }}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.discountPercent && (
-          <Text
-            style={{
-              color: colors.danger,
-              fontSize: 11,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {errors.discountPercent.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
           name="code"
-          render={({ field: { value, onChange } }) => (
-            <TextInput
-              value={value}
+          render={({ field: { value, onChange, onBlur } }) => (
+            <FieldInput
+              label={t("seller.voucherCodePlaceholder")}
+              value={value ?? ""}
               onChangeText={(v) => onChange(v.toUpperCase())}
+              onBlur={onBlur}
               placeholder={t("seller.voucherCodePlaceholder")}
-              placeholderTextColor={colors.muted}
               autoCapitalize="characters"
               autoCorrect={false}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                height: 48,
-                paddingHorizontal: 14,
-                fontSize: 14,
-                color: colors.ink,
-                borderRadius: radius.md,
-                marginTop: spacing.sm,
-                marginBottom: spacing.xs,
-              }}
+              hint={t("seller.customersEnterCode")}
+              containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
             />
           )}
         />
-        <Text
-          style={{
-            color: colors.muted,
-            fontSize: 11,
-            marginBottom: spacing.sm,
-          }}
-        >{t("seller.customersEnterCode")}</Text>
 
         <Text
           style={{
@@ -514,69 +444,33 @@ export default function PromotionFormScreen() {
             <Controller
               control={control}
               name="startsAt"
-              render={({ field: { value, onChange } }) => (
-                <TextInput
+              render={({ field: { value, onChange, onBlur } }) => (
+                <FieldInput
+                  label={t("seller.startPlaceholder")}
                   value={value}
                   onChangeText={onChange}
+                  onBlur={onBlur}
                   placeholder={t("seller.startPlaceholder")}
-                  placeholderTextColor={colors.muted}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.line,
-                    height: 48,
-                    paddingHorizontal: 14,
-                    fontSize: 14,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                  }}
+                  error={errors.startsAt?.message}
                 />
               )}
             />
-            {errors.startsAt && (
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontSize: 11,
-                  marginTop: spacing.xs,
-                }}
-              >
-                {errors.startsAt.message}
-              </Text>
-            )}
           </View>
           <View style={{ flex: 1 }}>
             <Controller
               control={control}
               name="endsAt"
-              render={({ field: { value, onChange } }) => (
-                <TextInput
+              render={({ field: { value, onChange, onBlur } }) => (
+                <FieldInput
+                  label={t("seller.endPlaceholder")}
                   value={value}
                   onChangeText={onChange}
+                  onBlur={onBlur}
                   placeholder={t("seller.endPlaceholder")}
-                  placeholderTextColor={colors.muted}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.line,
-                    height: 48,
-                    paddingHorizontal: 14,
-                    fontSize: 14,
-                    color: colors.ink,
-                    borderRadius: radius.md,
-                  }}
+                  error={errors.endsAt?.message}
                 />
               )}
             />
-            {errors.endsAt && (
-              <Text
-                style={{
-                  color: colors.danger,
-                  fontSize: 11,
-                  marginTop: spacing.xs,
-                }}
-              >
-                {errors.endsAt.message}
-              </Text>
-            )}
           </View>
         </View>
 

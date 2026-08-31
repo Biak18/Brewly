@@ -78,9 +78,27 @@ function RootNavigator() {
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="coffee/[id]" options={{ animation: "none" }} />
-          <Stack.Screen name="cart" />
-          <Stack.Screen name="checkout" />
-          <Stack.Screen name="addresses" />
+          <Stack.Screen
+            name="cart"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="checkout"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="addresses"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
           <Stack.Screen
             name="orders/[id]/tracking"
             options={{
@@ -95,7 +113,12 @@ function RootNavigator() {
               animationDuration: 400,
             }}
           />
-          <Stack.Screen name="shop/[id]" />
+          <Stack.Screen
+            name="shop/[id]"
+            options={{
+              animation: "none",
+            }}
+          />
           <Stack.Screen
             name="my-store"
             options={{
@@ -103,7 +126,13 @@ function RootNavigator() {
               animationDuration: 400,
             }}
           />
-          <Stack.Screen name="become-seller" />
+          <Stack.Screen
+            name="become-seller"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
           <Stack.Screen
             name="search"
             options={{
@@ -111,7 +140,13 @@ function RootNavigator() {
               animationDuration: 50,
             }}
           />
-          <Stack.Screen name="become-driver" />
+          <Stack.Screen
+            name="become-driver"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected
           guard={!session && !isPasswordRecovery && hasOnboarded}
@@ -123,16 +158,51 @@ function RootNavigator() {
         <Stack.Protected
           guard={!!session && !isPasswordRecovery && profile?.role === "seller"}
         >
-          <Stack.Screen name="seller/menu/index" />
-          <Stack.Screen name="seller/menu/coffee-form" />
-          <Stack.Screen name="seller/menu/options" />
-          <Stack.Screen name="seller/promotions/index" />
-          <Stack.Screen name="seller/promotions/form" />
+          <Stack.Screen
+            name="seller/menu/index"
+            options={{
+              animation: "none",
+            }}
+          />
+          <Stack.Screen
+            name="seller/menu/coffee-form"
+            options={{
+              animation: "slide_from_bottom",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="seller/menu/options"
+            options={{
+              animation: "slide_from_bottom",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="seller/promotions/index"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
+          <Stack.Screen
+            name="seller/promotions/form"
+            options={{
+              animation: "slide_from_bottom",
+              animationDuration: 400,
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected
           guard={!!session && !isPasswordRecovery && profile?.role === "driver"}
         >
-          <Stack.Screen name="(driver)" />
+          <Stack.Screen
+            name="(driver)"
+            options={{
+              animation: "slide_from_right",
+              animationDuration: 400,
+            }}
+          />
         </Stack.Protected>
       </Stack>
       <CartPreviewSheet />
