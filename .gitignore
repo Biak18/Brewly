@@ -53,3 +53,5 @@ supabase/.temp/
 # google-services.json is committed intentionally: app.json references it
 # (android.googleServicesFile) so EAS cloud builds resolve it from the repo.
 # It contains identifiers, not secrets (per Firebase documentation).
+
+src/config/devAccounts.ts
