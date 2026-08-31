@@ -3,18 +3,15 @@ import { Button } from "@/components/ui/Button";
 import { OrderItemsList } from "@/features/orders/components/OrderItemsList";
 import { StatusTimeline } from "@/features/orders/components/StatusTimeline";
 import { useOrderTracking } from "@/features/orders/hooks/useOrderTracking";
-import {
-  OrderStatus,
-  updateOrderStatus,
-} from "@/services/orders";
+import { OrderStatus, updateOrderStatus } from "@/services/orders";
 import { useToastStore } from "@/stores/toastStore";
-import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -40,6 +37,7 @@ export default function DriverDeliveryScreen() {
         status,
       });
       queryClient.invalidateQueries({ queryKey: ["driver-orders"] });
+      if (status === "completed") router.dismiss(2);
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       showToast(t("tracking.couldNotUpdatePayment"));
@@ -49,9 +47,7 @@ export default function DriverDeliveryScreen() {
   };
 
   if (isLoading || !order) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} />
-    );
+    return <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} />;
   }
 
   return (
@@ -120,7 +116,7 @@ export default function DriverDeliveryScreen() {
         {order.status === "out_for_delivery" && (
           <Button
             label={t("driver.markDelivered")}
-            onPress={() => advance("delivered")}
+            onPress={() => advance("completed")}
             loading={isAdvancing}
             variant="primary"
           />

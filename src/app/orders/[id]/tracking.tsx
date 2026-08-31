@@ -279,6 +279,7 @@ export default function OrderTrackingScreen() {
 
   useEffect(() => {
     if (!order) return;
+    if (order.status === "driver_assigned") return;
     if (prevStatusRef.current && order.status !== prevStatusRef.current) {
       if (pendingSelfChangeRef.current === order.status) {
         pendingSelfChangeRef.current = null;

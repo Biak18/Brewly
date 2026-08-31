@@ -240,6 +240,7 @@ export async function updateOrderStatus(
     p_order_id: orderId,
     p_status: status,
   });
+  console.log(status);
   console.log(error);
   if (error) throw error;
 }
