@@ -2,21 +2,11 @@
 
 Coffee ordering for Myanmar — **customers order, sellers run their shop, drivers deliver**. Built with **Expo SDK 57 • React Native • Expo Router • Supabase • TypeScript (strict)**.
 
-> Portfolio-ready preview via **EAS Build** (`preview` profile, internal distribution). Invite friends with a shareable install link — no store deploy needed.
-
 <p align="center">
   <img src="docs/images/docs_home.jpg" width="220" alt="Home" />
   <img src="docs/images/docs_shopdetails.jpg" width="220" alt="Shop details" />
   <img src="docs/images/docs_order_tracking.jpg" width="220" alt="Order tracking" />
 </p>
-
-## ✨ Highlights for portfolio
-
-* **Three-role flow in one app:** Customer → Seller → Driver, all on Supabase RLS + Realtime. Single-device dev quick-switch (`__DEV__` only) for testing.
-* **Polished UX:** Floating-label `FieldInput` (reanimated, UI thread), `IconButton` headers, `StatusTimeline`, localized `en`/`my` (react-i18next).
-* **Delivery done right:** Customer `MapLink` pin (`lat/lng`) → `orders.delivery_lat/lng` → Driver `Open in Google Maps` with precise coords fallback.
-* **Chat that works:** Per-order `chat_messages` with RLS for buyer/seller/**driver**, `Talk with Driver` switch after assignment.
-* **Manual payments:** KPay/MMQR proof (`attachPayment`) + cash, promo/voucher codes, loyalty stamps (free coffee at 10), pickup or delivery.
 
 ## 📸 Screenshots
 
@@ -48,7 +38,7 @@ Coffee ordering for Myanmar — **customers order, sellers run their shop, drive
 * **Sellers** — store profile (location pin + hours), menu + option management, promotions with voucher scoping (`all/category/coffee`), order queue + payment verification, earnings summary.
 * **Drivers** — `Become a Driver`, availability toggle, assigned deliveries, `driver_assigned → out_for_delivery → delivered → completed`, `Open in Google Maps` (coords-aware), customer chat.
 
-## 🚀 Preview / Portfolio build
+## 🚀 Preview build
 
 `eas.json` already has:
 
@@ -66,10 +56,10 @@ eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <
 
 # build a shareable APK (internal)
 eas build --profile preview --platform android
-# iOS needs Apple Dev; Android preview is enough for portfolio
+# iOS needs Apple Dev; Android preview is enough
 ```
 
-Find the install link on `expo.dev → Builds`. Share it — no store review. `DevAccountSwitcher` is `__DEV__` gated so it **won’t** appear in the preview; testers sign up as `customer` / `Become a Seller` / `Become a Driver` with real emails (more realistic for portfolio). For OTA fixes after sharing: `eas update --branch preview`.
+Find the install link on `expo.dev → Builds`. Share it — no store review. `DevAccountSwitcher` is `__DEV__` gated so it **won’t** appear in the preview; testers sign up as `customer` / `Become a Seller` / `Become a Driver` with real emails. For OTA fixes after sharing: `eas update --branch preview`.
 
 **Local preview build:**
 
