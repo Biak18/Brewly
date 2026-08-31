@@ -1,7 +1,8 @@
 // src/features/checkout/components/KpayPanel.tsx
 import { useTheme } from "@/theme";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { Copy, Smartphone } from "lucide-react-native";
-import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import type { Store } from "@/services/stores";
 import type { PaymentMethod } from "@/services/orders";
@@ -93,34 +94,21 @@ export function KpayPanel({
         )}
       </View>
 
-      <TextInput
+      <FieldInput
+        label="Transaction ID"
         value={value}
         onChangeText={onChangeText}
         placeholder="Paste KBZPay transaction ID"
-        placeholderTextColor={colors.muted}
         autoCapitalize="none"
         autoCorrect={false}
-        style={{
-          borderWidth: 1,
-          borderColor: error ? colors.danger : colors.line,
-          height: 48,
-          paddingHorizontal: 14,
-          fontSize: 14,
-          color: colors.ink,
-          borderRadius: radius.md,
-        }}
+        error={error}
+        hint={
+          Platform.select({
+            ios: "You'll find the TRX ID in your KBZPay receipt.",
+            default: "You'll find the TRX ID in your KBZPay receipt.",
+          }) as string
+        }
       />
-      <Text style={{ color: colors.muted, fontSize: typography.micro }}>
-        {Platform.select({
-          ios: "You'll find the TRX ID in your KBZPay receipt.",
-          default: "You'll find the TRX ID in your KBZPay receipt.",
-        })}
-      </Text>
-      {!!error && (
-        <Text style={{ color: colors.danger, fontSize: typography.micro }}>
-          {error}
-        </Text>
-      )}
     </View>
   );
 }

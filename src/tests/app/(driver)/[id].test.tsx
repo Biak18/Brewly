@@ -20,6 +20,8 @@ const mockDelivery: OrderWithItems = {
   promo_code: null,
   delivery_fee: 1.5,
   delivery_address: "123 Bahan Road, Yangon",
+  delivery_lat: 16.8409,
+  delivery_lng: 96.1735,
   placed_at: new Date("2026-01-01T10:00:00Z").toISOString(),
   payment_method: "cash",
   payment_status: "unpaid",

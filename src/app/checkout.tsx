@@ -237,6 +237,8 @@ export default function CheckoutScreen() {
             fulfillment === "delivery" && selectedAddress
               ? formatAddressSnapshot(selectedAddress)
               : null,
+          deliveryLat: fulfillment === "delivery" ? (selectedAddress?.lat ?? null) : null,
+          deliveryLng: fulfillment === "delivery" ? (selectedAddress?.lng ?? null) : null,
         });
         track("order_placed", {
           order_id: orderId,

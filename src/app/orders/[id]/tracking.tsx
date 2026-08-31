@@ -36,7 +36,8 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BackHandler, Pressable, Text, TextInput, View } from "react-native";
+import { FieldInput } from "@/components/ui/FieldInput";
+import { BackHandler, Pressable, Text, View } from "react-native";
 import {
   KeyboardAwareScrollView,
   KeyboardStickyView,
@@ -832,14 +833,19 @@ export default function OrderTrackingScreen() {
           )}
         </View>
 
-        {order.status !== "completed" && (
+        {order.status !== "completed" && (() => {
+          const hasDriver = !!order.driver_id;
+          const customerLabel = hasDriver
+            ? t("tracking.talkWithDriver")
+            : t("tracking.talkWithShop");
+          return (
           <View
             style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg }}
           >
             <Button
               label={
                 isCustomerOrder
-                  ? t("tracking.talkWithShop")
+                  ? customerLabel
                   : t("tracking.chatWithCustomer")
               }
               onPress={() =>
@@ -858,7 +864,8 @@ export default function OrderTrackingScreen() {
               }
             />
           </View>
-        )}
+          );
+        })()}
       </KeyboardAwareScrollView>
 
       {/* {canManage && nextStatus && (
@@ -954,20 +961,12 @@ export default function OrderTrackingScreen() {
             >
               {t("tracking.submitPaymentProof")}
             </Text>
-            <TextInput
+            <FieldInput
+              label={t("tracking.enterTransactionId")}
               value={paymentRef}
               onChangeText={setPaymentRef}
               placeholder={t("tracking.enterTransactionId")}
-              placeholderTextColor={colors.muted}
               autoCapitalize="characters"
-              style={{
-                borderWidth: 1,
-                borderColor: colors.line,
-                borderRadius: radius.md,
-                color: colors.ink,
-                paddingHorizontal: spacing.md,
-                height: 46,
-              }}
             />
             <Button
               label={t("tracking.submitPaymentProof")}

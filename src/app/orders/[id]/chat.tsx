@@ -40,6 +40,13 @@ export default function OrderChatScreen() {
 
   const storeName = receiptStore?.name ?? "shop";
   const canCall = isCustomerOrder && !!receiptStore?.contact_phone;
+  const hasDriver = !!order?.driver_id;
+  const driverName = (order as any)?.drivers?.full_name ?? t("tracking.driver");
+  const chatTitle = isCustomerOrder
+    ? hasDriver
+      ? t("tracking.talkWithDriver") + (driverName ? ` · ${driverName}` : "")
+      : t("chat.chatWithShop", { name: storeName })
+    : t("chat.chatWithCustomer");
 
   return (
     <SafeAreaView
@@ -69,7 +76,7 @@ export default function OrderChatScreen() {
           }}
           numberOfLines={1}
         >
-          {isCustomerOrder ? t("chat.chatWithShop", { name: storeName }) : t("chat.chatWithCustomer")}
+          {chatTitle}
         </Text>
         {canCall && (
           <IconButton accessibilityLabel={t("chat.callShop", { name: storeName })} onPress={handleCallShop}>

@@ -1,13 +1,14 @@
 // src/app/(driver)/_layout.tsx
-import { useThemeStore } from "@/theme/themeStore";
+import { IconButton } from "@/components/ui/IconButton";
+import { useTheme } from "@/theme";
 import { useTranslation } from "react-i18next";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback } from "react";
-import { BackHandler, Pressable } from "react-native";
+import { BackHandler } from "react-native";
 
 export default function DriverLayout() {
-  const colors = useThemeStore((s) => s.colors);
+  const { colors, typography } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -33,28 +34,43 @@ export default function DriverLayout() {
     }, [goBack]),
   );
 
-  const headerLeft = () => (
-    <Pressable
-      onPress={goBack}
-      hitSlop={12}
-      accessibilityLabel={t("common.back")}
-    >
-      <ChevronLeft size={24} color={colors.ink} strokeWidth={2} />
-    </Pressable>
-  );
+  const headerLeft = () => {
+    // Only show a polished back button when there is history; the
+    // driver index is a stack root and should not render a back arrow.
+    try {
+      if (!router.canGoBack()) return null as unknown as React.ReactElement;
+    } catch {
+      return null as unknown as React.ReactElement;
+    }
+    return (
+      <IconButton accessibilityLabel={t("common.back")} onPress={goBack}>
+        <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
+      </IconButton>
+    );
+  };
 
   return (
     <Stack
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: colors.surface },
+        headerStyle: { backgroundColor: colors.bg },
         headerTintColor: colors.ink,
-        headerTitleStyle: { color: colors.ink, fontWeight: "700" },
+        headerTitleStyle: {
+          color: colors.ink,
+          fontSize: typography.subheading,
+          fontWeight: "800",
+        },
+        headerTitleAlign: "center",
+        headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.bg },
         headerLeft,
+        animation: "slide_from_right",
       }}
     >
-      <Stack.Screen name="index" options={{ title: t("driver.title") }} />
+      <Stack.Screen
+        name="index"
+        options={{ title: t("driver.title"), headerLeft: () => null }}
+      />
       <Stack.Screen name="[id]" options={{ title: t("driver.delivery") }} />
     </Stack>
   );

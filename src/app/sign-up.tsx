@@ -1,5 +1,6 @@
 // src/app/sign-up.tsx
 import { Button } from "@/components/ui/Button";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useTranslation } from "react-i18next";
@@ -11,13 +12,13 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
 export default function SignUpScreen() {
   const { t } = useTranslation();
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
@@ -155,36 +156,17 @@ export default function SignUpScreen() {
             control={control}
             name="fullName"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <FieldInput
+                label={t("auth.fullNamePlaceholder")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={t("auth.fullNamePlaceholder")}
-                placeholderTextColor={colors.muted}
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginBottom: spacing.sm,
-                }}
+                error={errors.fullName?.message}
+                containerStyle={{ marginBottom: spacing.sm }}
               />
             )}
           />
-          {errors.fullName && (
-            <Text
-              style={{
-                color: colors.danger,
-                fontSize: 11,
-                marginBottom: spacing.sm,
-              }}
-            >
-              {errors.fullName.message}
-            </Text>
-          )}
         </View>
 
         <View>
@@ -192,40 +174,20 @@ export default function SignUpScreen() {
             control={control}
             name="email"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <FieldInput
+                label={t("auth.emailPlaceholder")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={t("auth.emailPlaceholder")}
-                placeholderTextColor={colors.muted}
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginTop: spacing.sm,
-                  marginBottom: spacing.sm,
-                }}
+                error={errors.email?.message}
+                containerStyle={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
               />
             )}
           />
-          {errors.email && (
-            <Text
-              style={{
-                color: colors.danger,
-                fontSize: 11,
-                marginBottom: spacing.sm,
-              }}
-            >
-              {errors.email.message}
-            </Text>
-          )}
         </View>
 
         <View>

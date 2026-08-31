@@ -76,22 +76,30 @@ export async function resolveMapLink(input: string): Promise<PinCoords | null> {
 }
 
 /**
- * Opens the maps app with directions to a free-text address (delivery orders
- * store an address snapshot, not coordinates). Returns false when nothing
- * could handle the URL.
+ * Opens the maps app with directions. Prefers precise coordinates (lat/lng)
+ * from the customer's MapLink pin; falls back to free-text address.
  */
-export async function openDirectionsTo(address: string): Promise<boolean> {
-  const query = address.trim();
-  if (!query) return false;
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-    query,
-  )}`;
+export async function openDirectionsTo(
+  address: string,
+  lat?: number | null,
+  lng?: number | null,
+): Promise<boolean> {
+  const hasCoords = typeof lat === "number" && typeof lng === "number" && valid(lat, lng);
+  const url = hasCoords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address.trim())}`;
+  if (!hasCoords && !address.trim()) return false;
   try {
     await Linking.openURL(url);
     return true;
   } catch {
     return false;
   }
+}
+
+/** Helper to open directions when coords are known separately. */
+export async function openDirectionsToCoords(lat: number, lng: number): Promise<boolean> {
+  return openDirectionsTo(`${lat},${lng}`, lat, lng);
 }
 
 /** Device fix for "use my current location" — permission handled, never throws. */

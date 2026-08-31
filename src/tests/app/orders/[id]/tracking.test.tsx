@@ -20,6 +20,8 @@ const mockOrder: OrderWithItems = {
   promo_code: null,
   delivery_fee: 0,
   delivery_address: null,
+  delivery_lat: null,
+  delivery_lng: null,
   placed_at: new Date("2026-01-01T10:00:00Z").toISOString(),
   payment_method: "cash",
   payment_status: "unpaid",

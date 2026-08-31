@@ -99,6 +99,8 @@ export async function placeOrder(params: {
   idempotencyKey?: string;
   /** Required snapshot string when fulfillment is "delivery". */
   deliveryAddress?: string | null;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
 }): Promise<string> {
   const { subtotal, tax, total } = computeOrderTotals(params.items);
   const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
@@ -134,6 +136,8 @@ export async function placeOrder(params: {
       params.fulfillment === "delivery"
         ? (params.deliveryAddress ?? null)
         : null,
+    p_delivery_lat: params.fulfillment === "delivery" ? (params.deliveryLat ?? null) : null,
+    p_delivery_lng: params.fulfillment === "delivery" ? (params.deliveryLng ?? null) : null,
     p_redeem_loyalty: params.redeemLoyalty ?? false,
     p_idempotency_key: params.idempotencyKey ?? null,
   };
@@ -188,6 +192,8 @@ export type OrderWithItems = {
   promo_code: string | null;
   delivery_fee: number;
   delivery_address: string | null;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
   placed_at: string;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
@@ -312,6 +318,8 @@ export type DriverDelivery = {
   total: number;
   placed_at: string;
   delivery_address: string | null;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
 };
 
 export async function fetchDriverOrders(
@@ -319,7 +327,7 @@ export async function fetchDriverOrders(
 ): Promise<DriverDelivery[]> {
   const { data, error } = await supabase
     .from("orders")
-    .select("id, status, total, placed_at, delivery_address")
+    .select("id, status, total, placed_at, delivery_address, delivery_lat, delivery_lng")
     .eq("driver_id", userId)
     .in("status", ["driver_assigned", "out_for_delivery"])
     .order("placed_at", { ascending: false });

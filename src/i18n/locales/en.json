@@ -272,7 +272,12 @@
     "toastDeleted": "Address deleted",
     "toastSaveFailed": "Could not save this address",
     "toastUpdated": "Address updated",
-    "useAsDefault": "Use as default"
+    "useAsDefault": "Use as default",
+    "mapHint": "Add a pin so driver can navigate precisely. Paste a Google Maps link or use your current location.",
+    "labelRequired": "Label is required",
+    "recipientRequired": "Recipient name is required",
+    "phoneRequired": "Phone is required",
+    "addressRequired": "Address is required"
   },
   "account": {
     "title": "Account settings",
@@ -369,6 +374,7 @@
     "trxId": "TRX ID: {{ref}}",
     "waitingPaymentConfirm": "Waiting for the shop to confirm your payment.",
     "talkWithShop": "Talk with Shop",
+    "talkWithDriver": "Talk with Driver",
     "chatWithCustomer": "Chat with customer",
     "confirmPaymentReceived": "Confirm payment received",
     "rejectWrongTrx": "Reject: wrong TRX ID",

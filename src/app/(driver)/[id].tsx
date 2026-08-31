@@ -102,7 +102,11 @@ export default function DriverDeliveryScreen() {
           <Button
             label={t("driver.openInMaps")}
             onPress={async () => {
-              const opened = await openDirectionsTo(order.delivery_address!);
+              const opened = await openDirectionsTo(
+                order.delivery_address!,
+                (order as any).delivery_lat ?? null,
+                (order as any).delivery_lng ?? null,
+              );
               if (!opened) showToast(t("driver.openMapsFailed"));
             }}
             variant="soft"

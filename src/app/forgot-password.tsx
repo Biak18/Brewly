@@ -1,5 +1,6 @@
 // src/app/forgot-password.tsx
 import { Button } from "@/components/ui/Button";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { IconButton } from "@/components/ui/IconButton";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
@@ -12,7 +13,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 import {
   Easing,
   FadeInUp,
@@ -24,7 +25,7 @@ import { z } from "zod";
 
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
   const [sent, setSent] = useState(false);
@@ -162,39 +163,19 @@ export default function ForgotPasswordScreen() {
             control={control}
             name="email"
             render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
+              <FieldInput
+                label={t("auth.emailPlaceholder")}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={t("auth.emailPlaceholder")}
-                placeholderTextColor={colors.muted}
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"
-                style={{
-                  borderWidth: 1,
-                  borderColor: colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginBottom: spacing.sm,
-                }}
+                error={errors.email?.message}
               />
             )}
           />
-          {errors.email && (
-            <Text
-              style={{
-                color: colors.danger,
-                fontSize: 11,
-                marginBottom: spacing.sm,
-              }}
-            >
-              {errors.email.message}
-            </Text>
-          )}
         </View>
         <Button
           label={t("auth.sendResetLink")}

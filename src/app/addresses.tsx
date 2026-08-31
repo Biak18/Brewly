@@ -13,6 +13,13 @@ import {
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
+import { Chip } from "@/components/ui/Chip";
+import { FieldInput } from "@/components/ui/FieldInput";
+import {
+  getCurrentCoordinates,
+  PinCoords,
+  resolveMapLink,
+} from "@/utils/mapLink";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -29,7 +36,6 @@ import {
   Pressable,
   Switch,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,79 +51,77 @@ const addressSchema = z.object({
 type AddressForm = z.infer<typeof addressSchema>;
 
 function AddressFormFields() {
-  const { colors, radius } = useTheme();
   const { t } = useTranslation();
   const {
     control,
     formState: { errors },
   } = useFormContext<AddressForm>();
 
-  const fields = [
-    { name: "label" as const, placeholder: t("addresses.labelPlaceholder") },
-    { name: "fullName" as const, placeholder: t("addresses.recipientPlaceholder") },
-    { name: "phone" as const, placeholder: t("addresses.phonePlaceholder") },
-  ];
-
   return (
     <>
-      {fields.map((f) => (
-        <View key={f.name} style={{ marginBottom: 12 }}>
-          <Controller
-            control={control}
-            name={f.name}
-            render={({ field: { value, onChange } }) => (
-              <TextInput
-                value={value}
-                onChangeText={onChange}
-                placeholder={f.placeholder}
-                placeholderTextColor={colors.muted}
-                style={{
-                  borderWidth: 1,
-                  borderColor: errors[f.name] ? colors.danger : colors.line,
-                  height: 48,
-                  paddingHorizontal: 14,
-                  fontSize: 14,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                }}
-              />
-            )}
-          />
-          {errors[f.name] && (
-            <Text style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}>
-              {t(errors[f.name]?.message ?? "")}
-            </Text>
-          )}
-        </View>
-      ))}
       <Controller
         control={control}
-        name="address"
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            value={value}
+        name="label"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <FieldInput
+            label={t("addresses.label")}
+            value={value ?? ""}
             onChangeText={onChange}
-            placeholder={t("addresses.addressPlaceholder")}
-            placeholderTextColor={colors.muted}
-            multiline
-            style={{
-              borderWidth: 1,
-              borderColor: errors.address ? colors.danger : colors.line,
-              minHeight: 80,
-              padding: 14,
-              fontSize: 14,
-              color: colors.ink,
-              borderRadius: radius.md,
-              textAlignVertical: "top",
-            }}
+            onBlur={onBlur}
+            placeholder={t("addresses.labelPlaceholder")}
+            error={errors.label ? t(errors.label.message ?? "") : undefined}
+            containerStyle={{ marginBottom: 12 }}
           />
         )}
       />
-      {errors.address && (
-        <Text style={{ color: colors.danger, fontSize: 11, marginTop: 4 }}>
-          {t(errors.address.message ?? "")}
-        </Text>
-      )}
+      <Controller
+        control={control}
+        name="fullName"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <FieldInput
+            label={t("addresses.recipientPlaceholder")}
+            value={value ?? ""}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            placeholder={t("addresses.recipientPlaceholder")}
+            error={errors.fullName ? t(errors.fullName.message ?? "") : undefined}
+            containerStyle={{ marginBottom: 12 }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="phone"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <FieldInput
+            label={t("addresses.phonePlaceholder")}
+            value={value ?? ""}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="phone-pad"
+            placeholder={t("addresses.phonePlaceholder")}
+            error={errors.phone ? t(errors.phone.message ?? "") : undefined}
+            containerStyle={{ marginBottom: 12 }}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="address"
+        render={({ field: { value, onChange, onBlur } }) => (
+          <FieldInput
+            label={t("addresses.addressPlaceholder")}
+            value={value ?? ""}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            placeholder={t("addresses.addressPlaceholder")}
+            error={errors.address ? t(errors.address.message ?? "") : undefined}
+            multiline
+            inputStyle={{ minHeight: 80, textAlignVertical: "top", paddingTop: 12 }}
+            containerStyle={{ marginBottom: 4 }}
+          />
+        )}
+      />
     </>
   );
 }
@@ -223,6 +227,11 @@ function AddressCard({
         >
           {address.address}
         </Text>
+        {address.lat != null && address.lng != null && (
+          <Text style={{ color: colors.green, fontSize: typography.micro, marginTop: 2 }}>
+            📍 {address.lat.toFixed(4)}, {address.lng.toFixed(4)}
+          </Text>
+        )}
         {!address.is_default && (
           <Pressable
             onPress={() => setDefault.mutate(address.id)}
@@ -284,6 +293,10 @@ export default function AddressesScreen() {
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [editing, setEditing] = useState<Address | null>(null);
+  const [mapLink, setMapLink] = useState("");
+  const [pin, setPin] = useState<PinCoords | null>(null);
+  const [pinSource, setPinSource] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   const form = useForm<AddressForm>({
     resolver: zodResolver(addressSchema),
@@ -291,9 +304,39 @@ export default function AddressesScreen() {
   });
   const [makeDefault, setMakeDefault] = useState(false);
 
+  const readMapLink = useCallback(async () => {
+    if (!mapLink.trim()) {
+      setLinkError(t("store.pasteMapsLinkFirst"));
+      return;
+    }
+    setLinkError(null);
+    const resolved = await resolveMapLink(mapLink);
+    if (!resolved) {
+      setLinkError(t("store.couldNotReadCoordsTap"));
+      return;
+    }
+    setPin(resolved);
+    setPinSource("from map link");
+  }, [mapLink, t]);
+
+  const useCurrentLocation = useCallback(async () => {
+    const coords = await getCurrentCoordinates();
+    if (!coords) {
+      showToast(t("store.couldNotGetLocation"));
+      return;
+    }
+    setPin(coords);
+    setPinSource("current location");
+    setLinkError(null);
+  }, [showToast, t]);
+
   const openAdd = useCallback(() => {
     setEditing(null);
     setMakeDefault((addresses?.length ?? 0) === 0);
+    setMapLink("");
+    setPin(null);
+    setPinSource(null);
+    setLinkError(null);
     form.reset({ label: "", fullName: "", phone: "", address: "" });
     setSheetVisible(true);
   }, [addresses, form]);
@@ -302,6 +345,10 @@ export default function AddressesScreen() {
     (a: Address) => {
       setEditing(a);
       setMakeDefault(!!a.is_default);
+      setMapLink("");
+      setPin(a.lat != null && a.lng != null ? { lat: a.lat, lng: a.lng } : null);
+      setPinSource(a.lat != null ? "saved" : null);
+      setLinkError(null);
       form.reset({
         label: a.label,
         fullName: a.full_name,
@@ -315,6 +362,14 @@ export default function AddressesScreen() {
 
   const onSubmit = useCallback(
     async (values: AddressForm) => {
+      let nextPin = pin;
+      if (!nextPin && mapLink.trim()) {
+        const resolved = await resolveMapLink(mapLink);
+        if (resolved) {
+          nextPin = resolved;
+          setPin(resolved);
+        }
+      }
       try {
         await saveAddress.mutateAsync({
           id: editing?.id,
@@ -323,6 +378,8 @@ export default function AddressesScreen() {
             full_name: values.fullName,
             phone: values.phone,
             address: values.address,
+            lat: nextPin?.lat ?? null,
+            lng: nextPin?.lng ?? null,
           },
           isDefault: makeDefault,
         });
@@ -333,7 +390,7 @@ export default function AddressesScreen() {
         showToast(t("addresses.toastSaveFailed"));
       }
     },
-    [editing, makeDefault, saveAddress, showToast],
+    [editing, makeDefault, saveAddress, showToast, pin, mapLink, t],
   );
 
   return (
@@ -417,6 +474,24 @@ export default function AddressesScreen() {
           <FormProvider {...form}>
             <AddressFormFields />
           </FormProvider>
+          <FieldInput
+            label={t("store.pasteMapsLink")}
+            value={mapLink}
+            onChangeText={setMapLink}
+            placeholder={t("store.pasteMapsLink")}
+            autoCapitalize="none"
+            autoCorrect={false}
+            multiline
+            inputStyle={{ minHeight: 48, textAlignVertical: "top", paddingTop: 12 }}
+            containerStyle={{ marginTop: 12 }}
+          />
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.sm }}>
+            <Chip label={t("seller.findCoordinates")} active={false} onPress={readMapLink} />
+            <Chip label={t("seller.useMyLocation")} active={false} onPress={useCurrentLocation} />
+          </View>
+          <Text style={{ color: linkError ? colors.danger : pin ? colors.green : colors.muted, fontSize: typography.micro, marginTop: spacing.xs, marginBottom: spacing.sm }}>
+            {linkError ? linkError : pin ? t("store.pinSaved", { source: pinSource ? ` (${pinSource})` : "", lat: pin.lat.toFixed(5), lng: pin.lng.toFixed(5) }) : t("addresses.mapHint")}
+          </Text>
           <View
             style={{
               flexDirection: "row",

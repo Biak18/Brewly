@@ -1,5 +1,6 @@
 // src/app/sign-in.tsx
 import { Button } from "@/components/ui/Button";
+import { FieldInput } from "@/components/ui/FieldInput";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useTranslation } from "react-i18next";
@@ -11,13 +12,13 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
 
 export default function SignInScreen() {
   const { t } = useTranslation();
-  const { colors, spacing, radius, typography } = useTheme();
+  const { colors, spacing, typography } = useTheme();
   const [serverError, setServerError] = useState<string | null>(null);
   const signInSchema = z.object({
     email: z.string().email(t("auth.emailInvalid")),
@@ -72,32 +73,20 @@ export default function SignInScreen() {
           control={control}
           name="email"
           render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
+            <FieldInput
+              label={t("auth.emailPlaceholder")}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
               placeholder={t("auth.emailPlaceholder")}
-              placeholderTextColor={colors.muted}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.line,
-                  color: colors.ink,
-                  borderRadius: radius.md,
-                  marginBottom: spacing.sm,
-                },
-              ]}
+              error={errors.email?.message}
+              containerStyle={{ marginBottom: spacing.sm }}
             />
           )}
         />
-        {errors.email && (
-          <Text style={[styles.error, { color: colors.danger }]}>
-            {errors.email.message}
-          </Text>
-        )}
 
         <Controller
           control={control}
