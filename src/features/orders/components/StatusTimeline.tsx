@@ -24,6 +24,7 @@ const DELIVERY_STEPS: OrderStatus[] = [
   "driver_assigned",
   "out_for_delivery",
   "delivered",
+  "completed",
 ];
 
 const DOT_SIZE = 24;

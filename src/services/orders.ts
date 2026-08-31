@@ -138,8 +138,6 @@ export async function placeOrder(params: {
     p_idempotency_key: params.idempotencyKey ?? null,
   };
   const { data, error } = await supabase.rpc("create_order", rpcParams);
-  console.log(error);
-
   if (error) throw error;
   return data as string; // create_order returns the new order's id
 }
@@ -281,6 +279,31 @@ export async function fetchAvailableDrivers(): Promise<Driver[]> {
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Driver[];
+}
+
+// A driver's own row in `drivers`. RLS lets a driver select and update only
+// their own row — these two power the availability toggle on the driver home.
+export async function fetchDriverProfile(
+  userId: string,
+): Promise<Driver | null> {
+  const { data, error } = await supabase
+    .from("drivers")
+    .select("id, full_name, phone, vehicle, is_available")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as Driver | null) ?? null;
+}
+
+export async function setDriverAvailability(
+  userId: string,
+  isAvailable: boolean,
+): Promise<void> {
+  const { error } = await supabase
+    .from("drivers")
+    .update({ is_available: isAvailable })
+    .eq("id", userId);
+  if (error) throw error;
 }
 
 export type DriverDelivery = {

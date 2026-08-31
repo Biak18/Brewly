@@ -2,6 +2,7 @@
 import { track } from "@/lib/analytics";
 import {
   ChatMessage,
+  CHAT_PAGE_SIZE,
   fetchOrderMessages,
   sendOrderMessage,
   subscribeOrderMessages,
@@ -13,6 +14,7 @@ import * as Haptics from "expo-haptics";
 import { useFocusEffect } from "expo-router";
 import { Send } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -62,6 +64,7 @@ export function OrderChat({
 }) {
   const { height } = useGradualAnimation();
   const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation();
   const showToast = useToastStore((s) => s.show);
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
@@ -69,6 +72,32 @@ export function OrderChat({
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["chat", orderId],
     queryFn: () => fetchOrderMessages(orderId),
+  });
+
+  // Older messages are paged in on demand ("Load earlier") so long histories
+  // don't over-fetch on open. Realtime appends land on the newest page.
+  const [earlierPages, setEarlierPages] = useState<ChatMessage[][]>([]);
+  // Reset paged-in history when switching orders — done during render (the
+  // React-endorsed pattern for state derived from a changed prop).
+  const [prevOrderId, setPrevOrderId] = useState(orderId);
+  if (prevOrderId !== orderId) {
+    setPrevOrderId(orderId);
+    setEarlierPages([]);
+  }
+
+  const allMessages = useMemo(
+    () => [...earlierPages.slice().reverse().flat(), ...messages],
+    [earlierPages, messages],
+  );
+  const oldestLoaded = allMessages.length ? allMessages[0].created_at : null;
+  const hasMoreEarlier =
+    (earlierPages.length
+      ? earlierPages[earlierPages.length - 1].length
+      : messages.length) >= CHAT_PAGE_SIZE;
+  const loadEarlier = useMutation({
+    mutationFn: () => fetchOrderMessages(orderId, { before: oldestLoaded }),
+    onSuccess: (page) => setEarlierPages((prev) => [...prev, page]),
+    onError: () => showToast(t("common.checkConnection")),
   });
 
   useEffect(() => {
@@ -86,9 +115,9 @@ export function OrderChat({
   // "previous"/"next"), then reversed once for the inverted list's data prop —
   // not recomputed per-row inside renderItem.
   const invertedData = useMemo(() => {
-    const withGroups = messages.map((m, i) => {
-      const prev = messages[i - 1];
-      const next = messages[i + 1];
+    const withGroups = allMessages.map((m, i) => {
+      const prev = allMessages[i - 1];
+      const next = allMessages[i + 1];
       const isFirstInGroup =
         !prev ||
         prev.sender_id !== m.sender_id ||
@@ -102,7 +131,7 @@ export function OrderChat({
       return { ...m, isFirstInGroup, isLastInGroup };
     });
     return [...withGroups].reverse();
-  }, [messages]);
+  }, [allMessages]);
 
   const send = useMutation({
     mutationFn: () =>
@@ -112,7 +141,7 @@ export function OrderChat({
       Haptics.selectionAsync();
       track("chat_message_sent", { order_id: orderId });
     },
-    onError: () => showToast("Could not send message"),
+    onError: () => showToast(t("chat.sendFailed")),
   });
 
   const handleSend = useCallback(() => {
@@ -144,7 +173,7 @@ export function OrderChat({
         >
           <ActivityIndicator color={colors.muted} />
         </View>
-      ) : messages.length === 0 ? (
+      ) : allMessages.length === 0 ? (
         <View
           style={{
             flex: 1,
@@ -160,7 +189,7 @@ export function OrderChat({
               textAlign: "center",
             }}
           >
-            No messages yet. Say something about your order.
+            {t("chat.empty")}
           </Text>
         </View>
       ) : (
@@ -176,6 +205,36 @@ export function OrderChat({
               isLastInGroup={item.isLastInGroup}
             />
           )}
+          // Inverted list: the footer renders at the visual top, right above
+          // the oldest message — exactly where "load earlier" belongs.
+          ListFooterComponent={
+            hasMoreEarlier ? (
+              <Pressable
+                onPress={() => loadEarlier.mutate()}
+                disabled={loadEarlier.isPending}
+                style={{
+                  alignItems: "center",
+                  paddingVertical: spacing.md,
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t("chat.loadEarlier")}
+              >
+                {loadEarlier.isPending ? (
+                  <ActivityIndicator color={colors.muted} size="small" />
+                ) : (
+                  <Text
+                    style={{
+                      color: colors.espresso,
+                      fontSize: typography.caption,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {t("chat.loadEarlier")}
+                  </Text>
+                )}
+              </Pressable>
+            ) : null
+          }
           contentContainerStyle={{
             padding: spacing.lg,
             flexGrow: 1,
@@ -201,7 +260,7 @@ export function OrderChat({
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="Message…"
+          placeholder={t("chat.placeholder")}
           placeholderTextColor={colors.muted}
           multiline
           maxLength={1000}
@@ -232,7 +291,7 @@ export function OrderChat({
             alignItems: "center",
             justifyContent: "center",
           }}
-          accessibilityLabel="Send message"
+          accessibilityLabel={t("chat.sendMessage")}
         >
           <Send
             size={18}

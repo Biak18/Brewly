@@ -8,7 +8,8 @@
     "scheme": "brewly",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.chanorg.grabcoffee"
     },
     "android": {
       "adaptiveIcon": {
@@ -55,7 +56,22 @@
       "expo-status-bar",
       "expo-web-browser",
       "@sentry/react-native",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#5c8064",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Brewly needs access to your photos so you can set a profile picture and add photos for your coffee menu.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

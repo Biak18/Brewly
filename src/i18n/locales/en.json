@@ -65,7 +65,8 @@
     "setNewPassword": "Set a new password",
     "newPasswordPlaceholder": "New password",
     "confirmNewPasswordPlaceholder": "Confirm new password",
-    "updatePassword": "Update password"
+    "updatePassword": "Update password",
+    "resetEmailFailed": "Couldn't send the reset link. Check your connection and try again."
   },
   "onboarding": {
     "skip": "Skip",
@@ -86,7 +87,8 @@
     "back": "Back",
     "delete": "Delete",
     "done": "Done",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
   },
   "home": {
     "menuLoadError": "Couldn't load the menu",
@@ -273,7 +275,7 @@
     "useAsDefault": "Use as default"
   },
   "account": {
-      "title": "Account settings",
+    "title": "Account settings",
     "signOut": "Sign out",
     "signedInAs": "Signed in as",
     "profile": "Profile",
@@ -408,13 +410,30 @@
     "phone": "Phone number",
     "vehicle": "Vehicle",
     "register": "Register as driver",
-    "registered": "You are now a driver"
+    "registered": "You are now a driver",
+    "nameRequired": "Enter your full name",
+    "phoneInvalid": "Enter a valid phone number",
+    "vehicleRequired": "Enter your vehicle (e.g. motorbike)",
+    "registerFailed": "Could not register as a driver. Please try again.",
+    "ordersError": "Couldn't load your deliveries",
+    "availableForDeliveries": "Available for deliveries",
+    "onlineHint": "Shops can assign you deliveries.",
+    "offlineHint": "Shops can't see you until you turn this on.",
+    "availabilityUpdateFailed": "Could not update your availability",
+    "statusUpdateFailed": "Could not update the delivery",
+    "openInMaps": "Open in Google Maps",
+    "openMapsFailed": "Could not open maps"
   },
   "chat": {
     "chatWithShop": "Chat with {{name}}",
     "chatWithCustomer": "Chat with customer",
     "callShop": "Call {{name}}",
-    "couldNotOpenDialer": "Could not open the dialer"
+    "couldNotOpenDialer": "Could not open the dialer",
+    "empty": "No messages yet. Say something about your order.",
+    "placeholder": "Message…",
+    "sendMessage": "Send message",
+    "loadEarlier": "Load earlier messages",
+    "sendFailed": "Could not send the message. Try again."
   },
   "store": {
     "title": "My Store",

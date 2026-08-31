@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
+import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { Stagger } from "@animatereactnative/stagger";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +26,7 @@ export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
   const { colors, spacing, radius, typography } = useTheme();
   const router = useRouter();
+  const showToast = useToastStore((s) => s.show);
   const [sent, setSent] = useState(false);
   const schema = z.object({ email: z.string().email(t("auth.emailInvalid")) });
   type FormValues = z.infer<typeof schema>;
@@ -37,14 +39,21 @@ export default function ForgotPasswordScreen() {
     defaultValues: { email: "" },
   });
 
-  const onSubmit = useCallback(async ({ email }: FormValues) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: Linking.createURL("reset-password"),
-    });
-    if (error) console.warn("resetPasswordForEmail error", error.message);
-
-    setSent(true);
-  }, []);
+  const onSubmit = useCallback(
+    async ({ email }: FormValues) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: Linking.createURL("reset-password"),
+      });
+      // A failed request must not look like success — surface it and stay on
+      // the form so the user can retry.
+      if (error) {
+        showToast(t("auth.resetEmailFailed"));
+        return;
+      }
+      setSent(true);
+    },
+    [showToast, t],
+  );
 
   if (sent) {
     return (

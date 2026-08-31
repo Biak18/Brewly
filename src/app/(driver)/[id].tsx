@@ -7,6 +7,7 @@ import { OrderStatus, updateOrderStatus } from "@/services/orders";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
+import { openDirectionsTo } from "@/utils/mapLink";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -40,7 +41,7 @@ export default function DriverDeliveryScreen() {
       if (status === "completed") router.dismiss(2);
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast(t("tracking.couldNotUpdatePayment"));
+      showToast(t("driver.statusUpdateFailed"));
     } finally {
       setIsAdvancing(false);
     }
@@ -96,6 +97,17 @@ export default function DriverDeliveryScreen() {
             </Text>
           ) : null}
         </View>
+
+        {order.delivery_address ? (
+          <Button
+            label={t("driver.openInMaps")}
+            onPress={async () => {
+              const opened = await openDirectionsTo(order.delivery_address!);
+              if (!opened) showToast(t("driver.openMapsFailed"));
+            }}
+            variant="soft"
+          />
+        ) : null}
 
         <OrderItemsList items={order.order_items} />
 

@@ -29,18 +29,26 @@ function mapMessage(row: any): ChatMessage {
   };
 }
 
+export const CHAT_PAGE_SIZE = 50;
+
+// Newest page first (descending), then reversed — callers consume
+// chronological order. `before` pages further back in history for
+// "load earlier" (pass the oldest currently-loaded created_at).
 export async function fetchOrderMessages(
   orderId: string,
-  limit = 200,
+  options: { limit?: number; before?: string | null } = {},
 ): Promise<ChatMessage[]> {
-  const { data, error } = await supabase
+  const limit = options.limit ?? CHAT_PAGE_SIZE;
+  let query = supabase
     .from("chat_messages")
     .select(MESSAGE_FIELDS)
     .eq("order_id", orderId)
-    .order("created_at", { ascending: true })
+    .order("created_at", { ascending: false })
     .limit(limit);
+  if (options.before) query = query.lt("created_at", options.before);
+  const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []).map(mapMessage);
+  return (data ?? []).map(mapMessage).reverse();
 }
 
 // Collapse whitespace and cap length — the DB check rejects >1000 chars,

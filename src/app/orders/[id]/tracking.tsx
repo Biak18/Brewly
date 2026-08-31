@@ -141,19 +141,20 @@ function PaymentStatusChip({ status }: { status: PaymentStatus }) {
   );
 }
 
-const PICKUP_FLOW: OrderStatus[] = [
+export const PICKUP_FLOW: OrderStatus[] = [
   "received",
   "preparing",
   "ready",
   "completed",
 ];
-const DELIVERY_FLOW: OrderStatus[] = [
+export const DELIVERY_FLOW: OrderStatus[] = [
   "received",
   "preparing",
   "ready",
   "driver_assigned",
   "out_for_delivery",
   "delivered",
+  "completed",
 ];
 
 function CancelledBanner() {
@@ -1044,7 +1045,9 @@ export default function OrderTrackingScreen() {
                   fontWeight: "600",
                 }}
               >
-                Revert to {previousStatus}
+                {t("tracking.revertTo", {
+                  status: t(`tracking.status.${previousStatus}`),
+                })}
               </Text>
             </Pressable>
           )}

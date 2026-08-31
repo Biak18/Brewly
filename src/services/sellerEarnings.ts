@@ -82,10 +82,16 @@ function round2(value: number): number {
 export async function fetchSellerEarnings(
   storeId: string,
 ): Promise<SellerEarnings> {
+  // Only the last ~30 days can influence the aggregates — bound the query so
+  // the payload stays constant-size as order history grows.
+  const monthStart = new Date();
+  monthStart.setHours(0, 0, 0, 0);
+  monthStart.setDate(monthStart.getDate() - 29);
   const { data, error } = await supabase
     .from("orders")
     .select("status, total, placed_at")
-    .eq("store_id", storeId);
+    .eq("store_id", storeId)
+    .gte("placed_at", monthStart.toISOString());
   if (error) throw error;
   return computeSellerEarnings((data ?? []) as SellerEarningsRow[]);
 }

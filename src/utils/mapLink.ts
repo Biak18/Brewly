@@ -2,6 +2,7 @@
 // Sellers pin their shop either by pasting a Google Maps link (Share → Copy
 // link) or by standing at the shop and using their device's fix. Only the
 // resulting {lat, lng} is persisted — the raw link is not stored.
+import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 
@@ -71,6 +72,25 @@ export async function resolveMapLink(input: string): Promise<PinCoords | null> {
     return null;
   } finally {
     clearTimeout(timer);
+  }
+}
+
+/**
+ * Opens the maps app with directions to a free-text address (delivery orders
+ * store an address snapshot, not coordinates). Returns false when nothing
+ * could handle the URL.
+ */
+export async function openDirectionsTo(address: string): Promise<boolean> {
+  const query = address.trim();
+  if (!query) return false;
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    query,
+  )}`;
+  try {
+    await Linking.openURL(url);
+    return true;
+  } catch {
+    return false;
   }
 }
 

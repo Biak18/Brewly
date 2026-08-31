@@ -1,40 +1,65 @@
 // src/app/become-driver.tsx
 import { Button } from "@/components/ui/Button";
+import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { registerAsDriver } from "@/services/orders";
 import { refreshProfile } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/theme";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { z } from "zod";
 
 export default function BecomeDriverScreen() {
   const { colors, spacing, radius, typography } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
   const showToast = useToastStore((s) => s.show);
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleRegister = async () => {
-    setIsSubmitting(true);
-    try {
-      await registerAsDriver({ fullName, phone, vehicle });
-      await refreshProfile();
-      showToast(t("driver.registered"));
-      router.replace("/(driver)" as any);
-    } catch {
-      showToast(t("tracking.couldNotAssignDriver"));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const schema = z.object({
+    fullName: z.string().trim().min(2, t("driver.nameRequired")),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^[0-9+\s-]{6,15}$/, t("driver.phoneInvalid")),
+    vehicle: z.string().trim().min(2, t("driver.vehicleRequired")),
+  });
+  type FormValues = z.infer<typeof schema>;
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { fullName: "", phone: "", vehicle: "" },
+  });
+
+  const onSubmit = useCallback(
+    async (values: FormValues) => {
+      setServerError(null);
+      try {
+        await registerAsDriver({
+          fullName: values.fullName,
+          phone: values.phone,
+          vehicle: values.vehicle,
+        });
+        await refreshProfile();
+        showToast(t("driver.registered"));
+        router.replace("/(driver)" as any);
+      } catch {
+        setServerError(t("driver.registerFailed"));
+      }
+    },
+    [showToast, t, router],
+  );
 
   const inputStyle = {
     borderWidth: 1,
@@ -45,6 +70,17 @@ export default function BecomeDriverScreen() {
     height: 46,
     fontSize: typography.bodySmall,
   } as const;
+
+  const fields = [
+    { name: "fullName" as const, label: t("driver.name"), placeholder: t("driver.name") },
+    {
+      name: "phone" as const,
+      label: t("driver.phone"),
+      placeholder: t("driver.phone"),
+      keyboardType: "phone-pad" as const,
+    },
+    { name: "vehicle" as const, label: t("driver.vehicle"), placeholder: t("driver.vehicle") },
+  ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -70,56 +106,54 @@ export default function BecomeDriverScreen() {
           {t("driver.becomeDriver")}
         </Text>
       </View>
-      <ScrollView
+      <FormScrollView
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
       >
         <Text style={{ color: colors.muted, fontSize: typography.bodySmall }}>
           {t("driver.becomeDriverDesc")}
         </Text>
-        <View style={{ gap: spacing.xs }}>
-          <Text style={{ color: colors.muted, fontSize: typography.caption }}>
-            {t("driver.name")}
+        {fields.map((field) => (
+          <View key={field.name} style={{ gap: spacing.xs }}>
+            <Text style={{ color: colors.muted, fontSize: typography.caption }}>
+              {field.label}
+            </Text>
+            <Controller
+              control={control}
+              name={field.name}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  placeholder={field.placeholder}
+                  placeholderTextColor={colors.muted}
+                  keyboardType={field.keyboardType ?? "default"}
+                  style={[
+                    inputStyle,
+                    errors[field.name] ? { borderColor: colors.danger } : null,
+                  ]}
+                />
+              )}
+            />
+            {errors[field.name] && (
+              <Text style={{ color: colors.danger, fontSize: typography.caption }}>
+                {errors[field.name]?.message}
+              </Text>
+            )}
+          </View>
+        ))}
+        {serverError && (
+          <Text style={{ color: colors.danger, fontSize: typography.caption }}>
+            {serverError}
           </Text>
-          <TextInput
-            value={fullName}
-            onChangeText={setFullName}
-            placeholder={t("driver.name")}
-            placeholderTextColor={colors.muted}
-            style={inputStyle}
-          />
-        </View>
-        <View style={{ gap: spacing.xs }}>
-          <Text style={{ color: colors.muted, fontSize: typography.caption }}>
-            {t("driver.phone")}
-          </Text>
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            placeholder={t("driver.phone")}
-            placeholderTextColor={colors.muted}
-            keyboardType="phone-pad"
-            style={inputStyle}
-          />
-        </View>
-        <View style={{ gap: spacing.xs }}>
-          <Text style={{ color: colors.muted, fontSize: typography.caption }}>
-            {t("driver.vehicle")}
-          </Text>
-          <TextInput
-            value={vehicle}
-            onChangeText={setVehicle}
-            placeholder={t("driver.vehicle")}
-            placeholderTextColor={colors.muted}
-            style={inputStyle}
-          />
-        </View>
+        )}
         <Button
           label={t("driver.register")}
-          onPress={handleRegister}
+          onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           variant="primary"
         />
-      </ScrollView>
+      </FormScrollView>
     </SafeAreaView>
   );
 }
