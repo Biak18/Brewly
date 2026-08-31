@@ -54,4 +54,4 @@ supabase/.temp/
 # (android.googleServicesFile) so EAS cloud builds resolve it from the repo.
 # It contains identifiers, not secrets (per Firebase documentation).
 
-src/config/devAccounts.ts
+src/config/devAccounts.local.ts

@@ -1,6 +1,6 @@
 // src/features/dev/DevAccountSwitcher.tsx — DEV ONLY, never in production
 // One-tap sign-out + sign-in with a test account on a single device.
-import { DEV_ACCOUNTS } from "@/config/devAccounts";
+import { DEV_ACCOUNTS, DevAccount } from "@/config/devAccounts";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
@@ -78,7 +78,7 @@ export function DevAccountSwitcher() {
         Edit `src/config/devAccounts.ts` with your test passwords. Never ships to prod (`__DEV__` gated).
       </Text>
       <View style={{ gap: spacing.sm }}>
-        {DEV_ACCOUNTS.map((acct) => {
+        {DEV_ACCOUNTS.map((acct: DevAccount) => {
           const isCurrent = sessionEmail.toLowerCase() === acct.email.toLowerCase();
           const isBusy = busy === acct.email;
           return (
