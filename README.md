@@ -1,81 +1,140 @@
 # Brewly (grab-coffee)
 
-Coffee ordering app for Myanmar — customers order from local roasters, sellers run their shop, drivers deliver. Built with **Expo SDK 57**, React Native, Expo Router, Supabase, and TypeScript (strict).
+Coffee ordering for Myanmar — **customers order, sellers run their shop, drivers deliver**. Built with **Expo SDK 57 • React Native • Expo Router • Supabase • TypeScript (strict)**.
+
+> Portfolio-ready preview via **EAS Build** (`preview` profile, internal distribution). Invite friends with a shareable install link — no store deploy needed.
+
+<p align="center">
+  <img src="docs/images/docs_home.jpg" width="220" alt="Home" />
+  <img src="docs/images/docs_shopdetails.jpg" width="220" alt="Shop details" />
+  <img src="docs/images/docs_order_tracking.jpg" width="220" alt="Order tracking" />
+</p>
+
+## ✨ Highlights for portfolio
+
+* **Three-role flow in one app:** Customer → Seller → Driver, all on Supabase RLS + Realtime. Single-device dev quick-switch (`__DEV__` only) for testing.
+* **Polished UX:** Floating-label `FieldInput` (reanimated, UI thread), `IconButton` headers, `StatusTimeline`, localized `en`/`my` (react-i18next).
+* **Delivery done right:** Customer `MapLink` pin (`lat/lng`) → `orders.delivery_lat/lng` → Driver `Open in Google Maps` with precise coords fallback.
+* **Chat that works:** Per-order `chat_messages` with RLS for buyer/seller/**driver**, `Talk with Driver` switch after assignment.
+* **Manual payments:** KPay/MMQR proof (`attachPayment`) + cash, promo/voucher codes, loyalty stamps (free coffee at 10), pickup or delivery.
+
+## 📸 Screenshots
+
+| Home | Home — Near you | Shop details |
+|---|---|---|
+| ![Home](docs/images/docs_home.jpg) | ![Home 2](docs/images/docs_home2.jpg) | ![Shop](docs/images/docs_shopdetails.jpg) |
+
+| Store (seller) | Order tracking | Order chat |
+|---|---|---|
+| ![Store](docs/images/docs_store.jpg) | ![Tracking](docs/images/docs_order_tracking.jpg) | ![Chat](docs/images/docs_orderchat.jpg) |
+
+| Deliveries (driver) | Profile | Notifications |
+|---|---|---|
+| ![Deliveries](docs/images/docs_deliveries.jpg) | ![Profile](docs/images/docs_profiles.jpg) | ![Notifications](docs/images/docs_notifications.jpg) |
+
+> All images live in [`docs/images/`](docs/images/) — add more and they auto-show here.
+
+## 🧩 Tech stack
+
+* **App:** Expo SDK 57, React Native, Expo Router (file-based `src/app/**`), TypeScript strict (`tsc --noEmit`)
+* **Backend:** Supabase Postgres + Auth + Realtime + Edge Functions (Deno) — `src/services/supabase.ts`
+* **State:** Zustand (`src/stores/` — auth/cart/network/toast), TanStack Query for server state, `react-hook-form + zod` (`zodResolver`)
+* **UI:** `useTheme()` tokens (`colors/spacing/radius/typography`), `lucide-react-native`, primitives in `src/components/ui/` (`FieldInput`, `Button`, `BottomSheet`, `IconButton`)
+* **Other:** `expo-location` (MapLink), `expo-notifications` (push), `expo-image-picker`, `i18n`
 
 ## Features
 
-- **Customers** — browse shops and menus, customize drinks, cart, checkout with KPay/MMQR manual transfer proof or cash, promo codes, loyalty stamps (free coffee at 10), pickup or delivery, order tracking with status timeline, per-order chat with the shop, push notifications, favorites, search, delivery address book. English + Burmese.
-- **Sellers** — store profile with location pin and opening hours, menu + option management, promotions with voucher codes, order queue with status flow and payment verification, earnings summary.
-- **Drivers** — availability toggle, assigned deliveries, status transitions (out for delivery → delivered), Google Maps directions, customer chat.
+* **Customers** — browse shops/menus, customize drinks, cart, checkout with KPay/MMQR proof or cash, promo codes, loyalty stamps, pickup/delivery, order tracking + status timeline, per-order chat (shop → driver after assignment), push notifications, favorites, search, address book with MapLink pin, EN+MY.
+* **Sellers** — store profile (location pin + hours), menu + option management, promotions with voucher scoping (`all/category/coffee`), order queue + payment verification, earnings summary.
+* **Drivers** — `Become a Driver`, availability toggle, assigned deliveries, `driver_assigned → out_for_delivery → delivered → completed`, `Open in Google Maps` (coords-aware), customer chat.
 
-## Getting started
+## 🚀 Preview / Portfolio build
 
-**Prerequisites:** Node 20+, npm, and a Supabase project. The app uses native modules, so run it through a dev build (Expo Go is not enough — push notifications in particular).
+`eas.json` already has:
 
-1. Install dependencies:
+```json
+{ "build": { "preview": { "distribution": "internal" } } }
+```
 
+**Cloud preview (share with friends):**
+
+```bash
+# one-time — expose Supabase vars to EAS ( .env is gitignored )
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value https://wiscnurivaskypxuldjz.supabase.co
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <anon>
+# add SENTRY_DSN if you use it
+
+# build a shareable APK (internal)
+eas build --profile preview --platform android
+# iOS needs Apple Dev; Android preview is enough for portfolio
+```
+
+Find the install link on `expo.dev → Builds`. Share it — no store review. `DevAccountSwitcher` is `__DEV__` gated so it **won’t** appear in the preview; testers sign up as `customer` / `Become a Seller` / `Become a Driver` with real emails (more realistic for portfolio). For OTA fixes after sharing: `eas update --branch preview`.
+
+**Local preview build:**
+
+```bash
+eas build --profile preview --platform android --local
+```
+
+## Getting started (local dev)
+
+**Prereqs:** Node 20+, npm, Supabase project. Native modules → use a dev build (Expo Go not enough for push).
+
+1. Install:
    ```sh
    npm install
    ```
-
-2. Create `.env` from `.env.example` and fill in your values (Supabase URL + anon key are required).
-
-3. Set up the database schema:
-
-   ```sh
-   npx supabase link --project-ref <your-project-ref>
-   npx supabase db push          # applies supabase/migrations/
+2. Env — create `.env` from `.env.example`:
    ```
-
-4. Deploy the edge function used for order push notifications:
-
+   EXPO_PUBLIC_SUPABASE_URL=https://wiscnurivaskypxuldjz.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+   EXPO_PUBLIC_SENTRY_DSN=...
+   ```
+3. DB:
+   ```sh
+   npx supabase link --project-ref wiscnurivaskypxuldjz
+   npx supabase db push          # supabase/migrations/
+   ```
+4. Edge function (push):
    ```sh
    npx supabase functions deploy send-order-notification
+   # secrets in Supabase dashboard, not .env
    ```
-
-   Function secrets (e.g. the Expo push access token) are set in the Supabase dashboard, not in `.env`.
-
-5. Run it:
-
+5. Run:
    ```sh
-   npm run android   # or: npm run ios / npm start
+   npm run android   # or ios / npm start
+   # single-device dev quick-switch: Profile → DEV · Quick switch (edit src/config/devAccounts.ts)
    ```
 
 ## Scripts
 
 | Command | What it does |
-| --- | --- |
+|---|---|
 | `npm start` | Expo dev server |
 | `npm run android` / `npm run ios` | Native dev build and run |
 | `npm run typecheck` | `tsc --noEmit` — run before committing |
-| `npm run lint` | ESLint (eslint-config-expo) |
-| `npm test` | Jest test suite (`src/tests/**`, `src/**/*.test.ts(x)`) |
-| `npm run web` | Web dev server |
+| `npm run lint` | `expo lint` |
+| `npm test` | Jest (`src/tests/**`, `src/**/*.test.ts(x)`) |
+| `npm run web` | Web dev server (static) |
 
 ## Architecture
 
-- `src/app/**` — Expo Router screens. `src/app/(tabs)/` is the tab bar; route groups use parentheses.
-- `src/features/<domain>/` — domain logic (components, hooks, api) composed by screens.
-- `src/services/` — cross-cutting Supabase API clients (orders, stores, addresses, loyalty, promotions, chat, storage, supabase client).
-- `src/stores/` — Zustand global state (auth, cart, network, toast, language, notifications).
-- `src/components/ui/` — shared UI primitives (Button, BottomSheet, Toast, EmptyState, …).
-- `src/theme/` — design tokens (colors, spacing, radius, typography) via `useTheme()`.
-- `src/i18n/` — react-i18next setup; locales in `src/i18n/locales/` (en, my).
-- `supabase/migrations/` — Postgres schema, RLS policies, and security-definer RPCs.
-- `supabase/functions/` — Deno edge functions.
-- `scripts/` — one-off generators (notification icon, i18n key helper).
+* `src/app/**` — Expo Router screens; `src/app/(tabs)/` tab bar, `src/app/(driver)/` driver stack
+* `src/features/<domain>/` — domain logic (components/hooks/api) composed by screens
+* `src/services/` — Supabase clients (`orders`, `stores`, `addresses`, `loyalty`, `promotions`, `chat`, `supabase`)
+* `src/stores/` — Zustand (auth/cart/network/toast/language/notifications)
+* `src/components/ui/` — primitives (`FieldInput` reanimated, `Button`, `BottomSheet`, `IconButton`, `Toast`)
+* `src/theme/` — design tokens via `useTheme()`
+* `src/i18n/` — `react-i18next`, `src/i18n/locales/{en,my}.json`
+* `supabase/migrations/` — schema + RLS + `SECURITY DEFINER` RPCs (`create_order`, `update_order_status`, `assign_driver`, `get_coffee_options`)
+* `supabase/functions/` — Deno edge functions (`send-order-notification`)
+* `scripts/` — generators (notification icon, i18n helper)
 
 ## Payments
 
-Manual proof-based checkout only (no in-app gateway): KPay (KBZPay) and MMQR are manual transfer methods — the buyer pastes a transaction ID, recorded via `attachPayment`, and the seller verifies it. Cash needs no proof. See `src/app/checkout.tsx` and `src/services/orders.ts`.
-
-## Deployment
-
-- Builds are managed with EAS (`eas build`); `google-services.json` is committed because `app.json` references it for Android FCM.
-- Push notifications go through the Expo push service; device tokens live in the `push_tokens` table.
-- `EXPO_PUBLIC_*` vars are loaded from `.env` (see `.env.example`). Never commit `.env`.
+Manual proof only (no gateway): `kpay`/`mmqr` → buyer pastes transaction ID in `KpayPanel` (`src/features/checkout/components/KpayPanel.tsx`) → `attachPayment(orderId, method, ref)`. `cash` needs no proof. See `src/app/checkout.tsx` + `src/services/orders.ts` (`placeOrder`, `DELIVERY_FEE`, `delivery_lat/lng`).
 
 ## Conventions
 
-Coding conventions (path aliases, styling, analytics events, error handling) live in [AGENTS.md](AGENTS.md).
-
+Path alias `@/*` → `src/*`, inline `useTheme()` styles (no Tailwind), `formatCurrency` (`src/utils/currency`), `track()` analytics (`src/lib/analytics`), services throw human `Error`s surfaced via toast. See [AGENTS.md](AGENTS.md).
