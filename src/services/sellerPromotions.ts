@@ -1,5 +1,6 @@
 // src/services/sellerPromotions.ts
 import { Promotion, PromotionScope } from "./promotions";
+import { assertOnline } from "@/lib/offlineGuard";
 import { supabase } from "./supabase";
 
 export async function fetchMyPromotions(storeId: string): Promise<Promotion[]> {
@@ -26,6 +27,7 @@ export type PromotionInput = {
 };
 
 export async function createPromotion(storeId: string, input: PromotionInput) {
+  assertOnline();
   const { error } = await supabase
     .from("promotions")
     .insert({ ...input, store_id: storeId });
@@ -36,6 +38,7 @@ export async function updatePromotion(
   id: number,
   input: Partial<PromotionInput>,
 ) {
+  assertOnline();
   const { error } = await supabase
     .from("promotions")
     .update(input)
@@ -44,11 +47,13 @@ export async function updatePromotion(
 }
 
 export async function deletePromotion(id: number) {
+  assertOnline();
   const { error } = await supabase.from("promotions").delete().eq("id", id);
   if (error) throw error;
 }
 
 export async function togglePromotionActive(id: number, isActive: boolean) {
+  assertOnline();
   const { error } = await supabase
     .from("promotions")
     .update({ is_active: isActive })

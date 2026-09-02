@@ -1,4 +1,5 @@
 // src/services/orders.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { CartLineItem } from "@/stores/cartStore";
 import { computeOrderTotals, DELIVERY_FEE } from "@/utils/orderTotals";
 import { supabase } from "./supabase";
@@ -102,6 +103,7 @@ export async function placeOrder(params: {
   deliveryLat?: number | null;
   deliveryLng?: number | null;
 }): Promise<string> {
+  assertOnline();
   const { subtotal, tax, total } = computeOrderTotals(params.items);
   const discount = Math.min(Math.max(params.loyaltyDiscount ?? 0, 0), total);
   const tip = Math.max(params.tip ?? 0, 0);
@@ -157,6 +159,7 @@ export async function attachPayment(
   method: Exclude<PaymentMethod, "cash">,
   ref: string,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("attach_payment", {
     p_order_id: orderId,
     p_method: method,
@@ -171,6 +174,7 @@ export async function setPaymentVerified(
   orderId: string,
   verified: boolean,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("set_payment_verified", {
     p_order_id: orderId,
     p_verified: verified,
@@ -240,6 +244,7 @@ export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("update_order_status", {
     p_order_id: orderId,
     p_status: status,
@@ -253,6 +258,7 @@ export async function assignDriver(
   orderId: string,
   driverId: string,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("assign_driver", {
     p_order_id: orderId,
     p_driver_id: driverId,
@@ -268,6 +274,7 @@ export async function registerAsDriver(params: {
   phone?: string | null;
   vehicle?: string | null;
 }): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("register_driver", {
     p_full_name: params.fullName ?? null,
     p_phone: params.phone ?? null,
@@ -305,6 +312,7 @@ export async function setDriverAvailability(
   userId: string,
   isAvailable: boolean,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase
     .from("drivers")
     .update({ is_available: isAvailable })
@@ -338,6 +346,7 @@ export async function fetchDriverOrders(
 // Server-guarded: the RPC re-checks ownership and that the order is still in
 // "received" before flipping it to "cancelled", never trust the client alone.
 export async function cancelOrder(orderId: string): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("cancel_order", {
     p_order_id: orderId,
   });

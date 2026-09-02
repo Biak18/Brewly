@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
+import { assertOnline } from "@/lib/offlineGuard";
 import { fetchMyStore, updateMyStore } from "@/services/stores";
 import { supabase } from "@/services/supabase";
 import { refreshProfile, useAuthStore } from "@/stores/authStore";
@@ -95,6 +96,12 @@ export default function BecomeSellerScreen() {
 
   const onSubmit = useCallback(
     async (values: FormValues) => {
+      try {
+        assertOnline();
+      } catch (e) {
+        setServerError((e as Error).message);
+        return;
+      }
       setServerError(null);
       let nextPin = pin;
       if (!nextPin && values.mapLink.trim()) {

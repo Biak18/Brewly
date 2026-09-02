@@ -2,6 +2,7 @@
 // Per-order chat between the buyer and the store owner. Access is enforced
 // by RLS on chat_messages via order participation; this layer only shapes
 // data and wires the realtime subscription.
+import { assertOnline } from "@/lib/offlineGuard";
 import { supabase } from "./supabase";
 
 export type ChatMessage = {
@@ -62,6 +63,7 @@ export async function sendOrderMessage(params: {
   senderId: string;
   body: string;
 }): Promise<void> {
+  assertOnline();
   const body = normalizeMessageBody(params.body);
   if (!body) throw new Error("Message is empty");
   const { error } = await supabase.from("chat_messages").insert({

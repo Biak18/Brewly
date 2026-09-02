@@ -1,10 +1,12 @@
 // src/services/profile.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { refreshProfile } from "@/stores/authStore";
 import { decode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system/legacy";
 import { supabase } from "./supabase";
 
 export async function updateDisplayName(userId: string, fullName: string) {
+  assertOnline();
   const { error } = await supabase
     .from("profiles")
     .update({ full_name: fullName })
@@ -14,6 +16,7 @@ export async function updateDisplayName(userId: string, fullName: string) {
 }
 
 export async function changePassword(newPassword: string) {
+  assertOnline();
   const { error } = await supabase.auth.updateUser({
     password: newPassword,
   });
@@ -26,6 +29,7 @@ export async function uploadAvatar(
   userId: string,
   localUri: string,
 ): Promise<string> {
+  assertOnline();
   const base64 = await FileSystem.readAsStringAsync(localUri, {
     encoding: FileSystem.EncodingType.Base64,
   });
@@ -51,6 +55,7 @@ export async function uploadAvatar(
 }
 
 export async function deleteAccount() {
+  assertOnline();
   // Avatar files can only be removed through the Storage API, direct
   // storage.objects deletes are blocked by Supabase (SQLSTATE 42501).
   // Best-effort: a leftover orphan file is acceptable if this fails.

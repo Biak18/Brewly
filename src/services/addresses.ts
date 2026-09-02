@@ -1,4 +1,5 @@
 // src/services/addresses.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { Tables } from "@/types/database";
 import { supabase } from "./supabase";
 
@@ -37,6 +38,7 @@ export async function createAddress(
   input: AddressInput,
   isDefault: boolean,
 ): Promise<Address> {
+  assertOnline();
   const { data, error } = await supabase
     .from("addresses")
     .insert({ ...input, user_id: userId, is_default: false })
@@ -51,6 +53,7 @@ export async function updateAddress(
   addressId: string,
   input: AddressInput,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase
     .from("addresses")
     .update(input)
@@ -59,6 +62,7 @@ export async function updateAddress(
 }
 
 export async function deleteAddress(addressId: string): Promise<void> {
+  assertOnline();
   const { error } = await supabase
     .from("addresses")
     .delete()
@@ -70,6 +74,7 @@ export async function setDefaultAddress(
   _userId: string,
   addressId: string,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("set_default_address", {
     p_address_id: addressId,
   });

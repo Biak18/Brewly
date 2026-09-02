@@ -1,4 +1,5 @@
 // src/services/stores.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { Tables } from "@/types/database";
 import { supabase } from "./supabase";
 
@@ -57,6 +58,7 @@ export async function updateMyStore(
   storeId: string,
   patch: StoreUpdateInput,
 ): Promise<void> {
+  assertOnline();
   const { error } = await supabase
     .from("stores")
     .update(patch)

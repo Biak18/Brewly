@@ -1,4 +1,5 @@
 // src/services/reviews.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { supabase } from "./supabase";
 
 export type CoffeeReview = {
@@ -63,6 +64,7 @@ export async function submitCoffeeReview(params: {
   rating: number;
   comment?: string;
 }): Promise<void> {
+  assertOnline();
   const { error } = await supabase.rpc("submit_coffee_review", {
     p_coffee_id: params.coffeeId,
     p_order_id: params.orderId,

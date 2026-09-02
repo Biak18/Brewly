@@ -1,5 +1,6 @@
 // src/services/sellerMenu.ts
 import { Coffee } from "./coffees";
+import { assertOnline } from "@/lib/offlineGuard";
 import { supabase } from "./supabase";
 
 export async function fetchMyCoffees(storeId: string): Promise<Coffee[]> {
@@ -23,6 +24,7 @@ export type CoffeeInput = {
 };
 
 export async function createCoffee(storeId: string, input: CoffeeInput) {
+  assertOnline();
   const { data, error } = await supabase
     .from("coffees")
     .insert({ ...input, store_id: storeId })
@@ -33,11 +35,13 @@ export async function createCoffee(storeId: string, input: CoffeeInput) {
 }
 
 export async function updateCoffee(id: string, input: Partial<CoffeeInput>) {
+  assertOnline();
   const { error } = await supabase.from("coffees").update(input).eq("id", id);
   if (error) throw error;
 }
 
 export async function toggleCoffeeActive(id: string, isActive: boolean) {
+  assertOnline();
   const { error } = await supabase
     .from("coffees")
     .update({ is_active: isActive })
@@ -46,6 +50,7 @@ export async function toggleCoffeeActive(id: string, isActive: boolean) {
 }
 
 export async function createCategory(storeId: string, name: string) {
+  assertOnline();
   const { data, error } = await supabase
     .from("categories")
     .insert({ store_id: storeId, name, sort_order: 0 })

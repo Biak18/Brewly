@@ -1,4 +1,5 @@
 // src/services/sellerOptions.ts
+import { assertOnline } from "@/lib/offlineGuard";
 import { supabase } from "./supabase";
 
 export type OptionType = "size" | "temperature" | "milk" | "extra";
@@ -41,6 +42,7 @@ export async function createOption(
   storeId: string,
   input: OptionInput,
 ): Promise<string> {
+  assertOnline();
   const { data, error } = await supabase
     .from("coffee_options")
     .insert({ ...input, store_id: storeId })
@@ -51,6 +53,7 @@ export async function createOption(
 }
 
 export async function updateOption(id: string, input: Partial<OptionInput>) {
+  assertOnline();
   const { error } = await supabase
     .from("coffee_options")
     .update(input)
@@ -59,6 +62,7 @@ export async function updateOption(id: string, input: Partial<OptionInput>) {
 }
 
 export async function deleteOption(id: string) {
+  assertOnline();
   const { error } = await supabase.from("coffee_options").delete().eq("id", id);
   if (error) throw error;
 }
@@ -67,6 +71,7 @@ export async function setOptionCategoryScoping(
   optionId: string,
   categoryIds: string[],
 ) {
+  assertOnline();
   const { error } = await supabase.rpc("set_option_category_scoping", {
     p_option_id: optionId,
     p_category_ids: categoryIds,
