@@ -212,19 +212,19 @@ export default function FavoritesScreen() {
             onAction={() => router.push("/(tabs)/shops")}
           />
         ) : (
-          <FlashList
-            data={stores}
-            keyExtractor={(s) => s.id}
-            contentContainerStyle={{
-              paddingHorizontal: spacing.lg,
-              paddingBottom: spacing.xxxl,
-            }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={colors.espresso}
-              />
+          <FlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={stores}
+ keyExtractor={(s) => s.id}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.lg,
+ paddingBottom: spacing.xxxl,
+ }}
+ refreshControl={
+ <RefreshControl
+ refreshing={refreshing}
+ onRefresh={onRefresh}
+ tintColor={colors.espresso}
+ />
             }
             renderItem={({ item }) => (
               <Animated.View entering={ZoomInEasyDown.springify()}>
@@ -256,20 +256,20 @@ export default function FavoritesScreen() {
           onAction={() => router.push("/(tabs)/shops")}
         />
       ) : (
-        <AnimatedFlashList
-          data={coffees}
-          numColumns={2}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.lg,
-            paddingBottom: spacing.xxxl,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.espresso}
-            />
+        <AnimatedFlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={coffees}
+ numColumns={2}
+ keyExtractor={(item) => item.id}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.lg,
+ paddingBottom: spacing.xxxl,
+ }}
+ refreshControl={
+ <RefreshControl
+ refreshing={refreshing}
+ onRefresh={onRefresh}
+ tintColor={colors.espresso}
+ />
           }
           renderItem={({ item }) => {
             const data = toCoffeeCardDataWithShop(item, promotions ?? []);

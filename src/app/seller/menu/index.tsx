@@ -169,20 +169,20 @@ export default function ManageMenuScreen() {
           onAction={() => router.push("/seller/menu/coffee-form")}
         />
       ) : (
-        <AnimatedFlashList
-          data={coffees}
-          keyExtractor={(c) => c.id}
-          contentContainerStyle={{ padding: spacing.lg }}
-          scrollEventThrottle={16}
-          onScroll={handleScroll}
-          renderItem={({ item, index }) => (
-            <AnimatedSellerCoffeeCard
-              coffee={item}
-              index={index}
-              scrollY={scrollY}
-              onPress={handlePress}
-              onToggleActive={handleToggleActive}
-            />
+        <AnimatedFlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={coffees}
+ keyExtractor={(c) => c.id}
+ contentContainerStyle={{ padding: spacing.lg }}
+ scrollEventThrottle={16}
+ onScroll={handleScroll}
+ renderItem={({ item, index }) => (
+ <AnimatedSellerCoffeeCard
+ coffee={item}
+ index={index}
+ scrollY={scrollY}
+ onPress={handlePress}
+ onToggleActive={handleToggleActive}
+ />
           )}
         />
       )}

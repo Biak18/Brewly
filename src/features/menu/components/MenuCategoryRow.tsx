@@ -48,19 +48,18 @@ export function MenuCategoryRow({
   );
 
   return (
-    <FlatList
-      horizontal
-      style={{ height: 38 }}
-      data={items}
-      keyExtractor={(c) => c.id}
-      renderItem={renderItem}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingHorizontal: spacing.xl,
-        gap: spacing.sm,
-        height: 38,
-        maxHeight: 38,
-      }}
-    />
+    <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ style={{ height: 38 }}
+ data={items}
+ keyExtractor={(c) => c.id}
+ renderItem={renderItem}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.xl,
+ gap: spacing.sm,
+ height: 38,
+ maxHeight: 38,
+ }}
+ />
   );
 }

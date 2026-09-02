@@ -115,7 +115,7 @@ export default function ProfileScreen() {
         backgroundColor: colors.bg,
       }}
     >
-      <ScrollView
+      <ScrollView showsVerticalScrollIndicator={false}
         style={{ flex: 1, backgroundColor: colors.bg }}
         contentContainerStyle={{
           paddingHorizontal: spacing.xl,

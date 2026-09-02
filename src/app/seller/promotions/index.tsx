@@ -94,16 +94,16 @@ export default function ManagePromotionsScreen() {
           onAction={() => router.push("/seller/promotions/form")}
         />
       ) : (
-        <FlashList
-          data={promotions}
-          keyExtractor={(p) => String(p.id)}
-          contentContainerStyle={{ padding: spacing.lg }}
-          renderItem={({ item }) => (
-            <PromotionCard
-              promotion={item}
-              onPress={handlePress}
-              onToggleActive={handleToggleActive}
-            />
+        <FlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={promotions}
+ keyExtractor={(p) => String(p.id)}
+ contentContainerStyle={{ padding: spacing.lg }}
+ renderItem={({ item }) => (
+ <PromotionCard
+ promotion={item}
+ onPress={handlePress}
+ onToggleActive={handleToggleActive}
+ />
           )}
         />
       )}

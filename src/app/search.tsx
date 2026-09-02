@@ -227,7 +227,7 @@ export default function SearchScreen() {
           ))}
         </View>
       ) : (
-        <ScrollView
+        <ScrollView showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingBottom: spacing.xxxl,
@@ -237,30 +237,28 @@ export default function SearchScreen() {
           {(stores.data?.length ?? 0) > 0 && (
             <>
               <SectionLabel>{t("search.shops")}</SectionLabel>
-              <FlatList
-                horizontal
-                data={stores.data}
-                keyExtractor={(s) => s.id}
-                renderItem={renderStore}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  gap: spacing.md,
-                  marginBottom: spacing.xl,
-                }}
-              />
+              <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ data={stores.data}
+ keyExtractor={(s) => s.id}
+ renderItem={renderStore}
+ contentContainerStyle={{
+ gap: spacing.md,
+ marginBottom: spacing.xl,
+ }}
+ />
             </>
           )}
           {(coffees.data?.length ?? 0) > 0 && (
             <>
               <SectionLabel>{t("search.coffees")}</SectionLabel>
-              <FlatList
-                horizontal
-                data={coffees.data}
-                keyExtractor={(c) => c.id}
-                renderItem={renderCoffee}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: spacing.md, paddingBottom: 8 }}
-              />
+              <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ data={coffees.data}
+ keyExtractor={(c) => c.id}
+ renderItem={renderCoffee}
+ contentContainerStyle={{ gap: spacing.md, paddingBottom: 8 }}
+ />
             </>
           )}
         </ScrollView>

@@ -173,16 +173,16 @@ export default function ShopsScreen() {
           onAction={() => setRadiusKm(null)}
         />
       ) : (
-        <AnimatedFlashList
-          data={filtered}
-          keyExtractor={(s: Store) => s.id}
-          contentContainerStyle={{ padding: spacing.lg }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.espresso}
-            />
+        <AnimatedFlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={filtered}
+ keyExtractor={(s: Store) => s.id}
+ contentContainerStyle={{ padding: spacing.lg }}
+ refreshControl={
+ <RefreshControl
+ refreshing={refreshing}
+ onRefresh={onRefresh}
+ tintColor={colors.espresso}
+ />
           }
           renderItem={({ item }: { item: Store }) => (
             <Animated.View

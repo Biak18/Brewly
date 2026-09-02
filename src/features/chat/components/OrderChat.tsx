@@ -193,17 +193,17 @@ export function OrderChat({
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={invertedData}
-          keyExtractor={(m) => m.id}
-          inverted
-          renderItem={({ item }) => (
-            <MessageBubble
-              message={item}
-              mine={item.sender_id === currentUserId}
-              isFirstInGroup={item.isFirstInGroup}
-              isLastInGroup={item.isLastInGroup}
-            />
+        <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={invertedData}
+ keyExtractor={(m) => m.id}
+ inverted
+ renderItem={({ item }) => (
+ <MessageBubble
+ message={item}
+ mine={item.sender_id === currentUserId}
+ isFirstInGroup={item.isFirstInGroup}
+ isLastInGroup={item.isLastInGroup}
+ />
           )}
           // Inverted list: the footer renders at the visual top, right above
           // the oldest message, exactly where "load earlier" belongs.
@@ -241,7 +241,6 @@ export function OrderChat({
             justifyContent: "flex-end",
           }}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
         />
       )}
 

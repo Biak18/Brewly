@@ -34,25 +34,24 @@ export function RecentOrdersRow() {
       >
         Recent orders
       </Text>
-      <FlatList
-        horizontal
-        data={orders}
-        keyExtractor={(o) => o.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.xl,
-          gap: spacing.md,
-        }}
-        renderItem={({ item }) => {
-          const data: OrderCardData = {
-            id: item.id,
-            status: item.status,
-            total: item.total,
-            placedAt: item.placed_at,
-            itemCount: item.item_count,
-            thumbnailUrl: item.thumbnail_url,
-          };
-          return <OrderCard order={data} onPress={handlePress} layout="row" />;
+      <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ data={orders}
+ keyExtractor={(o) => o.id}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.xl,
+ gap: spacing.md,
+ }}
+ renderItem={({ item }) => {
+ const data: OrderCardData = {
+ id: item.id,
+ status: item.status,
+ total: item.total,
+ placedAt: item.placed_at,
+ itemCount: item.item_count,
+ thumbnailUrl: item.thumbnail_url,
+ };
+ return <OrderCard order={data} onPress={handlePress} layout="row" />;
         }}
       />
     </View>

@@ -208,7 +208,7 @@ export default function CoffeeDetailScreen() {
       exiting={ZoomOut.duration(220).easing(Easing.in(Easing.cubic))}
       style={{ flex: 1, backgroundColor: colors.bg }}
     >
-      <Animated.ScrollView
+      <Animated.ScrollView showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 24 }}

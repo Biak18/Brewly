@@ -113,7 +113,7 @@ export function OptionFormSheet({
   }, [option, storeId, queryClient, onDone, showConfirm]);
 
   return (
-    <ScrollView
+    <ScrollView showsVerticalScrollIndicator={false}
       style={{ maxHeight: 480 }}
       contentContainerStyle={{
         paddingHorizontal: spacing.xl,

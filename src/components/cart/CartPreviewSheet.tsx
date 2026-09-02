@@ -38,19 +38,19 @@ export function CartPreviewSheet() {
         >
           Added to cart
         </Text>
-        <FlatList
-          data={recent}
-          keyExtractor={(i) => i.id}
-          scrollEnabled={false}
-          renderItem={({ item }: { item: CartLineItem }) => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: spacing.sm,
-              }}
-            >
-              <CoffeeImage uri={item.imageUrl} height={40} radius={radius.sm} />
+        <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={recent}
+ keyExtractor={(i) => i.id}
+ scrollEnabled={false}
+ renderItem={({ item }: { item: CartLineItem }) => (
+ <View
+ style={{
+ flexDirection: "row",
+ alignItems: "center",
+ marginBottom: spacing.sm,
+ }}
+ >
+ <CoffeeImage uri={item.imageUrl} height={40} radius={radius.sm} />
               <Text
                 style={{
                   flex: 1,

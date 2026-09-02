@@ -59,53 +59,53 @@ export function TimePickerSheet({
           Pick a time
         </Text>
       </View>
-      <FlashList
-        ref={listRef}
-        data={SLOTS}
-        numColumns={4}
-        keyExtractor={(t) => t}
-        contentContainerStyle={{ paddingHorizontal: spacing.xl }}
-        renderItem={({ item }) => {
-          const active = item === value;
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={item}
-              onPress={() => {
-                onSelect(item);
-                onClose();
-              }}
-              style={{
-                flexBasis: "25%",
-                padding: spacing.xs,
-              }}
-            >
-              <View
-                style={{
-                  height: 40,
-                  borderRadius: radius.md,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: active ? colors.espresso : colors.line,
-                  backgroundColor: active ? colors.espresso : colors.surface,
-                }}
-              >
-                <Text
-                  style={{
-                    color: active ? colors.surface : colors.ink,
-                    fontSize: typography.caption,
-                    fontWeight: active ? "800" : "600",
-                  }}
-                >
-                  {item}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        }}
-      />
+      <FlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ ref={listRef}
+ data={SLOTS}
+ numColumns={4}
+ keyExtractor={(t) => t}
+ contentContainerStyle={{ paddingHorizontal: spacing.xl }}
+ renderItem={({ item }) => {
+ const active = item === value;
+ return (
+ <Pressable
+ accessibilityRole="button"
+ accessibilityState={{ selected: active }}
+ accessibilityLabel={item}
+ onPress={() => {
+ onSelect(item);
+ onClose();
+ }}
+ style={{
+ flexBasis: "25%",
+ padding: spacing.xs,
+ }}
+ >
+ <View
+ style={{
+ height: 40,
+ borderRadius: radius.md,
+ alignItems: "center",
+ justifyContent: "center",
+ borderWidth: 1,
+ borderColor: active ? colors.espresso : colors.line,
+ backgroundColor: active ? colors.espresso : colors.surface,
+ }}
+ >
+ <Text
+ style={{
+ color: active ? colors.surface : colors.ink,
+ fontSize: typography.caption,
+ fontWeight: active ? "800" : "600",
+ }}
+ >
+ {item}
+ </Text>
+ </View>
+ </Pressable>
+ );
+ }}
+ />
       <Text
         style={{
           color: colors.muted,

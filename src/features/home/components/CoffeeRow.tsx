@@ -87,17 +87,16 @@ export function CoffeeRow({ title, coffees }: CoffeeRowProps) {
       >
         {title}
       </Text>
-      <FlatList
-        horizontal
-        data={coffees}
-        keyExtractor={(c) => c.id}
-        renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.xl,
-          gap: spacing.md,
-        }}
-      />
+      <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ data={coffees}
+ keyExtractor={(c) => c.id}
+ renderItem={renderItem}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.xl,
+ gap: spacing.md,
+ }}
+ />
     </View>
   );
 }

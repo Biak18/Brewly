@@ -224,12 +224,12 @@ export default function CartScreen() {
         />
       ) : (
         <>
-          <FlatList
-            data={items}
-            keyExtractor={(i) => i.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
-          />
+          <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={items}
+ keyExtractor={(i) => i.id}
+ renderItem={renderItem}
+ contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+ />
           <View
             style={{
               padding: spacing.xl,

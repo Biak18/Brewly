@@ -53,7 +53,7 @@ export default function DriverDeliveryScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView
+      <ScrollView showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
       >
         <StatusTimeline status={order.status} fulfillment={order.fulfillment} />

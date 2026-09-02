@@ -9,11 +9,15 @@ type FormScrollViewProps = React.ComponentProps<
 >;
 
 export function FormScrollView({
+  showsVerticalScrollIndicator = false,
+  showsHorizontalScrollIndicator = false,
   contentContainerStyle,
   ...rest
 }: FormScrollViewProps) {
   return (
     <KeyboardAwareScrollView
+      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+      showsHorizontalScrollIndicator={showsHorizontalScrollIndicator}
       keyboardShouldPersistTaps="handled"
       bottomOffset={12}
       contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}

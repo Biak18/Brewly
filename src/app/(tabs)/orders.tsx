@@ -136,19 +136,18 @@ export default function OrdersScreen() {
       )}
 
       <View style={{ paddingBottom: spacing.md }}>
-        <FlatList
-          horizontal
-          style={{ height: 38 }}
-          data={FILTERS}
-          keyExtractor={(f) => f.value}
-          renderItem={({ item }) => (
-            <Chip
-              label={item.label}
-              active={statusFilter === item.value}
-              onPress={() => setStatusFilter(item.value)}
-            />
+        <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ style={{ height: 38 }}
+ data={FILTERS}
+ keyExtractor={(f) => f.value}
+ renderItem={({ item }) => (
+ <Chip
+ label={item.label}
+ active={statusFilter === item.value}
+ onPress={() => setStatusFilter(item.value)}
+ />
           )}
-          showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             gap: spacing.sm,
@@ -193,19 +192,19 @@ export default function OrdersScreen() {
           description={t("ordersTab.noOrdersFiltered", { status: statusFilter })}
         />
       ) : (
-        <FlashList
-          data={filteredOrders}
-          keyExtractor={(o) => o.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ padding: spacing.lg }}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.espresso}
-            />
+        <FlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={filteredOrders}
+ keyExtractor={(o) => o.id}
+ renderItem={renderItem}
+ contentContainerStyle={{ padding: spacing.lg }}
+ onEndReached={loadMore}
+ onEndReachedThreshold={0.5}
+ refreshControl={
+ <RefreshControl
+ refreshing={refreshing}
+ onRefresh={onRefresh}
+ tintColor={colors.espresso}
+ />
           }
           ListFooterComponent={
             isFetchingNextPage ? <Pulse style={{ height: 76 }} /> : null

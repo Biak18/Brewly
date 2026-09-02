@@ -433,12 +433,12 @@ export default function AddressesScreen() {
           onAction={openAdd}
         />
       ) : (
-        <FlatList
-          data={addresses}
-          keyExtractor={(a) => a.id}
-          contentContainerStyle={{ padding: spacing.xl }}
-          renderItem={({ item }) => (
-            <AddressCard address={item} onEdit={openEdit} />
+        <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={addresses}
+ keyExtractor={(a) => a.id}
+ contentContainerStyle={{ padding: spacing.xl }}
+ renderItem={({ item }) => (
+ <AddressCard address={item} onEdit={openEdit} />
           )}
         />
       )}

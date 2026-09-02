@@ -254,18 +254,18 @@ export default function ShopMenuScreen() {
           }
         />
       ) : (
-        <AnimatedFlashList
-          data={coffees}
-          numColumns={2}
-          keyExtractor={(item) => item.id}
-          onEndReachedThreshold={0.5}
-          keyboardDismissMode={"on-drag"}
-          onEndReached={() => {
-            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-          }}
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <Pulse style={{ height: 60, margin: spacing.md }} />
+        <AnimatedFlashList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ data={coffees}
+ numColumns={2}
+ keyExtractor={(item) => item.id}
+ onEndReachedThreshold={0.5}
+ keyboardDismissMode={"on-drag"}
+ onEndReached={() => {
+ if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+ }}
+ ListFooterComponent={
+ isFetchingNextPage ? (
+ <Pulse style={{ height: 60, margin: spacing.md }} />
             ) : null
           }
           contentContainerStyle={{

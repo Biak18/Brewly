@@ -39,17 +39,16 @@ export function HomeShopsRow() {
       >
         Shops
       </Text>
-      <FlatList
-        horizontal
-        data={stores}
-        keyExtractor={(s) => s.id}
-        renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.xl,
-          gap: spacing.md,
-        }}
-      />
+      <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
+ horizontal
+ data={stores}
+ keyExtractor={(s) => s.id}
+ renderItem={renderItem}
+ contentContainerStyle={{
+ paddingHorizontal: spacing.xl,
+ gap: spacing.md,
+ }}
+ />
     </View>
   );
 }

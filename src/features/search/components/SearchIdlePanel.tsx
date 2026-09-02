@@ -95,7 +95,7 @@ export function SearchIdlePanel({
     );
 
   return (
-    <ScrollView
+    <ScrollView showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         padding: spacing.xl,
         paddingBottom: spacing.xxxl,
