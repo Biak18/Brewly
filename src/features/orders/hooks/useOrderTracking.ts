@@ -14,8 +14,10 @@ export function useOrderTracking(orderId: string) {
 
   useEffect(() => {
     if (!orderId) return;
-    const channel = supabase
-      .channel(`order-detail:${orderId}`)
+    // Unique topic per mount avoids "cannot add postgres_changes after subscribe" when
+    // Supabase reuses a cached channel that is still subscribed (see OrderChat).
+    const channelName = `order-detail:${orderId}:${Math.random().toString(36).slice(2, 8)}`;
+    const channel = supabase.channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
