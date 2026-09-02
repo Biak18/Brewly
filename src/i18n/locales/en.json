@@ -8,7 +8,8 @@
   },
   "role": {
     "customer": "Customer",
-    "seller": "Seller"
+    "seller": "Seller",
+    "driver": "Driver"
   },
   "profile": {
     "yourAccount": "Your account",
