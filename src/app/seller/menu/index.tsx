@@ -104,7 +104,7 @@ export default function ManageMenuScreen() {
   const scrollY = useSharedValue(0);
 
   const handleScroll = useCallback((event: any) => {
-    // This runs on the JS thread – perfectly fine for this use case
+    // This runs on the JS thread, perfectly fine for this use case
     scrollY.value = event.nativeEvent.contentOffset.y;
   }, [scrollY]);
 

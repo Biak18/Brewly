@@ -121,7 +121,7 @@ export default function CartScreen() {
         showToast(t("cart.pricesUpdated"));
       }
     } catch {
-      // Pricing service unavailable — keep cached prices; checkout
+      // Pricing service unavailable, keep cached prices; checkout
       // re-validates server-side anyway.
     }
   }, [removeItem, updateItem, showToast]);

@@ -1,4 +1,4 @@
-// src/components/coffee/CoffeePrice.tsx — full replacement
+// src/components/coffee/CoffeePrice.tsx: full replacement
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { StyleSheet, Text, View } from "react-native";

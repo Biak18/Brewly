@@ -1,4 +1,4 @@
-// src/test/testUtils.tsx — shared helpers for screen smoke tests.
+// src/test/testUtils.tsx: shared helpers for screen smoke tests.
 import {
   MutationCache,
   QueryCache,

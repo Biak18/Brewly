@@ -1,4 +1,4 @@
-// src/features/dev/DevAccountSwitcher.tsx — DEV ONLY, never in production
+// src/features/dev/DevAccountSwitcher.tsx: DEV ONLY, never in production
 // One-tap sign-out + sign-in with a test account on a single device.
 import { DEV_ACCOUNTS, DevAccount } from "@/config/devAccounts";
 import { supabase } from "@/services/supabase";
@@ -28,7 +28,7 @@ export function DevAccountSwitcher() {
     }
     setBusy(email);
     try {
-      // No explicit signOut — signInWithPassword replaces the session atomically.
+      // No explicit signOut, signInWithPassword replaces the session atomically.
       // Explicit signOut first emits SIGNED_OUT -> handleSession(null) -> RootNavigator
       // briefly shows the sign-in stack (flash). Direct sign-in keeps isLoading=true
       // and shows LoadingScreen instead.
@@ -42,7 +42,7 @@ export function DevAccountSwitcher() {
       // Restore loading so UI doesn't stay stuck if sign-in fails
       useAuthStore.setState({ isLoading: false });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast(e?.message ?? "Switch failed — check devAccounts.ts");
+      showToast(e?.message ?? "Switch failed, check devAccounts.ts");
     } finally {
       setBusy(null);
     }

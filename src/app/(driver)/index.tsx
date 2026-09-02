@@ -40,7 +40,7 @@ export default function DriverHome() {
     enabled: !!userId,
   });
 
-  // Availability feeds the seller's driver picker — drivers opt in/out here.
+  // Availability feeds the seller's driver picker, drivers opt in/out here.
   const { data: driverProfile } = useQuery({
     queryKey: ["driver-profile", userId],
     queryFn: () => fetchDriverProfile(userId!),

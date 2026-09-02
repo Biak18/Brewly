@@ -1,4 +1,4 @@
-// src/tests/app/become-driver.test.tsx — smoke tests for src/app/become-driver.tsx
+// src/tests/app/become-driver.test.tsx: smoke tests for src/app/become-driver.tsx
 import BecomeDriverScreen from "../../app/become-driver";
 import { renderScreen } from "../../test/testUtils";
 

@@ -1,4 +1,4 @@
-// src/tests/app/orders.test.tsx — smoke tests for src/app/(tabs)/orders.tsx
+// src/tests/app/orders.test.tsx: smoke tests for src/app/(tabs)/orders.tsx
 import OrdersScreen from "../../app/(tabs)/orders";
 import { useAuthStore } from "../../stores/authStore";
 import { renderScreen } from "../../test/testUtils";

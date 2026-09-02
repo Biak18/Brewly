@@ -1,4 +1,4 @@
-// src/tests/app/seller/promotions/index.test.tsx — smoke tests for src/app/seller/promotions/index.tsx
+// src/tests/app/seller/promotions/index.test.tsx: smoke tests for src/app/seller/promotions/index.tsx
 import ManagePromotionsScreen from "../../../../app/seller/promotions/index";
 import { renderScreen } from "../../../../test/testUtils";
 

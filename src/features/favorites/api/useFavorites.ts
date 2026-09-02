@@ -1,4 +1,4 @@
-// src/features/favorites/api/useFavorites.ts — full replacement
+// src/features/favorites/api/useFavorites.ts: full replacement
 import { fetchFavoriteCoffees } from "@/services/coffees";
 import { supabase } from "@/services/supabase";
 import { useAuthStore } from "@/stores/authStore";

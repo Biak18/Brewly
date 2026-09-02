@@ -29,7 +29,7 @@ export type ExpectedLinePrice = {
 /**
  * Server-authoritative re-pricing for persisted cart lines. Cart lines cache
  * unit_price at add-time, but promotions and menu edits happen server-side
- * afterwards — the cart screen refreshes through this before checkout so the
+ * afterwards, the cart screen refreshes through this before checkout so the
  * cached prices can't drift from what create_order will validate against.
  *
  * Resolves to one entry per line id: the refreshed price, or null when the
@@ -288,7 +288,7 @@ export async function fetchAvailableDrivers(): Promise<Driver[]> {
 }
 
 // A driver's own row in `drivers`. RLS lets a driver select and update only
-// their own row — these two power the availability toggle on the driver home.
+// their own row, these two power the availability toggle on the driver home.
 export async function fetchDriverProfile(
   userId: string,
 ): Promise<Driver | null> {
@@ -336,7 +336,7 @@ export async function fetchDriverOrders(
 }
 
 // Server-guarded: the RPC re-checks ownership and that the order is still in
-// "received" before flipping it to "cancelled" — never trust the client alone.
+// "received" before flipping it to "cancelled", never trust the client alone.
 export async function cancelOrder(orderId: string): Promise<void> {
   const { error } = await supabase.rpc("cancel_order", {
     p_order_id: orderId,
@@ -409,7 +409,7 @@ export async function fetchMyShopOrders(
 }
 
 // ---------------------------------------------------------------------
-// Paginated variants — used by the Orders screen's infinite scroll.
+// Paginated variants, used by the Orders screen's infinite scroll.
 // Fetching one extra row beyond the window lets us detect "hasMore"
 // without a separate count query. Existing non-paginated fetches above
 // are kept for callers that want the full list (e.g. home).

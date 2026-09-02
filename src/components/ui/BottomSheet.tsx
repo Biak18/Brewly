@@ -1,7 +1,7 @@
 // src/components/ui/BottomSheet.tsx
 // Thin wrapper around @expo/ui/community/bottom-sheet (native platform sheets)
 // keeping the app-wide { visible, onClose, children } API. Native sheets handle
-// keyboard avoidance inside modals automatically — KeyboardAwareScrollView and
+// keyboard avoidance inside modals automatically, KeyboardAwareScrollView and
 // RN's KeyboardAvoidingView do not work reliably there.
 import { useTheme } from "@/theme";
 import BottomSheetNative, {

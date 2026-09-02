@@ -1,4 +1,4 @@
-// src/tests/app/(tabs)/profile.test.tsx — smoke tests for src/app/(tabs)/profile.tsx
+// src/tests/app/(tabs)/profile.test.tsx: smoke tests for src/app/(tabs)/profile.tsx
 import ProfileScreen from "../../../app/(tabs)/profile";
 import { renderScreen } from "../../../test/testUtils";
 

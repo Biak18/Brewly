@@ -25,7 +25,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const { colors, spacing, radius, typography } = useTheme();
 
-  // Tight radius on the "tail" corner of the group's last bubble — the one
+  // Tight radius on the "tail" corner of the group's last bubble, the one
   // detail that reads as a real chat app rather than a stack of boxes. Every
   // other bubble in a consecutive group stays uniformly rounded.
   const tailRadius = isLastInGroup ? 4 : radius.lg;

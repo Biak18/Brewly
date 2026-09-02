@@ -22,7 +22,7 @@ function lineItemText(item: OrderWithItems["order_items"][number]): string {
   ]
     .filter(Boolean)
     .join(" · ");
-  return [`${qty} ${name} — ${amount}`, options ? `   ${options}` : null]
+  return [`${qty} ${name}, ${amount}`, options ? `   ${options}` : null]
     .filter(Boolean)
     .join("\n");
 }
@@ -35,7 +35,7 @@ export function buildReceiptText(
     order.placed_at ?? new Date().toISOString(),
   ).toLocaleString();
   const lines: string[] = [
-    "Brewly — Order receipt",
+    "Brewly, Order receipt",
     `Order #${order.id.slice(0, 8).toUpperCase()}`,
     `Placed: ${placedAt}`,
   ];
@@ -46,7 +46,7 @@ export function buildReceiptText(
   if (STATUS_LABELS[order.status])
     lines.push(`Status: ${STATUS_LABELS[order.status]}`);
 
-  lines.push("", "— Items —", ...order.order_items.map(lineItemText), "");
+  lines.push("", ", Items,", ...order.order_items.map(lineItemText), "");
 
   lines.push(`Subtotal        ${formatCurrency(order.subtotal)}`);
   lines.push(`Tax             ${formatCurrency(order.tax)}`);

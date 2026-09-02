@@ -1,5 +1,5 @@
 // src/stores/notificationStore.ts
-// Persisted push-notification opt-in. Only the preference lives here — OS
+// Persisted push-notification opt-in. Only the preference lives here, OS
 // permission state and device tokens belong to the OS / push_tokens table.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";

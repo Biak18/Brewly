@@ -5,4 +5,3 @@ export * from "./shadows";
 export * from "./spacing";
 export { useTheme } from "./themeStore";
 export * from "./typography";
-

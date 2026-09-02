@@ -13,7 +13,7 @@ export type AddressInput = {
   lng?: number | null;
 };
 
-/** "Home · Aung A · 09xxx · 123 Baho Rd" — snapshot stored on the order. */
+/** "Home · Aung A · 09xxx · 123 Baho Rd", snapshot stored on the order. */
 export function formatAddressSnapshot(a: Address): string {
   return [a.label, a.full_name, a.phone, a.address]
     .map((part) => part.trim())

@@ -34,7 +34,7 @@ export function formatMinutes(totalMinutes: number): string {
 }
 
 export type StoreOpenState = {
-  /** true when hours are missing/unparseable — never block on bad data */
+  /** true when hours are missing/unparseable, never block on bad data */
   isOpen: boolean;
   isKnown: boolean;
   closesAt: string | null;

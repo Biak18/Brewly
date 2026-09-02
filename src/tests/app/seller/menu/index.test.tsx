@@ -1,4 +1,4 @@
-// src/tests/app/seller/menu/index.test.tsx — smoke tests for src/app/seller/menu/index.tsx
+// src/tests/app/seller/menu/index.test.tsx: smoke tests for src/app/seller/menu/index.tsx
 import ManageMenuScreen from "../../../../app/seller/menu/index";
 import { renderScreen } from "../../../../test/testUtils";
 

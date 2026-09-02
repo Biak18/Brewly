@@ -1,7 +1,7 @@
 // src/utils/mapLink.ts
 // Sellers pin their shop either by pasting a Google Maps link (Share → Copy
 // link) or by standing at the shop and using their device's fix. Only the
-// resulting {lat, lng} is persisted — the raw link is not stored.
+// resulting {lat, lng} is persisted, the raw link is not stored.
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
@@ -53,7 +53,7 @@ function isShortLink(url: string): boolean {
  * Resolves whatever the seller pasted into coordinates. Direct formats are
  * parsed offline; short links (the usual result of Share → Copy link in the
  * mobile Maps app) redirect, so one fetch pulls the real page and scans it.
- * Never throws — null simply means "could not read a pin".
+ * Never throws, null simply means "could not read a pin".
  */
 export async function resolveMapLink(input: string): Promise<PinCoords | null> {
   const t = input.trim();
@@ -102,7 +102,7 @@ export async function openDirectionsToCoords(lat: number, lng: number): Promise<
   return openDirectionsTo(`${lat},${lng}`, lat, lng);
 }
 
-/** Device fix for "use my current location" — permission handled, never throws. */
+/** Device fix for "use my current location", permission handled, never throws. */
 export async function getCurrentCoordinates(): Promise<PinCoords | null> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();

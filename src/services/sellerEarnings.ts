@@ -1,6 +1,6 @@
 // src/services/sellerEarnings.ts
 // Sales summary for the seller's own store. Aggregation happens client-side
-// over the store's orders (narrow columns only) — RLS already restricts this
+// over the store's orders (narrow columns only), RLS already restricts this
 // query to the store owner.
 import { supabase } from "./supabase";
 
@@ -82,7 +82,7 @@ function round2(value: number): number {
 export async function fetchSellerEarnings(
   storeId: string,
 ): Promise<SellerEarnings> {
-  // Only the last ~30 days can influence the aggregates — bound the query so
+  // Only the last ~30 days can influence the aggregates, bound the query so
   // the payload stays constant-size as order history grows.
   const monthStart = new Date();
   monthStart.setHours(0, 0, 0, 0);

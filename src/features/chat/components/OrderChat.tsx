@@ -1,4 +1,4 @@
-// src/features/chat/components/OrderChat.tsx — full replacement
+// src/features/chat/components/OrderChat.tsx: full replacement
 import { track } from "@/lib/analytics";
 import {
   ChatMessage,
@@ -34,7 +34,7 @@ import { MessageBubble } from "./MessageBubble";
 const PADDING_BOTTOM = Platform.OS === "ios" ? 20 : 0;
 const GROUP_GAP_MS = 5 * 60 * 1000; // messages from the same sender within 5 minutes visually group together
 
-// Keyboard-height spacer only — no longer drives any scroll call. An inverted
+// Keyboard-height spacer only, no longer drives any scroll call. An inverted
 // list keeps "the bottom" anchored in place as the keyboard opens; it doesn't
 // need to be told to scroll to reveal it.
 const useGradualAnimation = () => {
@@ -77,7 +77,7 @@ export function OrderChat({
   // Older messages are paged in on demand ("Load earlier") so long histories
   // don't over-fetch on open. Realtime appends land on the newest page.
   const [earlierPages, setEarlierPages] = useState<ChatMessage[][]>([]);
-  // Reset paged-in history when switching orders — done during render (the
+  // Reset paged-in history when switching orders, done during render (the
   // React-endorsed pattern for state derived from a changed prop).
   const [prevOrderId, setPrevOrderId] = useState(orderId);
   if (prevOrderId !== orderId) {
@@ -112,7 +112,7 @@ export function OrderChat({
   }, [orderId, queryClient]);
 
   // Grouping computed once here in chronological order (easy to reason about
-  // "previous"/"next"), then reversed once for the inverted list's data prop —
+  // "previous"/"next"), then reversed once for the inverted list's data prop,
   // not recomputed per-row inside renderItem.
   const invertedData = useMemo(() => {
     const withGroups = allMessages.map((m, i) => {
@@ -206,7 +206,7 @@ export function OrderChat({
             />
           )}
           // Inverted list: the footer renders at the visual top, right above
-          // the oldest message — exactly where "load earlier" belongs.
+          // the oldest message, exactly where "load earlier" belongs.
           ListFooterComponent={
             hasMoreEarlier ? (
               <Pressable

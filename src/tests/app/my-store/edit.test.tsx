@@ -1,4 +1,4 @@
-// src/tests/app/my-store/edit.test.tsx — smoke tests for src/app/my-store/edit.tsx
+// src/tests/app/my-store/edit.test.tsx: smoke tests for src/app/my-store/edit.tsx
 import EditStoreScreen from "../../../app/my-store/edit";
 import { renderScreen } from "../../../test/testUtils";
 

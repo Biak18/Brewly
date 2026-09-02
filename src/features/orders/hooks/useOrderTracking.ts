@@ -1,4 +1,4 @@
-// src/features/orders/hooks/useOrderTracking.ts — simplified, no longer owns a subscription
+// src/features/orders/hooks/useOrderTracking.ts: simplified, no longer owns a subscription
 import { fetchOrderWithItems } from "@/services/orders";
 import { useQuery } from "@tanstack/react-query";
 

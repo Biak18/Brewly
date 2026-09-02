@@ -101,7 +101,7 @@ export function PromotionCard({
           {statusLabel} · {promotion.discount_percent}% off
         </Text>
         <Text style={{ color: colors.muted, fontSize: typography.micro }}>
-          {promotion.starts_at} – {promotion.ends_at}
+          {promotion.starts_at} to {promotion.ends_at}
         </Text>
       </View>
     </Pressable>

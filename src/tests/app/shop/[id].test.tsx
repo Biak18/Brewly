@@ -1,4 +1,4 @@
-// src/tests/app/shop/[id].test.tsx — smoke tests for src/app/shop/[id].tsx
+// src/tests/app/shop/[id].test.tsx: smoke tests for src/app/shop/[id].tsx
 import ShopMenuScreen from "../../../app/shop/[id]";
 import { renderScreen } from "../../../test/testUtils";
 

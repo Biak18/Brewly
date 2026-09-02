@@ -47,7 +47,7 @@ describe("getCoffeeDiscount", () => {
     );
   });
 
-  it("does NOT apply a store-wide promo from a different store — this is the exact bug that shipped once already", () => {
+  it("does NOT apply a store-wide promo from a different store, this is the exact bug that shipped once already", () => {
     const promoFromOtherStore = makePromotion({
       scope: "all",
       store_id: "store-b",

@@ -1,4 +1,4 @@
-// src/tests/app/seller/promotions/form.test.tsx — smoke tests for src/app/seller/promotions/form.tsx
+// src/tests/app/seller/promotions/form.test.tsx: smoke tests for src/app/seller/promotions/form.tsx
 import PromotionFormScreen from "../../../../app/seller/promotions/form";
 import { renderScreen } from "../../../../test/testUtils";
 

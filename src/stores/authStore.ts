@@ -1,4 +1,4 @@
-// src/stores/authStore.ts — full file
+// src/stores/authStore.ts: full file
 import { supabase } from "@/services/supabase";
 import { Session } from "@supabase/supabase-js";
 import { create } from "zustand";
@@ -116,4 +116,3 @@ const {
 });
 
 export { subscription };
-

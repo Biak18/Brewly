@@ -80,7 +80,7 @@ export function PickupTimeRow({
           }}
         >
           Pickup times follow the shop&apos;s hours ({formatMinutes(parsed!.open)}
-          {" – "}
+          {" to "}
           {formatMinutes(parsed!.close)}).
         </Text>
       )}

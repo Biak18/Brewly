@@ -31,7 +31,7 @@ function mapMessage(row: any): ChatMessage {
 
 export const CHAT_PAGE_SIZE = 50;
 
-// Newest page first (descending), then reversed — callers consume
+// Newest page first (descending), then reversed, callers consume
 // chronological order. `before` pages further back in history for
 // "load earlier" (pass the oldest currently-loaded created_at).
 export async function fetchOrderMessages(
@@ -51,7 +51,7 @@ export async function fetchOrderMessages(
   return (data ?? []).map(mapMessage).reverse();
 }
 
-// Collapse whitespace and cap length — the DB check rejects >1000 chars,
+// Collapse whitespace and cap length, the DB check rejects >1000 chars,
 // so normalize here to keep sends within bounds instead of erroring.
 export function normalizeMessageBody(raw: string): string {
   return raw.replace(/\s+/g, " ").trim().slice(0, 1000);

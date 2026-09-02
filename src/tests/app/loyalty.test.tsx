@@ -1,4 +1,4 @@
-// src/tests/app/loyalty.test.tsx — smoke tests for src/app/loyalty.tsx
+// src/tests/app/loyalty.test.tsx: smoke tests for src/app/loyalty.tsx
 import LoyaltyScreen from "../../app/loyalty";
 import { renderScreen } from "../../test/testUtils";
 

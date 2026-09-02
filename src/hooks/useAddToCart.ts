@@ -24,7 +24,7 @@ export function useAddToCart() {
         showConfirm({
           title: "Start a new cart?",
           message:
-            "Your cart has items from a different shop. Pickup orders can only come from one shop at a time — adding this will clear your current cart.",
+            "Your cart has items from a different shop. Pickup orders can only come from one shop at a time, adding this will clear your current cart.",
           confirmLabel: "Clear cart & add",
           destructive: true,
           onConfirm: () => {

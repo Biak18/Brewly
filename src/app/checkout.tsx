@@ -1,4 +1,4 @@
-// src/app/checkout.tsx — full replacement
+// src/app/checkout.tsx: full replacement
 import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
@@ -99,7 +99,7 @@ export default function CheckoutScreen() {
 
   useEffect(() => {
     track("checkout_started", { store_id: storeId, item_count: items.length });
-    // Fired once per checkout visit — cart contents at entry are the props.
+    // Fired once per checkout visit, cart contents at entry are the props.
      
   }, []);
   const { data: store } = useQuery({
@@ -252,7 +252,7 @@ export default function CheckoutScreen() {
         });
         if (values.paymentMethod === "mmqr" || values.paymentMethod === "kpay") {
           // Manual proof path. Order is already placed; a failed proof attach
-          // must not lose it — the seller sees it unpaid and coordinates.
+          // must not lose it, the seller sees it unpaid and coordinates.
           try {
             await attachPayment(
               orderId,

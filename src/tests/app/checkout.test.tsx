@@ -1,4 +1,4 @@
-// src/tests/app/checkout.test.tsx — smoke tests for src/app/checkout.tsx
+// src/tests/app/checkout.test.tsx: smoke tests for src/app/checkout.tsx
 import CheckoutScreen from "../../app/checkout";
 import { useCartStore } from "../../stores/cartStore";
 import { renderScreen } from "../../test/testUtils";

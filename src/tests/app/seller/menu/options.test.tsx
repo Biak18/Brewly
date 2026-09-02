@@ -1,4 +1,4 @@
-// src/tests/app/seller/menu/options.test.tsx — smoke tests for src/app/seller/menu/options.tsx
+// src/tests/app/seller/menu/options.test.tsx: smoke tests for src/app/seller/menu/options.tsx
 import ManageOptionsScreen from "../../../../app/seller/menu/options";
 import { renderScreen } from "../../../../test/testUtils";
 

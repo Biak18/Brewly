@@ -13,7 +13,7 @@ export default function DriverLayout() {
   const router = useRouter();
 
   // The driver stack can be cold-started from a restored URL with empty history
-  // (Expo dev client persists last route) — fall back to tabs instead of
+  // (Expo dev client persists last route), fall back to tabs instead of
   // letting back exit the app or emit GO_BACK not handled.
   const goBack = useCallback(() => {
     try {

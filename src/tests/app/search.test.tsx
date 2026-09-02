@@ -1,4 +1,4 @@
-// src/tests/app/search.test.tsx — smoke tests for src/app/search.tsx
+// src/tests/app/search.test.tsx: smoke tests for src/app/search.tsx
 import SearchScreen from "../../app/search";
 import { renderScreen } from "../../test/testUtils";
 

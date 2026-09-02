@@ -1,4 +1,4 @@
-// src/tests/components/OrderChat.test.tsx — smoke tests for the chat list
+// src/tests/components/OrderChat.test.tsx: smoke tests for the chat list
 import { OrderChat } from "@/features/chat/components/OrderChat";
 import { ChatMessage } from "@/services/chat";
 import { renderScreen } from "../../test/testUtils";

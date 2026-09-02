@@ -1,4 +1,4 @@
-// src/tests/app/(driver)/index.test.tsx — smoke tests for the driver home
+// src/tests/app/(driver)/index.test.tsx: smoke tests for the driver home
 import DriverHome from "../../../app/(driver)/index";
 import { renderScreen } from "../../../test/testUtils";
 

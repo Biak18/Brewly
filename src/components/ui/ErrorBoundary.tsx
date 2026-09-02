@@ -1,7 +1,7 @@
 // src/components/ui/ErrorBoundary.tsx
 // Root JS error boundary. Without this, any render error unmounts the whole
 // React tree and leaves the user on a white screen (Sentry logs alone don't
-// help them recover). Class component by design — error boundaries require it.
+// help them recover). Class component by design, error boundaries require it.
 import { Button } from "@/components/ui/Button";
 import { captureException } from "@/lib/sentry";
 import { useTheme } from "@/theme";

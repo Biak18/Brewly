@@ -1,4 +1,4 @@
-// src/features/home/components/RecentOrdersRow.tsx — full replacement
+// src/features/home/components/RecentOrdersRow.tsx: full replacement
 import {
   OrderCard,
   OrderCardData,

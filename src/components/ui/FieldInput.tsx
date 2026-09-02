@@ -1,7 +1,7 @@
 // src/components/ui/FieldInput.tsx
 // Modern replacement for placeholder-only TextInput: always shows a visible label,
 // animates a floating label when focused or filled, keeps hint as helper text.
-// Uses useTheme colors/spacing/radius/typography + reanimated (UI thread) — no Tailwind.
+// Uses useTheme colors/spacing/radius/typography + reanimated (UI thread), no Tailwind.
 import { useTheme } from "@/theme";
 import { useEffect, useState } from "react";
 import {

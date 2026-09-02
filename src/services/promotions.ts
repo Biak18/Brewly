@@ -38,7 +38,7 @@ export async function fetchActivePromotions(
 ): Promise<Promotion[]> {
   const today = new Date().toISOString().slice(0, 10);
   // Only codeless promotions are automatic discounts. Voucher-code promotions
-  // must NOT auto-apply to displayed prices — the customer redeems them
+  // must NOT auto-apply to displayed prices, the customer redeems them
   // explicitly at checkout via lookupPromoCode, otherwise the discount would
   // be counted twice.
   let query = supabase

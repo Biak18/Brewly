@@ -22,7 +22,7 @@ type DropdownMenuProps<T extends string> = {
   anchorTop: number; // approximate position below the trigger button, not a measured ref
 };
 
-// Same Modal + backdrop-dismiss + Reanimated-scale pattern as ConfirmDialog —
+// Same Modal + backdrop-dismiss + Reanimated-scale pattern as ConfirmDialog,
 // this is genuinely just a smaller, anchored variant of it, not a new pattern.
 export function DropdownMenu<T extends string>({
   visible,

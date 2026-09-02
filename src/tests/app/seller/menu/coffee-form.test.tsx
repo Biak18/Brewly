@@ -1,4 +1,4 @@
-// src/tests/app/seller/menu/coffee-form.test.tsx — smoke tests for src/app/seller/menu/coffee-form.tsx
+// src/tests/app/seller/menu/coffee-form.test.tsx: smoke tests for src/app/seller/menu/coffee-form.tsx
 import CoffeeFormScreen from "../../../../app/seller/menu/coffee-form";
 import { renderScreen } from "../../../../test/testUtils";
 

@@ -1,4 +1,4 @@
-// src/tests/app/reset-password.test.tsx — smoke tests for src/app/reset-password.tsx
+// src/tests/app/reset-password.test.tsx: smoke tests for src/app/reset-password.tsx
 import ResetPasswordScreen from "../../app/reset-password";
 import { renderScreen } from "../../test/testUtils";
 

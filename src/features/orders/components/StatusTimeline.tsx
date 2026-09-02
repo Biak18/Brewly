@@ -80,7 +80,7 @@ export function StatusTimeline({
           />
         </View>
 
-        {/* Rendered second in the same parent — normal-flow siblings paint over
+        {/* Rendered second in the same parent, normal-flow siblings paint over
           earlier absolutely-positioned ones by default in RN, no zIndex needed.
           This is what makes the dots visually sit "on top of" the line rather
           than the line cutting across them. */}

@@ -1,4 +1,4 @@
-// src/tests/app/(tabs)/shops.test.tsx — smoke tests for src/app/(tabs)/shops.tsx
+// src/tests/app/(tabs)/shops.test.tsx: smoke tests for src/app/(tabs)/shops.tsx
 import ShopsScreen from "../../../app/(tabs)/shops";
 import { renderScreen } from "../../../test/testUtils";
 

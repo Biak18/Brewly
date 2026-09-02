@@ -1,4 +1,4 @@
-// src/tests/app/become-seller.test.tsx — smoke tests for src/app/become-seller.tsx
+// src/tests/app/become-seller.test.tsx: smoke tests for src/app/become-seller.tsx
 import BecomeSellerScreen from "../../app/become-seller";
 import { renderScreen } from "../../test/testUtils";
 

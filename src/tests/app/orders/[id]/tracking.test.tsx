@@ -1,4 +1,4 @@
-// src/tests/app/orders/[id]/tracking.test.tsx — smoke tests for tracking.tsx
+// src/tests/app/orders/[id]/tracking.test.tsx: smoke tests for tracking.tsx
 import OrderTrackingScreen from "../../../../app/orders/[id]/tracking";
 import { OrderWithItems } from "../../../../services/orders";
 import { createTestQueryClient } from "../../../../test/testUtils";

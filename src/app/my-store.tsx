@@ -135,7 +135,7 @@ export default function MyStoreScreen() {
                     marginLeft: spacing.sm,
                   }}
                 >
-                  {store.hours.open} – {store.hours.close}
+                  {store.hours.open} to {store.hours.close}
                 </Text>
               </View>
             )}

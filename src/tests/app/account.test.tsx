@@ -1,4 +1,4 @@
-// src/tests/app/account.test.tsx — smoke tests for src/app/account.tsx
+// src/tests/app/account.test.tsx: smoke tests for src/app/account.tsx
 import AccountScreen from "../../app/account";
 import { useAuthStore } from "../../stores/authStore";
 import { renderScreen } from "../../test/testUtils";

@@ -45,7 +45,7 @@ export default function ForgotPasswordScreen() {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: Linking.createURL("reset-password"),
       });
-      // A failed request must not look like success — surface it and stay on
+      // A failed request must not look like success, surface it and stay on
       // the form so the user can retry.
       if (error) {
         showToast(t("auth.resetEmailFailed"));

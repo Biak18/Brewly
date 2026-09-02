@@ -1,4 +1,4 @@
-// src/tests/app/(tabs)/favorites.test.tsx — smoke tests for src/app/(tabs)/favorites.tsx
+// src/tests/app/(tabs)/favorites.test.tsx: smoke tests for src/app/(tabs)/favorites.tsx
 import FavoritesScreen from "../../../app/(tabs)/favorites";
 import { renderScreen } from "../../../test/testUtils";
 

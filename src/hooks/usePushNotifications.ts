@@ -67,7 +67,7 @@ export function usePushNotifications() {
         | undefined;
       const projectId = easExtra?.eas?.projectId;
       // Before `npx eas init` populates extra.eas.projectId there is nothing
-      // to register — fail quietly instead of letting the SDK throw.
+      // to register, fail quietly instead of letting the SDK throw.
       if (!projectId) return;
 
       try {
@@ -114,7 +114,7 @@ export function usePushNotifications() {
     };
   }, [userId, enabled]);
 
-  // Tapping a notification navigates to the order it's about — router is
+  // Tapping a notification navigates to the order it's about, router is
   // expo-router's imperative singleton, safe to call outside a hook/component tree.
   const openOrderFromResponse = useCallback(
     (response: Notifications.NotificationResponse | null) => {
@@ -123,10 +123,10 @@ export function usePushNotifications() {
       if (!orderId) return;
       const isChat = (data?.type as string | undefined) === "chat";
 
-      // Already on the destination screen for this order — don't stack it.
+      // Already on the destination screen for this order, don't stack it.
       if (isOnTargetScreen(pathnameRef.current, orderId, isChat)) return;
       // Cold start: the Stack isn't mounted and the session isn't restored
-      // yet — park the tap and flush it once auth settles.
+      // yet, park the tap and flush it once auth settles.
       if (isAuthLoadingRef.current) {
         pendingOrderIdRef.current = orderId;
         pendingTypeRef.current = isChat ? "chat" : "order";
@@ -162,11 +162,11 @@ export function usePushNotifications() {
     if (!orderId) return;
     pendingOrderIdRef.current = null;
     pendingTypeRef.current = null;
-    // Signed out (or into another account) — the screens are
+    // Signed out (or into another account), the screens are
     // session-guarded, so a stale tap has nowhere to land.
     if (!userId) return;
     const isChat = type === "chat";
-    // Already on the destination screen for this order — don't stack it.
+    // Already on the destination screen for this order, don't stack it.
     if (isOnTargetScreen(pathnameRef.current, orderId, isChat)) return;
     if (isChat) {
       router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
@@ -175,7 +175,7 @@ export function usePushNotifications() {
     }
   }, [isAuthLoading, userId]);
 
-  // App is open and every queued push is on screen — badge can be cleared.
+  // App is open and every queued push is on screen, badge can be cleared.
   useEffect(() => {
     if (!userId || !enabled) return;
     Notifications.setBadgeCountAsync(0).catch(() => {});

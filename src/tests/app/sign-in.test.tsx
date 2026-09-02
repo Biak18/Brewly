@@ -1,4 +1,4 @@
-// src/tests/app/sign-in.test.tsx — smoke tests for src/app/sign-in.tsx
+// src/tests/app/sign-in.test.tsx: smoke tests for src/app/sign-in.tsx
 import SignInScreen from "../../app/sign-in";
 import { renderScreen } from "../../test/testUtils";
 

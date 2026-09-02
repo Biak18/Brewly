@@ -9,7 +9,7 @@ type StarRatingProps = {
   size?: number;
 };
 
-// Standout gold — theme tokens are too pale for stars on cream surfaces.
+// Standout gold, theme tokens are too pale for stars on cream surfaces.
 const GOLD = "#FFC107";
 
 export function StarRating({ value, onChange, size = 28 }: StarRatingProps) {

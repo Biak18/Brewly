@@ -1,4 +1,4 @@
-// src/tests/app/(driver)/[id].test.tsx — smoke tests for the driver delivery detail
+// src/tests/app/(driver)/[id].test.tsx: smoke tests for the driver delivery detail
 import DriverDeliveryScreen from "../../../app/(driver)/[id]";
 import { OrderWithItems } from "../../../services/orders";
 import { createTestQueryClient } from "../../../test/testUtils";

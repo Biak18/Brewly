@@ -42,7 +42,7 @@ export async function fetchCoffeeReviews(
   return (data ?? []).map(mapReview);
 }
 
-// Which coffees of this order the current user has already reviewed —
+// Which coffees of this order the current user has already reviewed,
 // powers the "rate your drinks" prompts without double submissions.
 export async function fetchReviewedCoffeeIds(
   orderId: string,

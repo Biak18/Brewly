@@ -1,4 +1,4 @@
-// src/features/promotions/hooks/useActivePromotions.ts — now just the query
+// src/features/promotions/hooks/useActivePromotions.ts: now just the query
 import { fetchActivePromotions } from "@/services/promotions";
 import { useQuery } from "@tanstack/react-query";
 
