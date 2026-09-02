@@ -216,6 +216,9 @@ export default function AccountScreen() {
                 source={{ uri: avatarUrl }}
                 style={StyleSheet.absoluteFill}
                 contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+                placeholder={{ blurhash: "L6Pj0^i_.AyE_3t7t7R**0o#DgR4" }}
               />
             ) : (
               <UserRound size={40} color={colors.espresso} strokeWidth={1.6} />
