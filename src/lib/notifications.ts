@@ -4,9 +4,14 @@
 import * as Notifications from "expo-notifications";
 
 export async function ensureNotificationPermission(): Promise<boolean> {
-  const current = await Notifications.getPermissionsAsync();
+  const current = (await Notifications.getPermissionsAsync()) as unknown as {
+    granted: boolean;
+    canAskAgain: boolean;
+  };
   if (current.granted) return true;
   if (!current.canAskAgain) return false;
-  const requested = await Notifications.requestPermissionsAsync();
+  const requested = (await Notifications.requestPermissionsAsync()) as unknown as {
+    granted: boolean;
+  };
   return requested.granted;
 }

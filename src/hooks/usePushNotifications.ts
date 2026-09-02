@@ -78,14 +78,21 @@ export function usePushNotifications() {
           });
         }
 
-        const { status: existingStatus } =
-          await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== "granted") {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
+        const existing = (await Notifications.getPermissionsAsync()) as unknown as {
+          status: string;
+          granted: boolean;
+        };
+        let finalStatus = existing.status;
+        let granted = existing.granted;
+        if (existing.status !== "granted" && !existing.granted) {
+          const requested = (await Notifications.requestPermissionsAsync()) as unknown as {
+            status: string;
+            granted: boolean;
+          };
+          finalStatus = requested.status;
+          granted = requested.granted;
         }
-        if (finalStatus !== "granted") return;
+        if (finalStatus !== "granted" && !granted) return;
 
         const { data: token } = await Notifications.getExpoPushTokenAsync({
           projectId,
@@ -126,9 +133,9 @@ export function usePushNotifications() {
         return;
       }
       if (isChat) {
-        router.replace({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+        router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
       } else {
-        router.replace(`/orders/${orderId}/tracking`);
+        router.push(`/orders/${orderId}/tracking`);
       }
     },
     [],
@@ -162,9 +169,9 @@ export function usePushNotifications() {
     // Already on the destination screen for this order — don't stack it.
     if (isOnTargetScreen(pathnameRef.current, orderId, isChat)) return;
     if (isChat) {
-      router.replace({ pathname: "/orders/[id]/chat", params: { id: orderId } });
+      router.push({ pathname: "/orders/[id]/chat", params: { id: orderId } });
     } else {
-      router.replace(`/orders/${orderId}/tracking`);
+      router.push(`/orders/${orderId}/tracking`);
     }
   }, [isAuthLoading, userId]);
 

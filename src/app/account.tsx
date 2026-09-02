@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { IconButton } from "@/components/ui/IconButton";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { PasswordRequirements } from "@/components/ui/PasswordRequirements";
 import { useAvatarUpload } from "@/features/account/hooks/useAvatarUpload";
 import {
   changePassword,
@@ -21,7 +22,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, Pencil, UserRound } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { FieldInput } from "@/components/ui/FieldInput";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -38,7 +39,15 @@ const AVATAR_EPOCH = Date.now();
 
 const passwordSchema = z
   .object({
-    password: z.string().min(8, "account.passwordMin"),
+    password: z
+      .string()
+      .min(6, "auth.passwordMinLength")
+      .refine((v) => /[A-Z]/.test(v), {
+        message: "auth.passwordReqUpper",
+      })
+      .refine((v) => /[^A-Za-z0-9]/.test(v), {
+        message: "auth.passwordReqSpecial",
+      }),
     confirm: z.string(),
   })
   .refine((v) => v.password === v.confirm, {
@@ -73,6 +82,7 @@ export default function AccountScreen() {
     resolver: zodResolver(passwordSchema),
     defaultValues: { password: "", confirm: "" },
   });
+  const watchedAccountPassword = useWatch({ control: passwordForm.control, name: "password" }) ?? "";
 
   const onSaveName = useCallback(
     async (values: NameForm) => {
@@ -313,13 +323,18 @@ export default function AccountScreen() {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder={t("account.newPasswordPlaceholder")}
-                containerStyle={{ marginBottom: spacing.sm }}
+                containerStyle={{ marginBottom: spacing.xs }}
               />
             )}
           />
+          <PasswordRequirements password={watchedAccountPassword} />
           {passwordForm.formState.errors.password && (
             <Text
-              style={{ color: colors.danger, fontSize: typography.caption }}
+              style={{
+                color: colors.danger,
+                fontSize: typography.caption,
+                marginTop: spacing.xs,
+              }}
             >
               {t(passwordForm.formState.errors.password.message ?? "")}
             </Text>

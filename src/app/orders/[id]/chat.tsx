@@ -10,8 +10,8 @@ import { useTheme } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ChevronLeft, Phone } from "lucide-react-native";
-import { useCallback } from "react";
-import { Linking, Text, View } from "react-native";
+import { useCallback, useEffect } from "react";
+import { BackHandler, Linking, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OrderChatScreen() {
@@ -38,6 +38,19 @@ export default function OrderChatScreen() {
     });
   }, [receiptStore, showToast, t]);
 
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) router.back();
+    else router.replace("/(tabs)");
+  }, []);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [handleBack]);
+
   const storeName = receiptStore?.name ?? "shop";
   const canCall = isCustomerOrder && !!receiptStore?.contact_phone;
   const hasDriver = !!order?.driver_id;
@@ -63,7 +76,7 @@ export default function OrderChatScreen() {
           backgroundColor: colors.bg,
         }}
       >
-        <IconButton accessibilityLabel={t("common.back")} onPress={() => router.back()}>
+        <IconButton accessibilityLabel={t("common.back")} onPress={handleBack}>
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
         <Text

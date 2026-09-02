@@ -12,7 +12,6 @@ import { useNotificationStore } from "@/stores/notificationStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
-import { useTranslation } from "react-i18next";
 import { Stagger } from "@animatereactnative/stagger";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -27,6 +26,7 @@ import {
   StoreIcon,
 } from "lucide-react-native";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Switch, Text, View } from "react-native";
 import { FadeOutDown, ZoomInEasyDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";

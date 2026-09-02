@@ -422,9 +422,14 @@ export default function OrderTrackingScreen() {
     }
   }, [order, paymentRef, queryClient, id, showToast, t]);
 
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) router.back();
+    else router.replace("/(tabs)");
+  }, []);
+
   useEffect(() => {
     const onBackPress = () => {
-      router.back();
+      handleBack();
       return true;
     };
 
@@ -434,7 +439,7 @@ export default function OrderTrackingScreen() {
     );
 
     return () => subscription.remove();
-  }, [router]);
+  }, [handleBack]);
 
   const handleAdvance = useCallback(async () => {
     if (!order || !nextStatus) return;
@@ -508,7 +513,7 @@ export default function OrderTrackingScreen() {
       >
         <IconButton
           accessibilityLabel={t("common.back")}
-          onPress={() => router.back()}
+          onPress={handleBack}
         >
           <ChevronLeft size={20} color={colors.ink} strokeWidth={2} />
         </IconButton>
@@ -992,7 +997,7 @@ export default function OrderTrackingScreen() {
           )}
           <Button
             label={t("common.done")}
-            onPress={() => router.back()}
+            onPress={handleBack}
             variant="primary"
           />
         </View>
@@ -1011,7 +1016,7 @@ export default function OrderTrackingScreen() {
           )}
           <Button
             label={t("common.done")}
-            onPress={() => router.back()}
+            onPress={handleBack}
             variant="soft"
           />
         </View>

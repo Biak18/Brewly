@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { FieldInput } from "@/components/ui/FieldInput";
 import { FormScrollView } from "@/components/ui/FormScrollView";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { PasswordRequirements } from "@/components/ui/PasswordRequirements";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useTheme } from "@/theme";
@@ -11,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
 import { Easing, FadeInUp } from "react-native-reanimated";
 import { z } from "zod";
@@ -26,7 +27,15 @@ export default function SignUpScreen() {
     .object({
       fullName: z.string().min(1, t("auth.nameRequired")),
       email: z.string().email(t("auth.emailInvalid")),
-      password: z.string().min(6, t("auth.passwordMinLength")),
+      password: z
+        .string()
+        .min(6, t("auth.passwordMinLength"))
+        .refine((v) => /[A-Z]/.test(v), {
+          message: t("auth.passwordReqUpper"),
+        })
+        .refine((v) => /[^A-Za-z0-9]/.test(v), {
+          message: t("auth.passwordReqSpecial"),
+        }),
       confirmPassword: z.string(),
     })
     .refine((d) => d.password === d.confirmPassword, {
@@ -47,6 +56,7 @@ export default function SignUpScreen() {
       confirmPassword: "",
     },
   });
+  const watchedPassword = useWatch({ control, name: "password" }) ?? "";
 
   const onSubmit = useCallback(
     async ({ fullName, email, password }: FormValues) => {
@@ -202,16 +212,18 @@ export default function SignUpScreen() {
                 placeholder={t("auth.passwordPlaceholder")}
                 containerStyle={{
                   marginTop: spacing.sm,
-                  marginBottom: spacing.sm,
+                  marginBottom: spacing.xs,
                 }}
               />
             )}
           />
+          <PasswordRequirements password={watchedPassword} />
           {errors.password && (
             <Text
               style={{
                 color: colors.danger,
                 fontSize: 11,
+                marginTop: spacing.xs,
                 marginBottom: spacing.sm,
               }}
             >

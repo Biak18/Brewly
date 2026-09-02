@@ -66,7 +66,11 @@
     "newPasswordPlaceholder": "စကားဝှက်အသစ်",
     "confirmNewPasswordPlaceholder": "စကားဝှက်အသစ်ကို အတည်ပြုပါ",
     "updatePassword": "စကားဝှက်ပြောင်းရန်",
-    "resetEmailFailed": "လင့်ခ်ပို့၍ မရပါ။ ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်ကြိုးစားပါ။"
+    "resetEmailFailed": "လင့်ခ်ပို့၍ မရပါ။ ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်ကြိုးစားပါ။",
+    "passwordRequirements": "စကားဝှက်တွင် ပါဝင်ရမည်:",
+    "passwordReqLength": "အနည်းဆုံး စာလုံး ၆ လုံး",
+    "passwordReqUpper": "အနည်းဆုံး စာလုံးအကြီး တစ်လုံး",
+    "passwordReqSpecial": "အနည်းဆုံး သင်္ကေတတစ်ခု (!@#$%^&*)"
   },
   "onboarding": {
     "skip": "ကျော်ရန်",
@@ -238,7 +242,10 @@
     "placingOrder": "အော်ဒါတင်နေသည်…",
     "promoCheckFailed": "ထိုကုဒ်ကို စစ်ဆေး၍ မရပါ။ ထပ်မံကြိုးစားပါ။",
     "promoInvalid": "ထိုကုဒ်သည် ယခုအချိန်တွင် ဤဆိုင်အတွက် မမှန်ကန်ပါ။",
-    "useFreeCoffee": "ကျွန်ုပ်၏ အခမဲ့ကော်ဖီကို အသုံးပြုမည်"
+    "useFreeCoffee": "ကျွန်ုပ်၏ အခမဲ့ကော်ဖီကို အသုံးပြုမည်",
+    "freeCoffeeHint": "ဈေးအနည်းဆုံး သောက်စရာအတွက် {{price}} သက်သာမည်",
+    "closed": "{{name}} သည် ယခု ပိတ်ထားသည်။ {{time}} တွင် ဖွင့်မည်။",
+    "transactionIdRequired": "ငွေလွှဲမှတ်တမ်း ID ထည့်ရန် လိုအပ်သည်"
   },
   "addresses": {
     "title": "လိပ်စာများ",
@@ -259,6 +266,8 @@
     "deleteTitle": "လိပ်စာကို ဖျက်မလား?",
     "deleteMessage": "ဤလိပ်စာကို သင့်အကောင့်မှ ဖယ်ရှားမည်။",
     "couldNotSave": "ဤလိပ်စာကို သိမ်း၍ မရပါ။",
+    "deleteLabel": "{{label}} ကို ဖျက်ရန်",
+    "editLabel": "{{label}} ကို ပြင်ရန်",
     "addressPlaceholder": "လမ်းလိပ်စာ၊ မြို့နယ်၊ အထင်ကရနေရာ…",
     "default": "မူလ",
     "editAddress": "လိပ်စာပြင်ရန်",
@@ -291,6 +300,11 @@
     "address": "လိပ်စာ",
     "save": "သိမ်းရန်",
     "couldNotSave": "သင့်ပရိုဖိုင်ကို သိမ်း၍ မရပါ။",
+    "nameRequired": "အမည်ထည့်ရန် လိုအပ်သည်",
+    "nameUpdateFailed": "အမည်ကို အပ်ဒိတ်လုပ်၍ မရပါ။",
+    "passwordChangeFailed": "စကားဝှက်ကို ပြောင်းလဲ၍ မရပါ။",
+    "passwordMin": "အနည်းဆုံး စာလုံး ၆ လုံး",
+    "passwordsMismatch": "စကားဝှက်များ မတူညီပါ။",
     "language": "ဘာသာစကား",
     "loyalty": "သစ္စာရှိမှု",
     "orders": "အော်ဒါများ",
@@ -336,7 +350,8 @@
     "emptyDescription": "အော်ဒါတိုင်းအတွက် တံဆိပ်တစ်ခု ရရှိပါသည်။ အခမဲ့ကော်ဖီရရန် {{count}} ခု စုပါ။",
     "redeemed": "အသုံးပြုပြီး",
     "orderAt": "{{shop}} တွင် အော်ဒါတင်ထားသည်",
-    "freeCoffeeReady": "အခမဲ့ကော်ဖီ ရပါပြီ!"
+    "freeCoffeeReady": "အခမဲ့ကော်ဖီ ရပါပြီ!",
+    "remaining": "အခမဲ့ကော်ဖီရရန် {{count}} ခု ကျန်သေးသည်"
   },
   "tracking": {
     "title": "အော်ဒါခြေရာခံခြင်း",

@@ -71,7 +71,7 @@ describe("usePushNotifications", () => {
     render(<Harness />);
     await flushAsync();
 
-    expect(router.replace).toHaveBeenCalledWith("/orders/order-42/tracking");
+    expect(router.push).toHaveBeenCalledWith("/orders/order-42/tracking");
   });
 
   it("defers a cold-start tap until auth settles, then opens the order", async () => {
@@ -79,12 +79,12 @@ describe("usePushNotifications", () => {
 
     render(<Harness />);
     await flushAsync();
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
 
     signIn();
     await flushAsync();
 
-    expect(router.replace).toHaveBeenCalledWith("/orders/order-7/tracking");
+    expect(router.push).toHaveBeenCalledWith("/orders/order-7/tracking");
   });
 
   it("skips stale taps when the user is signed out after auth settles", async () => {
@@ -95,7 +95,7 @@ describe("usePushNotifications", () => {
     mockUseAuthStore.setState({ session: null, isLoading: false });
     await flushAsync();
 
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("opens an order when a running app receives a tap response", async () => {
@@ -112,7 +112,7 @@ describe("usePushNotifications", () => {
     render(<Harness />);
     listener(responseWithOrderId("order-99"));
 
-    expect(router.replace).toHaveBeenCalledWith("/orders/order-99/tracking");
+    expect(router.push).toHaveBeenCalledWith("/orders/order-99/tracking");
   });
 
   it("ignores responses without an orderId", async () => {
@@ -124,7 +124,7 @@ describe("usePushNotifications", () => {
     render(<Harness />);
     await flushAsync();
 
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("removes the response listener when unmounted", () => {

@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/Button";
 import { FieldInput } from "@/components/ui/FieldInput";
 import { IconButton } from "@/components/ui/IconButton";
-import { useTranslation } from "react-i18next";
 import { supabase } from "@/services/supabase";
 import { useToastStore } from "@/stores/toastStore";
 import { useTheme } from "@/theme";
@@ -13,6 +12,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import {
   Easing,
@@ -135,6 +135,7 @@ export default function ForgotPasswordScreen() {
           flex: 1,
           paddingHorizontal: spacing.xl,
           justifyContent: "center",
+          gap: spacing.md,
         }}
       >
         <View>

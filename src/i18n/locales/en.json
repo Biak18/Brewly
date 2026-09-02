@@ -66,7 +66,11 @@
     "newPasswordPlaceholder": "New password",
     "confirmNewPasswordPlaceholder": "Confirm new password",
     "updatePassword": "Update password",
-    "resetEmailFailed": "Couldn't send the reset link. Check your connection and try again."
+    "resetEmailFailed": "Couldn't send the reset link. Check your connection and try again.",
+    "passwordRequirements": "Password must contain:",
+    "passwordReqLength": "At least 6 characters",
+    "passwordReqUpper": "At least one uppercase letter",
+    "passwordReqSpecial": "At least one special character"
   },
   "onboarding": {
     "skip": "Skip",
@@ -238,7 +242,10 @@
     "placingOrder": "Placing order…",
     "promoCheckFailed": "Couldn't check that code. Try again.",
     "promoInvalid": "That code isn't valid for this shop right now.",
-    "useFreeCoffee": "Use my free coffee"
+    "useFreeCoffee": "Use my free coffee",
+    "freeCoffeeHint": "Save {{price}} on your cheapest drink",
+    "closed": "{{name}} is closed. Opens at {{time}}.",
+    "transactionIdRequired": "Transaction ID is required"
   },
   "addresses": {
     "title": "Addresses",
@@ -259,6 +266,8 @@
     "deleteTitle": "Delete address?",
     "deleteMessage": "This address will be removed from your account.",
     "couldNotSave": "Could not save this address.",
+    "deleteLabel": "Delete {{label}}",
+    "editLabel": "Edit {{label}}",
     "addressPlaceholder": "Street address, township, landmark…",
     "default": "Default",
     "editAddress": "Edit address",
@@ -291,6 +300,11 @@
     "address": "Address",
     "save": "Save",
     "couldNotSave": "Could not save your profile.",
+    "nameRequired": "Enter your name",
+    "nameUpdateFailed": "Could not update your name.",
+    "passwordChangeFailed": "Could not update your password.",
+    "passwordMin": "At least 6 characters",
+    "passwordsMismatch": "Passwords don't match",
     "language": "Language",
     "loyalty": "Loyalty",
     "orders": "Orders",
@@ -336,7 +350,8 @@
     "emptyDescription": "Each order earns a stamp. Collect {{count}} for a free coffee.",
     "redeemed": "Redeemed",
     "orderAt": "Order at {{shop}}",
-    "freeCoffeeReady": "Free coffee ready!"
+    "freeCoffeeReady": "Free coffee ready!",
+    "remaining": "{{count}} more to free coffee"
   },
   "tracking": {
     "title": "Order tracking",
