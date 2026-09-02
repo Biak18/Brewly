@@ -3,7 +3,8 @@ import OrderTrackingScreen from "../../../../app/orders/[id]/tracking";
 import { OrderWithItems } from "../../../../services/orders";
 import { createTestQueryClient } from "../../../../test/testUtils";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
+import { router } from "expo-router";
 import React from "react";
 
 const mockOrder: OrderWithItems = {
@@ -72,5 +73,28 @@ describe("<OrderTrackingScreen />", () => {
     // Items are rendered as "<quantity>× <name>"
     expect((await findAllByText(/Latte/)).length).toBeGreaterThan(0);
     expect(getByText("Subtotal")).toBeTruthy();
+  });
+
+  it("navigates back when history exists", async () => {
+    (router.canGoBack as jest.Mock).mockReturnValue(true);
+    (router.back as jest.Mock).mockClear();
+    (router.replace as jest.Mock).mockClear();
+    const { findByText, getByLabelText } = renderWithOrder(mockOrder);
+    await findByText("Order tracking");
+    fireEvent.press(getByLabelText("Back"));
+    expect(router.back).toHaveBeenCalledTimes(1);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("falls back to tabs when no history (cold-start notification)", async () => {
+    (router.canGoBack as jest.Mock).mockReturnValue(false);
+    (router.back as jest.Mock).mockClear();
+    (router.replace as jest.Mock).mockClear();
+    const { findByText, getByLabelText } = renderWithOrder(mockOrder);
+    await findByText("Order tracking");
+    fireEvent.press(getByLabelText("Back"));
+    expect(router.replace).toHaveBeenCalledWith("/(tabs)");
+    expect(router.back).not.toHaveBeenCalled();
+    (router.canGoBack as jest.Mock).mockReturnValue(true);
   });
 });
