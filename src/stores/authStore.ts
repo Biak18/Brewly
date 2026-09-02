@@ -91,27 +91,49 @@ async function handleSession(session: Session | null) {
   });
 }
 
-// Initial session
+// Initial session with refresh-token failure handling
 supabase.auth.getSession().then(({ data: { session }, error }) => {
   if (error) {
-    console.error("Failed to get session:", error);
-
+    console.error("Failed to get session:", error.message);
+    // Refresh token invalid/expired: clear stale session so guards route to sign-in
+    // instead of hanging on isLoading. Supabase already clears storage, we just
+    // ensure local state matches.
     useAuthStore.setState({
       session: null,
       profile: null,
       isLoading: false,
+      isPasswordRecovery: false,
     });
-
+    useCartStore.getState().setCartUser(null);
     return;
   }
 
   handleSession(session);
 });
 
-// Auth changes
+// Auth changes with explicit recovery and refresh-failure handling
 const {
   data: { subscription },
 } = supabase.auth.onAuthStateChange((event, session) => {
+  // Password recovery sessions are flagged so RootNavigator routes to reset-password
+  if (event === "PASSWORD_RECOVERY") {
+    useAuthStore.setState({ isPasswordRecovery: true });
+  }
+  if (event === "SIGNED_OUT" || (event as string) === "TOKEN_REFRESH_FAILED") {
+    // Token refresh failed means the refresh token is revoked/expired
+    // (e.g. password changed elsewhere, leaked token rotation). Force sign-out
+    // state so the user is not stuck on a loading screen.
+    if (!session) {
+      useAuthStore.setState({
+        session: null,
+        profile: null,
+        isLoading: false,
+        isPasswordRecovery: false,
+      });
+      useCartStore.getState().setCartUser(null);
+      return;
+    }
+  }
   handleSession(session);
 });
 
