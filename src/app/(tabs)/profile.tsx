@@ -4,7 +4,10 @@ import { Chip } from "@/components/ui/Chip";
 import { SettingsRow } from "@/components/ui/SettingsRow";
 import { DevAccountSwitcher } from "@/features/dev/DevAccountSwitcher";
 import { SUPPORTED_LANGUAGES } from "@/i18n";
-import { ensureNotificationPermission } from "@/lib/notifications";
+import {
+  ensureNotificationPermission,
+  getNotificationPermissionState,
+} from "@/lib/notifications";
 import { useAuthStore } from "@/stores/authStore";
 import { useConfirmDialogStore } from "@/stores/confirmDialogStore";
 import { useLanguageStore } from "@/stores/languageStore";
@@ -14,6 +17,7 @@ import { useTheme } from "@/theme";
 import { useThemeStore } from "@/theme/themeStore";
 import { Stagger } from "@animatereactnative/stagger";
 import { Image } from "expo-image";
+import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import {
   Bell,
@@ -48,14 +52,44 @@ export default function ProfileScreen() {
 
   // Only flip on when the OS permission is actually granted, otherwise the
   // toggle would claim pushes are on while the system blocks them.
+  // If the user previously denied and canAskAgain is false, deep-link to OS
+  // settings so they can re-enable.
   const togglePush = useCallback(async () => {
     const next = !pushEnabled;
-    if (next && !(await ensureNotificationPermission())) {
-      showToast(t("profile.enableNotifications"));
+    if (next) {
+      const state = await getNotificationPermissionState();
+      if (state.granted) {
+        setPushEnabled(true);
+        return;
+      }
+      if (!state.canAskAgain) {
+        showConfirm({
+          title: t("profile.pushNotifications"),
+          message: t("profile.enableNotifications"),
+          confirmLabel: t("common.done"),
+          onConfirm: () => Linking.openSettings(),
+        });
+        return;
+      }
+      if (!(await ensureNotificationPermission())) {
+        const after = await getNotificationPermissionState();
+        if (!after.canAskAgain && !after.granted) {
+          showConfirm({
+            title: t("profile.pushNotifications"),
+            message: t("profile.enableNotifications"),
+            confirmLabel: t("common.done"),
+            onConfirm: () => Linking.openSettings(),
+          });
+        } else {
+          showToast(t("profile.enableNotifications"));
+        }
+        return;
+      }
+      setPushEnabled(true);
       return;
     }
-    setPushEnabled(next);
-  }, [pushEnabled, setPushEnabled, showToast, t]);
+    setPushEnabled(false);
+  }, [pushEnabled, setPushEnabled, showToast, showConfirm, t]);
 
   const firstInitial = (profile?.full_name ??
     session?.user.email ??
