@@ -6,6 +6,7 @@ import { DimensionValue, StyleSheet, View } from "react-native";
 type CoffeeImageProps = {
   uri: string;
   height?: DimensionValue;
+  width?: DimensionValue;
   radius?: number;
 };
 
@@ -14,6 +15,7 @@ const BLURHASH_PLACEHOLDER = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4"; // generic warm-ton
 export function CoffeeImage({
   uri,
   height = 144,
+  width,
   radius: cornerRadius,
 }: CoffeeImageProps) {
   const { colors, radius } = useTheme();
@@ -23,6 +25,7 @@ export function CoffeeImage({
         styles.wrap,
         {
           height,
+          ...(width !== undefined ? { width } : {}),
           backgroundColor: colors.surface2,
           borderRadius: cornerRadius ?? radius.lg,
         },

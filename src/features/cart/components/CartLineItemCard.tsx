@@ -112,7 +112,7 @@ function CartLineItemCardComponent({
             },
           ]}
         >
-          <CoffeeImage uri={item.imageUrl} height={64} radius={radius.md} />
+          <CoffeeImage uri={item.imageUrl} height={64} width={64} radius={radius.md} />
           <View style={{ flex: 1, marginLeft: spacing.md }}>
             <Text
               style={{

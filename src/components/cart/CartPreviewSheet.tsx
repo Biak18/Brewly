@@ -3,17 +3,12 @@ import { CoffeeImage } from "@/components/coffee/CoffeeImage";
 import { CoffeePrice } from "@/components/coffee/CoffeePrice";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
-import {
-  CartLineItem,
-  selectCartSavings,
-  selectCartTotal,
-  useCartStore,
-} from "@/stores/cartStore";
+import { selectCartSavings, selectCartTotal, useCartStore } from "@/stores/cartStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/theme";
 import { formatCurrency } from "@/utils/currency";
 import { useRouter } from "expo-router";
-import { FlatList, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 export function CartPreviewSheet() {
   const { colors, spacing, typography, radius } = useTheme();
@@ -27,7 +22,7 @@ export function CartPreviewSheet() {
 
   return (
     <BottomSheet visible={isOpen} onClose={close}>
-      <View style={{ paddingHorizontal: spacing.xl }}>
+      <View style={{ paddingHorizontal: spacing.xl, width: "100%" }}>
         <Text
           style={{
             color: colors.ink,
@@ -38,22 +33,27 @@ export function CartPreviewSheet() {
         >
           Added to cart
         </Text>
-        <FlatList showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}
- data={recent}
- keyExtractor={(i) => i.id}
- scrollEnabled={false}
- renderItem={({ item }: { item: CartLineItem }) => (
- <View
- style={{
- flexDirection: "row",
- alignItems: "center",
- marginBottom: spacing.sm,
- }}
- >
- <CoffeeImage uri={item.imageUrl} height={40} radius={radius.sm} />
+        <View style={{ width: "100%" }}>
+          {recent.map((item) => (
+            <View
+              key={item.id}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: spacing.sm,
+                width: "100%",
+              }}
+            >
+              <CoffeeImage
+                uri={item.imageUrl}
+                height={40}
+                width={40}
+                radius={radius.sm}
+              />
               <Text
                 style={{
                   flex: 1,
+                  flexShrink: 1,
                   marginLeft: spacing.sm,
                   color: colors.ink,
                   fontSize: typography.bodySmall,
@@ -64,14 +64,15 @@ export function CartPreviewSheet() {
               </Text>
               <CoffeePrice value={item.unitPrice * item.quantity} size={12} />
             </View>
-          )}
-        />
+          ))}
+        </View>
         {savings > 0 && (
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
               marginBottom: spacing.xs,
+              width: "100%",
             }}
           >
             <Text
@@ -100,6 +101,7 @@ export function CartPreviewSheet() {
             justifyContent: "space-between",
             marginTop: spacing.md,
             marginBottom: spacing.lg,
+            width: "100%",
           }}
         >
           <Text style={{ color: colors.muted, fontSize: typography.body }}>

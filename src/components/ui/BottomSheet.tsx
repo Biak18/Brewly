@@ -33,7 +33,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       onClose={onClose}
       backgroundStyle={{ backgroundColor: colors.surface }}
     >
-      <BottomSheetView style={{ paddingBottom: spacing.xxl }}>
+      <BottomSheetView style={{ paddingBottom: spacing.xxl, width: "100%" }}>
         {children}
       </BottomSheetView>
     </BottomSheetNative>
