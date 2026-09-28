@@ -1,30 +1,37 @@
-name: Keep Supabase awake
+# .github/workflows/keep-supabase-awake.yml
+
+name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: "17 9 */2 * *"
+    # Every Sunday at 00:17 UTC
+    - cron: "17 0 * * 0"
   workflow_dispatch:
 
 jobs:
   ping:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Ping Supabase project
+      - name: Ping Supabase Database
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://wiscnurivaskypxuldjz.supabase.co' }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ROLE: ${{ secrets.SUPABASE_ROLE }}
 
         run: |
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::SUPABASE_ANON_KEY secret is not set."
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL secret is not set."
             exit 1
           fi
 
-          curl --fail --silent --show-error \
-            --max-time 30 \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/auth/v1/settings"
+          if [ -z "$SUPABASE_ROLE" ]; then
+            echo "::error::SUPABASE_ROLE secret is not set."
+            exit 1
+          fi
 
-          echo "Supabase ping successful."
+          curl -fsS -X GET \
+            "$SUPABASE_URL/rest/v1/orders?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ROLE" \
+            -H "Authorization: Bearer $SUPABASE_ROLE"
+
+          echo "Supabase database ping successful."
